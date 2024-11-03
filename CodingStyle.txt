@@ -1,0 +1,81 @@
+
+# Naming
+For struct, class, type, enum and function, the first letter and the first letter of internal words must be capitalized [A-Z].
+Example:
+class ReadWritePtr;
+
+For constants (const constexpr, enum, macro constants), all letters must be cepitalized [A-Z], and use underscore (_) to separate internal words.
+Example:
+const constexpr std::size_t SIZE_OF_ARRAY = 16;
+
+For variables, all letters must be lowercase [a-z], and use underscore (_) to separate internal words.
+Example:
+int temporary_variable = 0;
+
+For private member variables, the names must strat with m_.
+class Example {
+        int m_private_variable;
+};
+
+For function-like macro (macro with arguments), the following rules can be used depends on the situation.
+1. All letters must be cepitalized [A-Z], and use underscore (_) to separate internal words.
+2. Same as functions.
+
+For files, the first letter and the first letter of internal words must be capitalized [A-Z] and the first letter cannot be number [0-9].
+The file name can only contain uppercase, lowercase letters and numbers [A-Z][a-z][0-9].
+For C++ source file, the extension must be .cpp.
+For C++ header file, the extension must be .hpp, do NOT use .h for C++ header.
+For C source file, the extension must be .c.
+For C header file, the extension must be .h.
+
+# Casting
+All casting must be explicit, implicit casting is not allowed.
+Do NOT use C style casting, use C++ casting only (const_cast, dynamic_cast, reinterpret_cast, static_cast).
+
+# Exception
+Do NOT use exception at all, use return value instead.
+All function (except main) must be marked as noexcept.
+
+# Resource Management
+Use RAII
+
+# Assertion
+assert and static_assert should be used to catch error.
+Create new assert if needed.
+
+# Goto and Longjump
+Do NOT use goto and longjump at all, use RAII and scope_guard instead.
+
+# This Pointer
+When accessing a class member, this-> must be used explicitly.
+
+# The ++ and -- Expression
+The sentence can only contain ++ or --.
+Example:
+++i; // OK
+--i; // OK
+array[i++] = value; // NOT OK
+
+# Null Pointer
+Use C++ nullptr, do NOT use C style NULL for type safety.
+
+# Typedef and Using
+Use using only, do NOT use typedef.
+
+# Warning
+Enable all warnings, and all warnings should be treat as error, unless the warnings are coming from the third-party libraries.
+
+# Inline Namespace
+Do NOT inline namespace in header file at all.
+Do NOT inlie namespace in source file globally.
+It is OK to inline a namespace locally (within a scope) to use literals.
+It is NOT OK to inline a namespace locally (within a scope) to use anything other than literals.
+It is OK to rename namespace.
+Example:
+using namespace std; // Bad, NOT OK
+using namespace std::literals::chrono_literals; // Bad, NOT OK because it is unscoped.
+void ExampleFunction(void)
+{
+        using namespace std::literals::chrono_literals; // OK because it is scoped.
+        using namespace std; // Bad, NOT OK
+}
