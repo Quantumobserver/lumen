@@ -35,4 +35,10 @@ add_subdirectory(Dependencies)
 
 set(DEPENDENCIES_DIR ${CMAKE_CURRENT_SOURCE_DIR}/Dependencies)
 
+if (LUMEN_BUILD_TESTS)
+        set(LUMEN_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src)
+        include(CTest)
+        add_subdirectory(tests)
+endif ()
+
 add_subdirectory(src)
