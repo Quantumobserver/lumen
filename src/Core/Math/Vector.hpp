@@ -1,4 +1,6 @@
 
+#pragma once
+
 #include <type_traits>
 
 #include <glm/vec2.hpp>
