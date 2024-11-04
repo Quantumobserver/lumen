@@ -79,3 +79,7 @@ void ExampleFunction(void)
         using namespace std::literals::chrono_literals; // OK because it is scoped.
         using namespace std; // Bad, NOT OK
 }
+
+# Indentation and Tab
+Never use tab in the project.
+Indentation must be 8 spaces.
