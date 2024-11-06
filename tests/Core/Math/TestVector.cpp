@@ -38,18 +38,18 @@ void TestLumenCoreMathVectorCase_1(void) noexcept
         constexpr float VEC2f_1_Y_INIT_VALUE = -5678.543f;
         constexpr float VEC2f_2_X_INIT_VALUE = 12.0f;
         constexpr float VEC2f_2_Y_INIT_VALUE = 66.54f;
-        Lumen::Core::Math::Vec2f vec2f_1{}; // Test default constractor
+        Lumen::Core::Math::Vec2f32 vec2f_1{}; // Test default constractor
         vec2f_1.x = VEC2f_1_X_INIT_VALUE; // Test public member x
         vec2f_1.y = VEC2f_1_Y_INIT_VALUE; // Test public member y
 
         TestFloat32(vec2f_1.x, VEC2f_1_X_INIT_VALUE);
         TestFloat32(vec2f_1.y, VEC2f_1_Y_INIT_VALUE);
 
-        Lumen::Core::Math::Vec2f vec2f_2{VEC2f_2_X_INIT_VALUE, VEC2f_2_Y_INIT_VALUE}; // Test constexpr Vec2f(float x, float y) noexcept
+        Lumen::Core::Math::Vec2f32 vec2f_2{VEC2f_2_X_INIT_VALUE, VEC2f_2_Y_INIT_VALUE}; // Test constexpr Vec2f32(float x, float y) noexcept
         TestFloat32(vec2f_2.x, VEC2f_2_X_INIT_VALUE);
         TestFloat32(vec2f_2.y, VEC2f_2_Y_INIT_VALUE);
 
-        Lumen::Core::Math::Vec2f result{vec2f_1}; // Test constexpr Vec2f(const Vec2f &vec2f) noexcept
+        Lumen::Core::Math::Vec2f32 result{vec2f_1}; // Test constexpr Vec2f32(const Vec2f32 &vec2f) noexcept
         TestFloat32(result.x, vec2f_1.x);
         TestFloat32(result.y, vec2f_1.y);
 
@@ -98,13 +98,13 @@ void TestLumenCoreMathVectorCase_1(void) noexcept
         TestFloat32(result.y, vec2f_2.y);
 
         {
-                Lumen::Core::Math::Vec2f puls_result = +result;
+                Lumen::Core::Math::Vec2f32 puls_result = +result;
                 TestFloat32(puls_result.x, result.x);
                 TestFloat32(puls_result.y, result.y);
         }
 
         {
-                Lumen::Core::Math::Vec2f minus_result = -result;
+                Lumen::Core::Math::Vec2f32 minus_result = -result;
                 TestFloat32(minus_result.x, -result.x);
                 TestFloat32(minus_result.y, -result.y);
         }
