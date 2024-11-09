@@ -125,9 +125,6 @@ private:
         : m_is_alive{true}, m_id{id}, m_tag{tag}//, m_animation_type{animation_type}
         {}
 
-
-        template<typename Entity, template<typename ...> typename Vector>
-        friend class BasicEntityManager;
 public:
 
         constexpr BasicEntity(const BasicEntity &) noexcept = delete;
@@ -203,7 +200,7 @@ public:
         }
 
         template<typename T, typename ...Args>
-        constexpr T &AddComponent(Args ...args) noexcept
+        constexpr T &AddComponent(Args &&...args) noexcept
         {
                 auto &component = this->GetInternalComponentMutableRefNoCheck<T>();
                 component = T{std::forward<Args>(args)...};
@@ -231,14 +228,14 @@ private:
         constexpr typename std::add_lvalue_reference<T>::type
         GetInternalComponentMutableRefNoCheck(void) noexcept
         {
-                return std::get<T>(this->m_components);;
+                return std::get<T>(this->m_components);
         }
 
         template<typename T>
         constexpr typename std::add_lvalue_reference<typename std::add_const<T>::type>::type
         GetInternalComponentRefNoCheck(void) const noexcept
         {
-                return std::get<T>(this->m_components);;
+                return std::get<T>(this->m_components);
         }
 };
 
