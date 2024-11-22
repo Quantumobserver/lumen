@@ -47,11 +47,21 @@ struct Transform {
 };
 
 struct BoundingBox {
+        struct BlockVision {
+                bool value;
+        };
+        struct BlockMovement {
+                bool value;
+        };
         Lumen::Core::Math::Vec2f32 size;
         Lumen::Core::Math::Vec2f32 half_size;
+        bool block_vision : 1;
+        bool block_movement : 1;
 
-        constexpr BoundingBox(void) noexcept {}
-        constexpr BoundingBox(const Lumen::Core::Math::Vec2f32 &size) noexcept : size{size}, half_size{size / 2.0f} {}
+        constexpr BoundingBox(void) noexcept : block_vision{false}, block_movement{false} {}
+        constexpr BoundingBox(const Lumen::Core::Math::Vec2f32 &size,
+                              BlockVision block_vision = BlockVision{true}, BlockMovement block_movement = BlockMovement{true}) noexcept
+        : size{size}, half_size{size / 2.0f}, block_vision{block_vision.value}, block_movement{block_movement.value} {}
         constexpr BoundingBox(const BoundingBox &other) noexcept = default;
         constexpr BoundingBox &operator=(const BoundingBox &other) noexcept = default;
 };
