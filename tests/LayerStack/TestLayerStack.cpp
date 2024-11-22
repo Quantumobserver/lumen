@@ -3,7 +3,7 @@
 
 #include <Action/ActionManager.hpp>
 #include <LayerStack/LayerStack.hpp>
-#include "Render/Window/RenderWindow.hpp"
+#include <SFML/Graphics/RenderWindow.hpp>
 
 #include <iostream>
 
@@ -58,7 +58,7 @@ public:
 
 void TestLayerStackCase1(void) noexcept
 {
-        Lumen::RenderWindow window{Lumen::VideoMode{{800, 600}}, Lumen::WindowTitle{"My window"}};
+        sf::RenderWindow window{sf::VideoMode{{800, 600}}, {"My window"}};
         Lumen::Action::ActionManager action_manager{};
 
         Lumen::LayerStack::LayerStack layer_stack{};
@@ -75,23 +75,20 @@ void TestLayerStackCase1(void) noexcept
         action_manager.RegisteAction(sf::Keyboard::Key::G, Lumen::Action::ActionName::TOGGLE_DRAWING_GRID);
         action_manager.SetActionKind(Lumen::Action::ActionName::TOGGLE_DRAWING_GRID, Lumen::Action::ActionKind::TRIGGER);
 
-        //sf::Image image{};
-        // run the program as long as the window is open
-        while (window.IsOpen()) {
-                // check all the window's events that were triggered since the last iteration of the loop
-                for (Lumen::Event event = window.PollEvent(); event.HasEvent(); event = window.PollEvent()) {
-
-                        if (event.IsThisEventType<sf::Event::KeyPressed>()) {
-                                const sf::Event::KeyPressed key_pressed_data = event.GetEventData<sf::Event::KeyPressed>();
+        while (window.isOpen()) {
+                for (std::optional<sf::Event> optional_event = window.pollEvent(); optional_event.has_value(); optional_event = window.pollEvent()) {
+                        sf::Event &event = optional_event.value();
+                        if (event.is<sf::Event::KeyPressed>()) {
+                                const sf::Event::KeyPressed &key_pressed_data = *event.getIf<sf::Event::KeyPressed>();
                                 if (sf::Keyboard::Key::A == key_pressed_data.code) {
                                         std::cout << "[SFML KeyPressed]: A\n";
 
                                 }
                                 if (sf::Keyboard::Key::Escape == key_pressed_data.code) {
-                                        window.CloseWindow();
+                                        window.close();
                                 }
-                        } else if (event.IsThisEventType<sf::Event::KeyReleased>()) {
-                                const sf::Event::KeyReleased key_pressed_data = event.GetEventData<sf::Event::KeyReleased>();
+                        } else if (event.is<sf::Event::KeyReleased>()) {
+                                const sf::Event::KeyReleased key_pressed_data = *event.getIf<sf::Event::KeyReleased>();
                                 if (sf::Keyboard::Key::A == key_pressed_data.code) {
                                         std::cout << "[SFML KeyReleased]: A\n";
                                 }

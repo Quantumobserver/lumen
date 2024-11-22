@@ -6,7 +6,7 @@
 #include "ActionStatusBuffer.hpp"
 #include "ActionKindRecord.hpp"
 
-#include <Render/Window/Event/Event.hpp>
+#include <SFML/Window/Event.hpp>
 
 #include <SFML/Window.hpp>
 #include <SFML/Window/Keyboard.hpp>
@@ -75,17 +75,17 @@ public:
                 this->m_action_kind_record.SetActionKind(action_name, action_kind);
         }
 
-        constexpr void CreateActionFromEvent(Lumen::Event &event) noexcept
+        constexpr void CreateActionFromEvent(sf::Event &event) noexcept
         {
                 Lumen::Action::Action action{};
 
-                if (event.IsThisEventType<sf::Event::KeyPressed>()) {
-                        const sf::Event::KeyPressed key_pressed_data = event.GetEventData<sf::Event::KeyPressed>();
+                if (event.is<sf::Event::KeyPressed>()) {
+                        const sf::Event::KeyPressed &key_pressed_data = *event.getIf<sf::Event::KeyPressed>();
                         action.action_name = this->m_key_to_action_map.GetActionName(key_pressed_data.code);
                         action.action_status = this->m_action_kind_record.GetActionStartStatus(action.action_name);
 
-                } else if (event.IsThisEventType<sf::Event::KeyReleased>()) {
-                        const sf::Event::KeyReleased &key_released_data = event.GetEventData<sf::Event::KeyReleased>();
+                } else if (event.is<sf::Event::KeyReleased>()) {
+                        const sf::Event::KeyReleased &key_released_data = *event.getIf<sf::Event::KeyReleased>();
                         action.action_name = this->m_key_to_action_map.GetActionName(key_released_data.code);
                         action.action_status = Lumen::Action::ActionStatus::END;
                 } // TODO: Mouse Input
