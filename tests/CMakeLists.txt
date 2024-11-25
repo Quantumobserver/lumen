@@ -8,3 +8,5 @@ add_subdirectory(Action)
 add_subdirectory(Physics)
 
 add_subdirectory(LayerStack)
+
+add_subdirectory(Log)
