@@ -36,22 +36,31 @@ private:
         Lumen::Scene::SceneManager m_scene_manager;
         Lumen::ECS::Entity::EntityManager m_entity_manager;
 
+        bool m_is_initialized{false};
+
 public:
         constexpr void Init(void) noexcept
         {
+                if (this->m_is_initialized) {
+                        return;
+                }
+
                 this->LoadInitConfig();
                 this->CreateWindow();
                 this->InitSceneManager();
+                this->m_is_initialized = true;
         }
 
         void Updata(void)
         {
+                assert(this->m_is_initialized);
                 this->m_scene_manager.Update();
                 //this->TestUpdate();
         }
 
         constexpr void Run(void) noexcept
         {
+                assert(this->m_is_initialized);
                 while (this->IsRunning()) {
                         this->Updata();
                 }
@@ -60,6 +69,7 @@ public:
 private:
         constexpr void LoadInitConfig(void) noexcept
         {
+                assert(!this->m_is_initialized);
                 // TODO: LoadInitConfig from json file
                 this->m_config.window.video_mode.width = 800;
                 this->m_config.window.video_mode.height = 500;
@@ -68,6 +78,7 @@ private:
 
         constexpr void CreateWindow(void) noexcept
         {
+                assert(!this->m_is_initialized);
                 this->m_window.create(
                         sf::VideoMode{
                                 {this->m_config.window.video_mode.width,
@@ -77,11 +88,13 @@ private:
 
         constexpr void InitSceneManager(void) noexcept
         {
+                assert(!this->m_is_initialized);
                 this->m_scene_manager.Init(&this->m_window, &this->m_entity_manager);
         }
 
         constexpr bool IsRunning(void) const noexcept
         {
+                assert(this->m_is_initialized);
                 return this->m_scene_manager.IsRunning();
         }
 };

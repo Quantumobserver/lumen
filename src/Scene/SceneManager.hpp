@@ -24,6 +24,8 @@ private:
         std::vector<std::unique_ptr<Lumen::Scene::BaseScene> > m_scene_vector;
         Lumen::Scene::BaseScene *m_current_scene_ptr;
 
+        bool m_is_initialized{false};
+
         constexpr Lumen::Scene::BaseScene *GetScene(Lumen::Scene::SceneID scene_id) noexcept
         {
                 assert(static_cast<std::size_t>(scene_id) < this->m_scene_vector.size());
@@ -79,6 +81,8 @@ public:
 
                 this->m_current_scene_ptr = this->GetScene(Lumen::Scene::SceneID::MENU);
 
+                this->m_is_initialized = true;
+
         }
 
         /*constexpr SceneType CurrentScene(void) const noexcept
@@ -111,6 +115,7 @@ public:
 
         constexpr void Update(void) noexcept
         {
+                assert(this->m_is_initialized);
                 if (this->m_inter_scene_communication_data.change_scene) {
                         this->ChangeScene();
                 }
@@ -170,6 +175,7 @@ public:
 
         constexpr bool IsRunning(void) const noexcept
         {
+                assert(this->m_is_initialized);
                 return this->m_inter_scene_communication_data.running;
         }
 
@@ -181,6 +187,7 @@ public:
 private:
         constexpr void ChangeScene(void) noexcept
         {
+                assert(this->m_is_initialized);
                 assert(this->m_inter_scene_communication_data.change_scene);
 
                 this->m_current_scene_ptr = this->GetScene(this->m_inter_scene_communication_data.change_scene_args.change_to_this_scene);

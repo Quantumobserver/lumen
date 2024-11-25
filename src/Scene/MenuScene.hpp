@@ -10,7 +10,7 @@ namespace Scene {
 
 class MenuScene : public Lumen::Scene::BaseScene {
 private:
-        bool m_is_initialized;
+        bool m_is_initialized{false};
 public:
         constexpr MenuScene(sf::RenderWindow *window_ptr,
                             Lumen::ECS::Entity::EntityManager *entity_manager_ptr,
@@ -36,6 +36,8 @@ public:
 
         constexpr void Update(void) noexcept override
         {
+                assert(this->m_is_initialized);
+
                 this->CreateActions();
                 
                 this->DoActions();
@@ -43,17 +45,20 @@ public:
 
         constexpr void Render(void) noexcept override
         {
-
+                assert(this->m_is_initialized);
         }
 
         constexpr void ChangeToThisScene(Lumen::Scene::ChangeSceneArgs &change_scene_args) noexcept override
         {
+                assert(this->m_is_initialized);
                 (void)change_scene_args;
         }
 
 private:
         constexpr void InitActionManager(void) noexcept
         {
+                assert(!this->m_is_initialized);
+
                 Lumen::Scene::BaseScene::m_action_manager.Init();
 
                 // TODO: read action map data from file
@@ -154,12 +159,14 @@ private:
         
         constexpr void InitLayerStack(void) noexcept
         {
+                assert(!this->m_is_initialized);
                 Lumen::Scene::BaseScene::m_layer_stack.PushBackLayer(Lumen::LayerStack::MakeLayer<TestUILayer>(this));
                 Lumen::Scene::BaseScene::m_layer_stack.PushBackLayer(Lumen::LayerStack::MakeLayer<TestBackgroundLayer>());
         }
 
         constexpr void CreateActions(void) noexcept
         {
+                assert(this->m_is_initialized);
                 for (std::optional<sf::Event> optional_event = Lumen::Scene::BaseScene::m_window_ptr->pollEvent();
                      optional_event.has_value();
                      optional_event = Lumen::Scene::BaseScene::m_window_ptr->pollEvent()) {
@@ -170,6 +177,7 @@ private:
 
         constexpr void DoActions(void) noexcept
         {
+                assert(this->m_is_initialized);
                 for (auto action : Lumen::Scene::BaseScene::m_action_manager) {
                         for (auto layer_stack_it = Lumen::Scene::BaseScene::m_layer_stack.rbegin();
                              layer_stack_it != Lumen::Scene::BaseScene::m_layer_stack.rend();
