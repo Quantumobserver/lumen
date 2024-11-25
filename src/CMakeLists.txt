@@ -1,5 +1,5 @@
 
-add_executable(Lumen main.cpp)
+add_executable(Lumen main.cpp ${LUMEN_SRC_DIR}/Log/DebugSignal.cpp)
 
 target_include_directories(Lumen PRIVATE
                            ${DEPENDENCIES_DIR}/glm/
