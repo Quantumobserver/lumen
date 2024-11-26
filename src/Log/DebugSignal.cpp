@@ -8,10 +8,10 @@
 #define FALSE 0
 #define TRUE  1
 
-std::sig_atomic_t segmentation_fault = FALSE;
-std::sig_atomic_t erroneous_arithmetic_operation = FALSE;
-std::sig_atomic_t invalid_program_image = FALSE;
-std::sig_atomic_t abnormal_termination_condition = FALSE;
+static std::sig_atomic_t segmentation_fault = FALSE;
+static std::sig_atomic_t erroneous_arithmetic_operation = FALSE;
+static std::sig_atomic_t invalid_program_image = FALSE;
+static std::sig_atomic_t abnormal_termination_condition = FALSE;
 
 struct SIGNAL_ERROR {
         enum SIGNAL_ERROR_CODE {
