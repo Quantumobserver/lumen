@@ -10,3 +10,5 @@ add_subdirectory(Physics)
 add_subdirectory(LayerStack)
 
 add_subdirectory(Log)
+
+add_subdirectory(Utility)
