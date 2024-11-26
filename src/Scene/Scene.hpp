@@ -68,6 +68,8 @@ struct InterSceneCommunicationData {
         ChangeSceneArgs change_scene_args;
         bool change_scene : 1;
         bool running : 1;
+
+        constexpr InterSceneCommunicationData(void) noexcept : change_scene{false}, running{true} {}
 };
 
 class BaseScene {

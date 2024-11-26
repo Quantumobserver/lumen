@@ -63,7 +63,8 @@ private:
         
 
 public:
-        constexpr SceneManager(void) noexcept {}
+        constexpr SceneManager(void) noexcept
+        : m_window_ptr{nullptr}, m_entity_manager_ptr{nullptr}, m_current_scene_ptr{nullptr} {}
 
         constexpr void Init(sf::RenderWindow *window_ptr,
                             Lumen::ECS::Entity::EntityManager *entity_manager_ptr) noexcept
