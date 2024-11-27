@@ -1,6 +1,7 @@
 
 #pragma once
 
+#include <cmath>
 #include <type_traits>
 
 #include <glm/vec2.hpp>
@@ -53,7 +54,7 @@ public:
         constexpr Vec2f32 &operator=(const Vec2f32 &vec2f) noexcept = default;
 
 #define LUMEN_CORE_MATH_VEC2F_UNARY_ASSIGN_OPERATOR_GENERATOR(unary_assign_operator, Argument, argument)                \
-        constexpr Vec2f32 &operator unary_assign_operator(Argument argument) noexcept                                     \
+        constexpr Vec2f32 &operator unary_assign_operator(Argument argument) noexcept                                   \
         {                                                                                                               \
                 glm::vec2::operator unary_assign_operator(static_cast<typename BaseCastIf<Argument>::type>(argument));  \
                 return *this;                                                                                           \
@@ -91,7 +92,7 @@ public:
         LUMEN_CORE_MATH_VEC2F_UNARY_ASSIGN_OPERATOR_GENERATOR(>>=, float, scalar)
         LUMEN_CORE_MATH_VEC2F_UNARY_ASSIGN_OPERATOR_GENERATOR(>>=, const Vec2f32 &, vec2f)*/
 
-#undef LUMEN_CORE_MATH_VEC2F_UNARYC_ASSIGN_OPERATOR_GENERATOR
+#undef LUMEN_CORE_MATH_VEC2F_UNARY_ASSIGN_OPERATOR_GENERATOR
 
         /*constexpr Vec2f32 &operator+=(float scalar) noexcept
         {
@@ -170,6 +171,143 @@ public:
 
 #undef LUMEN_CORE_MATH_VEC2F_BINARY_OPERATOR_GENERATOR
 };
+
+struct Vec2i : private glm::ivec2 {
+private:
+        template<typename GlmVecQualifier, GlmVecQualifier qualifier>
+        constexpr Vec2i(const glm::vec<2, int, qualifier> &glm_vec) noexcept
+        : glm::ivec2{glm_vec} {}
+
+        template<typename T>
+        struct BaseCastIf {
+        private:
+                template<typename U>
+                struct BaseCastIfImpl {
+                        using type = U;
+                };
+
+                template<>
+                struct BaseCastIfImpl<Vec2i> {
+                        using type = glm::ivec2;
+                };
+        
+        public:
+                using type = typename BaseCastIfImpl<
+                                typename std::remove_cv<
+                                        typename std::remove_reference<T>::type
+                                >::type>::type;
+        };
+
+
+public:
+        using glm::ivec2::x;
+        using glm::ivec2::y;
+
+        constexpr Vec2i(void) noexcept : glm::ivec2{} {}
+
+        constexpr Vec2i(int x, int y) noexcept : glm::ivec2{x, y} {}
+
+        constexpr Vec2i(const Vec2i &vec2i) noexcept : glm::ivec2{vec2i} {}
+
+        constexpr Vec2i &operator=(const Vec2i &vec2i) noexcept = default;
+
+#define LUMEN_CORE_MATH_VEC2I_UNARY_ASSIGN_OPERATOR_GENERATOR(unary_assign_operator, Argument, argument)                \
+        constexpr Vec2i &operator unary_assign_operator(Argument argument) noexcept                                     \
+        {                                                                                                               \
+                glm::ivec2::operator unary_assign_operator(static_cast<typename BaseCastIf<Argument>::type>(argument)); \
+                return *this;                                                                                           \
+        }
+
+        // Unary arithmetic assign operators
+        LUMEN_CORE_MATH_VEC2I_UNARY_ASSIGN_OPERATOR_GENERATOR(+=, int, scalar)
+        LUMEN_CORE_MATH_VEC2I_UNARY_ASSIGN_OPERATOR_GENERATOR(+=, const Vec2i &, vec2i)
+
+        LUMEN_CORE_MATH_VEC2I_UNARY_ASSIGN_OPERATOR_GENERATOR(-=, int, scalar)
+        LUMEN_CORE_MATH_VEC2I_UNARY_ASSIGN_OPERATOR_GENERATOR(-=, const Vec2i &, vec2i)
+
+        LUMEN_CORE_MATH_VEC2I_UNARY_ASSIGN_OPERATOR_GENERATOR(*=, int, scalar)
+        LUMEN_CORE_MATH_VEC2I_UNARY_ASSIGN_OPERATOR_GENERATOR(*=, const Vec2i &, vec2i)
+
+        LUMEN_CORE_MATH_VEC2I_UNARY_ASSIGN_OPERATOR_GENERATOR(/=, int, scalar)
+        LUMEN_CORE_MATH_VEC2I_UNARY_ASSIGN_OPERATOR_GENERATOR(/=, const Vec2i &, vec2i)
+
+        // Unary bit assign operators
+        LUMEN_CORE_MATH_VEC2I_UNARY_ASSIGN_OPERATOR_GENERATOR(%=, int, scalar)
+        LUMEN_CORE_MATH_VEC2I_UNARY_ASSIGN_OPERATOR_GENERATOR(%=, const Vec2i &, vec2i)
+
+        LUMEN_CORE_MATH_VEC2I_UNARY_ASSIGN_OPERATOR_GENERATOR(&=, int, scalar)
+        LUMEN_CORE_MATH_VEC2I_UNARY_ASSIGN_OPERATOR_GENERATOR(&=, const Vec2i &, vec2i)
+
+        LUMEN_CORE_MATH_VEC2I_UNARY_ASSIGN_OPERATOR_GENERATOR(|=, int, scalar)
+        LUMEN_CORE_MATH_VEC2I_UNARY_ASSIGN_OPERATOR_GENERATOR(|=, const Vec2i &, vec2i)
+
+        LUMEN_CORE_MATH_VEC2I_UNARY_ASSIGN_OPERATOR_GENERATOR(^=, int, scalar)
+        LUMEN_CORE_MATH_VEC2I_UNARY_ASSIGN_OPERATOR_GENERATOR(^=, const Vec2i &, vec2i)
+
+        LUMEN_CORE_MATH_VEC2I_UNARY_ASSIGN_OPERATOR_GENERATOR(<<=, int, scalar)
+        LUMEN_CORE_MATH_VEC2I_UNARY_ASSIGN_OPERATOR_GENERATOR(<<=, const Vec2i &, vec2i)
+
+        LUMEN_CORE_MATH_VEC2I_UNARY_ASSIGN_OPERATOR_GENERATOR(>>=, int, scalar)
+        LUMEN_CORE_MATH_VEC2I_UNARY_ASSIGN_OPERATOR_GENERATOR(>>=, const Vec2i &, vec2i)
+
+#undef LUMEN_CORE_MATH_VEC2I_UNARY_ASSIGN_OPERATOR_GENERATOR
+
+        constexpr Vec2i &operator++(void) noexcept
+        {
+                glm::ivec2::operator++();
+                return *this;
+        }
+
+        constexpr Vec2i &operator--(void) noexcept
+        {
+                glm::ivec2::operator--();
+                return *this;
+        }
+
+#define LUMEN_CORE_MATH_VEC2I_UNARY_OPERATOR_GENERATOR(unary_operator, Argument, argument)                              \
+        friend constexpr Vec2i operator unary_operator(Argument argument) noexcept                                      \
+        {                                                                                                               \
+                return glm::operator unary_operator(static_cast<typename BaseCastIf<Argument>::type>(argument));        \
+        }
+
+        // Unary operators
+        LUMEN_CORE_MATH_VEC2I_UNARY_OPERATOR_GENERATOR(+, const Vec2i &, vec2i)
+        LUMEN_CORE_MATH_VEC2I_UNARY_OPERATOR_GENERATOR(-, const Vec2i &, vec2i)
+
+#undef LUMEN_CORE_MATH_VEC2I_UNARY_OPERATOR_GENERATOR
+
+#define LUMEN_CORE_MATH_VEC2I_BINARY_OPERATOR_GENERATOR(binary_operator, Argument1, argument1, Argument2, argument2)    \
+        friend constexpr Vec2i operator binary_operator(Argument1 argument1, Argument2 argument2) noexcept              \
+        {                                                                                                               \
+                return glm::operator binary_operator(static_cast<typename BaseCastIf<Argument1>::type>(argument1),      \
+                                                     static_cast<typename BaseCastIf<Argument2>::type>(argument2));     \
+        }
+
+        // Binary operators
+        LUMEN_CORE_MATH_VEC2I_BINARY_OPERATOR_GENERATOR(+, const Vec2i &, vec2i, int, scalar)
+        LUMEN_CORE_MATH_VEC2I_BINARY_OPERATOR_GENERATOR(+, int, scalar, const Vec2i &, vec2i)
+        LUMEN_CORE_MATH_VEC2I_BINARY_OPERATOR_GENERATOR(+, const Vec2i &, vec2i_1, const Vec2i &, vec2i_2)
+
+        LUMEN_CORE_MATH_VEC2I_BINARY_OPERATOR_GENERATOR(-, const Vec2i &, vec2i, int, scalar)
+        LUMEN_CORE_MATH_VEC2I_BINARY_OPERATOR_GENERATOR(-, int, scalar, const Vec2i &, vec2i)
+        LUMEN_CORE_MATH_VEC2I_BINARY_OPERATOR_GENERATOR(-, const Vec2i &, vec2i_1, const Vec2i &, vec2i_2)
+
+        LUMEN_CORE_MATH_VEC2I_BINARY_OPERATOR_GENERATOR(*, const Vec2i &, vec2i, int, scalar)
+        LUMEN_CORE_MATH_VEC2I_BINARY_OPERATOR_GENERATOR(*, int, scalar, const Vec2i &, vec2i)
+        LUMEN_CORE_MATH_VEC2I_BINARY_OPERATOR_GENERATOR(*, const Vec2i &, vec2i_1, const Vec2i &, vec2i_2)
+
+        LUMEN_CORE_MATH_VEC2I_BINARY_OPERATOR_GENERATOR(/, const Vec2i &, vec2i, int, scalar)
+        LUMEN_CORE_MATH_VEC2I_BINARY_OPERATOR_GENERATOR(/, int, scalar, const Vec2i &, vec2i)
+        LUMEN_CORE_MATH_VEC2I_BINARY_OPERATOR_GENERATOR(/, const Vec2i &, vec2i_1, const Vec2i &, vec2i_2)
+
+#undef LUMEN_CORE_MATH_VEC2I_BINARY_OPERATOR_GENERATOR
+
+};
+
+constexpr Vec2i Abs(const Vec2i &vec2i) noexcept
+{
+        return {std::abs(vec2i.x), std::abs(vec2i.y)};
+}
 
 } // namespace Math
 } // namespace Core
