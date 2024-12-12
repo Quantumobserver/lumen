@@ -19,9 +19,9 @@ constexpr void LifespanUpdate(Lumen::ECS::Entity::Entity &entity, const float de
         entity_lifespan.remaining_lifespan -= delta_time;
 }
 
-constexpr void LifespanUpdateForEach(Lumen::ECS::Entity::EntityManager &entity_namager, const float delta_time) noexcept
+constexpr void LifespanUpdateForEach(Lumen::ECS::Entity::EntityManager &entity_manager, const float delta_time) noexcept
 {
-        auto &all_entities = entity_namager.GetAllEntities();
+        auto &all_entities = entity_manager.GetAllEntities();
 
         for (auto &entity_vector : all_entities) {
                 for (auto &entity : entity_vector) {
