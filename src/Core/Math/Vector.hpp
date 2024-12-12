@@ -4,7 +4,7 @@
 #include <cmath>
 #include <type_traits>
 
-#include <glm/vec2.hpp>
+#include <glm/glm.hpp>
 
 namespace Lumen {
 
@@ -52,6 +52,12 @@ public:
         : glm::vec2{vec2f} {}
 
         constexpr Vec2f32 &operator=(const Vec2f32 &vec2f) noexcept = default;
+
+        constexpr Vec2f32 &Normalize(void) noexcept
+        {
+                *this = glm::normalize(*this);
+                return *this;
+        }
 
 #define LUMEN_CORE_MATH_VEC2F_UNARY_ASSIGN_OPERATOR_GENERATOR(unary_assign_operator, Argument, argument)                \
         constexpr Vec2f32 &operator unary_assign_operator(Argument argument) noexcept                                   \

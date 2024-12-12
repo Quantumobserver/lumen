@@ -33,9 +33,19 @@ private:
         struct EntityCurrentlyControlledByThePlayer {
                 entity_type::TagType tag;
                 entity_id_type id;
+                float speed;
+
+                static constexpr const float PLAYER_SPEED_DEFAULT = 20.0f;
 
                 constexpr EntityCurrentlyControlledByThePlayer(void) noexcept
-                : tag{entity_type::TagType::PLAYER}, id{0} {}
+                : tag{entity_type::TagType::PLAYER}, id{0}, speed{PLAYER_SPEED_DEFAULT} {}
+
+                constexpr void SetEntity(entity_type::TagType tag, entity_id_type id) noexcept
+                {
+                        this->tag = tag;
+                        this->id = id;
+                }
+
         } m_entity_currently_controlled_by_the_player;
 
         using this_t = EntityManager;
@@ -146,6 +156,16 @@ public:
                         }
                 }
                 std::abort();
+        }
+
+        constexpr void SetEntityCurrentlyControlledByThePlayer(entity_type::TagType tag, entity_id_type id) noexcept
+        {
+                this->m_entity_currently_controlled_by_the_player.SetEntity(tag, id);
+        }
+
+        constexpr float GetSpeedOfEntityCurrentlyControlledByThePlayer(void) const noexcept
+        {
+                return this->m_entity_currently_controlled_by_the_player.speed;
         }
 };
 

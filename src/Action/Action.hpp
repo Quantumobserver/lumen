@@ -136,5 +136,13 @@ struct Action {
         ActionStatus action_status;
 };
 
+struct MovementAction {
+        bool is_move_up : 1;
+        bool is_move_down : 1;
+        bool is_move_left : 1;
+        bool is_move_right : 1;
+        bool has_movement : 1;
+};
+
 } // namespace Action
 } // namespace Lumen

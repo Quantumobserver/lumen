@@ -75,6 +75,11 @@ public:
                 this->m_action_kind_record.SetActionKind(action_name, action_kind);
         }
 
+        constexpr Lumen::Action::MovementAction GetMovementAction(void) const noexcept
+        {
+                return this->m_action_status_buffer.GetMovementAction();
+        }
+
         constexpr void CreateActionFromEvent(sf::Event &event) noexcept
         {
                 Lumen::Action::Action action{};

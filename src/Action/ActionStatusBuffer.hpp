@@ -61,6 +61,9 @@ private:
                         return {this->m_action_name, return_value};
                 }
         };
+
+        using this_t = ActionStatusBuffer;
+
 public:
         using iterator = ActionStatusBufferIterator;
 
@@ -92,6 +95,52 @@ public:
                 }
                 //std::cout << "[SetActionStatus]: " << fmt(action.action_status) << "\n";
                 this->m_action_status_buffer[static_cast<std::size_t>(action.action_name)] = action.action_status;
+        }
+
+        static constexpr bool IsActionHappened(Lumen::Action::ActionStatus action_status) noexcept
+        {
+                constexpr const std::array<bool, static_cast<std::size_t>(Lumen::Action::ActionStatus::END) + 1> action_status_map{
+                        true, true, false, false
+                };
+                return action_status_map[static_cast<std::size_t>(action_status)];
+        }
+
+        constexpr bool IsMoveUp(void) const noexcept
+        {
+                const auto action_status = this->m_action_status_buffer[static_cast<std::size_t>(Lumen::Action::ActionName::MOVE_UP)];
+                return this_t::IsActionHappened(action_status);
+        }
+
+        constexpr bool IsMoveDown(void) const noexcept
+        {
+                const auto action_status = this->m_action_status_buffer[static_cast<std::size_t>(Lumen::Action::ActionName::MOVE_DOWN)];
+                return this_t::IsActionHappened(action_status);
+        }
+
+        constexpr bool IsMoveLeft(void) const noexcept
+        {
+                const auto action_status = this->m_action_status_buffer[static_cast<std::size_t>(Lumen::Action::ActionName::MOVE_LEFT)];
+                return this_t::IsActionHappened(action_status);
+        }
+
+        constexpr bool IsMoveRight(void) const noexcept
+        {
+                const auto action_status = this->m_action_status_buffer[static_cast<std::size_t>(Lumen::Action::ActionName::MOVE_RIGHT)];
+                return this_t::IsActionHappened(action_status);
+        }
+
+        constexpr Lumen::Action::MovementAction GetMovementAction(void) const noexcept
+        {
+                Lumen::Action::MovementAction movement_action{
+                        this->IsMoveUp(),
+                        this->IsMoveDown(),
+                        this->IsMoveLeft(),
+                        this->IsMoveRight(),
+                        false,
+                };
+                movement_action.has_movement = movement_action.is_move_up || movement_action.is_move_down ||
+                                               movement_action.is_move_left || movement_action.is_move_right;
+                return movement_action;
         }
 
         constexpr ActionStatusBufferIterator begin(void) noexcept

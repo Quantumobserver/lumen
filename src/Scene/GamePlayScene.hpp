@@ -27,6 +27,7 @@ public:
 
                 this->InitActionManager();
                 this->InitLayerStack();
+                this->InitSpawnePlayer();
 
                 this->m_is_initialized = true;
         }
@@ -137,12 +138,112 @@ private:
         };
 
         friend TestUILayer;
+
+        class GameWorldLayer : public Lumen::LayerStack::BaseLayer {
+        private:
+                GamePlayScene *m_game_play_scene;
+        public:
+                constexpr GameWorldLayer(GamePlayScene *game_play_scene) noexcept
+                : m_game_play_scene{game_play_scene}
+                {
+                        assert(nullptr != this->m_game_play_scene);
+                }
+
+                constexpr void Update(void) noexcept override
+                {
+
+                }
+
+                constexpr void Render(void) noexcept override
+                {
+
+                }
+
+                [[nodiscard]] constexpr Lumen::LayerStack::BaseLayer::DoActionResult DoAction([[maybe_unused]] Lumen::Action::Action action) noexcept override
+                {
+                        switch (action.action_name) {
+
+                        //case Lumen::Action::ActionName::JUMP:
+                        //        return Lumen::LayerStack::BaseLayer::DoActionResult::HandledOrBlocked;
+
+                        case Lumen::Action::ActionName::SQUAT:
+                                // TODO:
+                                return Lumen::LayerStack::BaseLayer::DoActionResult::HandledOrBlocked;
+
+                        case Lumen::Action::ActionName::SHOOT:
+                                // TODO:
+                                return Lumen::LayerStack::BaseLayer::DoActionResult::HandledOrBlocked;
+
+                        case Lumen::Action::ActionName::TOGGLE_DRAWING_BOUNDING_BOX:
+                                // TODO:
+                                return Lumen::LayerStack::BaseLayer::DoActionResult::HandledOrBlocked;
+
+                        case Lumen::Action::ActionName::TOGGLE_DRAWING_TEXTURE:
+                                // TODO:
+                                return Lumen::LayerStack::BaseLayer::DoActionResult::HandledOrBlocked;
+                        
+                        default:
+                                break;
+                        }
+                        return Lumen::LayerStack::BaseLayer::DoActionResult::NotHandedOrNotBlocked;
+                }
+
+                [[nodiscard]] constexpr Lumen::LayerStack::BaseLayer::DoActionResult
+                DoMovementAction([[maybe_unused]] Lumen::Action::MovementAction movement_action) noexcept override
+                {
+                        Lumen::Core::Math::Vec2f32 velocity{0.0f, 0.0f};
+                        if (movement_action.is_move_up) {
+                                velocity += {0.0f, -1.0f};
+                        }
+                        if (movement_action.is_move_down) {
+                                velocity += {0.0f, 1.0f};
+                        }
+                        if (movement_action.is_move_left) {
+                                velocity += {-1.0f, 0.0f};
+                        }
+                        if (movement_action.is_move_right) {
+                                velocity += {1.0f, 0.0f};
+                        }
+                        //std::cout << "[GameWorldLayer] velocity{ " << velocity.x << ", " << velocity.y << "}\n";
+                        velocity.Normalize();
+                        std::cout << "[GameWorldLayer] velocity{ " << velocity.x << ", " << velocity.y << "}\n";
+                        auto &entity_manager = *this->m_game_play_scene->m_entity_manager_ptr;//std::cout << "[GameWorldLayer] " << __LINE__ << "\n";
+                        float speed = entity_manager.GetSpeedOfEntityCurrentlyControlledByThePlayer();//std::cout << "[GameWorldLayer] " << __LINE__ << "\n";
+                        velocity *= speed;//std::cout << "[GameWorldLayer] " << __LINE__ << "\n";
+                        auto &player = entity_manager.GetEntityCurrentlyControlledByThePlayer();//std::cout << "[GameWorldLayer] " << __LINE__ << "\n";
+                        auto &transform = player.GetComponent<Lumen::ECS::Component::Transform>();//std::cout << "[GameWorldLayer] " << __LINE__ << "\n";
+                        transform.velocity = velocity;//std::cout << "[GameWorldLayer] " << __LINE__ << "\n";
+                        //std::cout << "[GameWorldLayer] " << __LINE__ << "\n";
+                        return Lumen::LayerStack::BaseLayer::DoActionResult::HandledOrBlocked;
+                }
+        };
+        friend GameWorldLayer;
         
         constexpr void InitLayerStack(void) noexcept
         {
                 assert(!this->m_is_initialized);
                 Lumen::Scene::BaseScene::m_layer_stack.PushBackLayer(Lumen::LayerStack::MakeLayer<TestUILayer>(this));
+                Lumen::Scene::BaseScene::m_layer_stack.PushBackLayer(Lumen::LayerStack::MakeLayer<GameWorldLayer>(this));
                 Lumen::Scene::BaseScene::m_layer_stack.PushBackLayer(Lumen::LayerStack::MakeLayer<TestBackgroundLayer>());
+        }
+
+        constexpr void InitSpawnePlayer(void) noexcept
+        {
+                assert(!this->m_is_initialized);
+                auto &entity_manager = *Lumen::Scene::BaseScene::m_entity_manager_ptr;
+                auto &player_entity = entity_manager.CreateEntity(Lumen::ECS::Entity::Entity::TagType::PLAYER);
+                player_entity.AddComponent<Lumen::ECS::Component::Transform>(
+                        Lumen::Core::Math::Vec2f32{0.0f, 0.0f},
+                        Lumen::Core::Math::Vec2f32{0.0f, 0.0f},
+                        Lumen::Core::Math::Vec2f32{15.0f, 16.0f});
+
+                player_entity.AddComponent<Lumen::ECS::Component::BoundingBox>(
+                        Lumen::Core::Math::Vec2f32{30.0f, 30.0f}
+                );
+
+                entity_manager.SetEntityCurrentlyControlledByThePlayer(player_entity.GetTag(), player_entity.GetId());
+                entity_manager.Update();
+                std::cout << "[InitSpawnePlayer]\n";
         }
 
         constexpr void CreateActions(void) noexcept
@@ -169,6 +270,20 @@ private:
                                 }
                         }
                 }
+                do {
+                        const auto movement_action = Lumen::Scene::BaseScene::m_action_manager.GetMovementAction();
+                        if (!movement_action.has_movement) {
+                                break;
+                        }
+                        for (auto layer_stack_it = Lumen::Scene::BaseScene::m_layer_stack.rbegin();
+                             layer_stack_it != Lumen::Scene::BaseScene::m_layer_stack.rend();
+                             ++layer_stack_it) {
+                                Lumen::LayerStack::LayerPtr &layer_ptr = (*layer_stack_it);
+                                if (Lumen::LayerStack::BaseLayer::DoActionResult::HandledOrBlocked == layer_ptr->DoMovementAction(movement_action)) {
+                                        break;
+                                }
+                        }
+                } while (false);
         }
 /*private:
 

@@ -23,15 +23,22 @@ public:
         constexpr BaseLayer &operator=(const BaseLayer &) noexcept = delete;
         constexpr BaseLayer &operator=(BaseLayer &&other) noexcept = default;
 
-        constexpr virtual void Attach(void) {}
-        constexpr virtual void Detach(void) {}
-        constexpr virtual void Update(void) {}
+        constexpr virtual void Attach(void) noexcept {}
+        constexpr virtual void Detach(void) noexcept {}
+        constexpr virtual void Update(void) noexcept {}
+        constexpr virtual void Render(void) noexcept {}
 
         enum class DoActionResult {
                 NotHandedOrNotBlocked,
                 HandledOrBlocked,
         };
-        [[nodiscard]] constexpr virtual DoActionResult DoAction([[maybe_unused]] Lumen::Action::Action action)
+        
+        [[nodiscard]] constexpr virtual DoActionResult DoAction([[maybe_unused]] Lumen::Action::Action action) noexcept
+        {
+                return DoActionResult::NotHandedOrNotBlocked;
+        }
+
+        [[nodiscard]] constexpr virtual DoActionResult DoMovementAction([[maybe_unused]] Lumen::Action::MovementAction movement_action) noexcept
         {
                 return DoActionResult::NotHandedOrNotBlocked;
         }
