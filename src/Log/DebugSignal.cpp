@@ -86,7 +86,7 @@ static int SetupDebugSignal(void)
         return 0;
 }
 
-[[maybe_unused]] static int Unused = SetupDebugSignal();
+[[maybe_unused]] static int unused = SetupDebugSignal();
 } // extern "C"
 
 #endif // NDEBUG
