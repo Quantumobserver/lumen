@@ -124,66 +124,16 @@ public:
                 this->m_current_scene_ptr->Update();
         }
 
-        /*constexpr void Render(void) noexcept
+        constexpr void Render(void) noexcept
         {
-                switch (this->CurrentScene()) {
-                case SceneType::Null:
-                        assert(false);
-                        std::abort();
-
-                case SceneType::Menu:
-                        this->m_menuScene.Render(this->m_sceneData);
-                        break;
-                case SceneType::GamePlay:
-                        this->m_gamePlayScene.Render(this->m_sceneData);
-                        break;
-                }
-        }*/
-
-        //constexpr void Simulate(std::size_t);
-        /*constexpr void DoActionImpl(const Action &action) noexcept
-        {
-                switch (this->m_currentScene) {
-                case SceneType::Null:
-                        assert(false);
-                        std::abort();
-
-                case SceneType::Menu:
-                        this->m_menuScene.DoActionImpl(action);
-                        break;
-                case SceneType::GamePlay:
-                        this->m_gamePlayScene.DoActionImpl(action);
-                        break;
-                }
-        }*/
-
-        /*template<typename KeyCode>
-        constexpr void RegisterAction(KeyCode keyCode, ActionName actionName) noexcept
-        {
-                switch (this->CurrentScene()) {
-                case SceneType::Null:
-                        assert(false);
-                        std::abort();
-
-                case SceneType::Menu:
-                        this->m_menuScene.RegisterAction(keyCode, actionName);
-                        break;
-                case SceneType::GamePlay:
-                        this->m_gamePlayScene.RegisterAction(keyCode, actionName);
-                        break;
-                }
-        }*/
+                this->m_current_scene_ptr->Render();
+        }
 
         constexpr bool IsRunning(void) const noexcept
         {
                 assert(this->m_is_initialized);
                 return this->m_inter_scene_communication_data.running;
         }
-
-        /*constexpr void SetFramerateLimit(unsigned int limit) noexcept
-        {
-                this->m_sceneData.SetFramerateLimit(limit);
-        }*/
 
 private:
         constexpr void ChangeScene(void) noexcept
