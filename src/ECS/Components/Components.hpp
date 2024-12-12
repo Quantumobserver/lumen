@@ -91,7 +91,12 @@ struct Score {
 };
 
 struct Lifespan {
-        std::size_t remaining_lifespan;
+        float remaining_lifespan;
+
+        constexpr bool ShouldBeDestroyed(void) noexcept
+        {
+                return this->remaining_lifespan < 0.0f;
+        }
 };
 
 //#include <iostream>
