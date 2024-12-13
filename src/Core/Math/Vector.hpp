@@ -12,6 +12,12 @@ namespace Core {
 
 namespace Math {
 
+template<typename Number>
+constexpr float Abs(Number number) noexcept
+{
+        return glm::abs(number);
+}
+
 struct Vec2f32 : private glm::vec2 {
 private:
         template<typename GlmVecQualifier, GlmVecQualifier qualifier>

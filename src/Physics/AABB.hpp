@@ -11,11 +11,6 @@ namespace Physics {
 
 namespace AABB {
 
-inline constexpr float Abs(float number) noexcept
-{
-        return (number > 0.0f) ? number : -number;
-}
-
 template<typename Transform, typename BoundingBox, typename Entity>
 constexpr Lumen::Core::Math::Vec2f32 GetOverlap(const Entity &entity0, const Entity &entity1) noexcept
 {
@@ -29,8 +24,8 @@ constexpr Lumen::Core::Math::Vec2f32 GetOverlap(const Entity &entity0, const Ent
                 entity0.template GetComponent<Transform>().position -
                 entity1.template GetComponent<Transform>().position;
 
-        distance.x = Physics::AABB::Abs(distance.x);
-        distance.y = Physics::AABB::Abs(distance.y);
+        distance.x = Lumen::Core::Math::Abs(distance.x);
+        distance.y = Lumen::Core::Math::Abs(distance.y);
 
         Lumen::Core::Math::Vec2f32 boundingbox_size =
                 entity0.template GetComponent<BoundingBox>().half_size +
@@ -50,8 +45,8 @@ constexpr Lumen::Core::Math::Vec2f32 GetPrevOverlap(const Entity &entity0, const
         Lumen::Core::Math::Vec2f32 previous_distance =
                 entity0.template GetComponent<Transform>().previous_position -
                 entity1.template GetComponent<Transform>().previous_position;
-        previous_distance.x = Physics::AABB::Abs(previous_distance.x);
-        previous_distance.y = Physics::AABB::Abs(previous_distance.y);
+        previous_distance.x = Lumen::Core::Math::Abs(previous_distance.x);
+        previous_distance.y = Lumen::Core::Math::Abs(previous_distance.y);
 
         Lumen::Core::Math::Vec2f32 boundingbox_size =
                 entity0.template GetComponent<BoundingBox>().half_size +
