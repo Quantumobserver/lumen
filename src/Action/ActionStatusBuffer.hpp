@@ -97,6 +97,13 @@ public:
                 this->m_action_status_buffer[static_cast<std::size_t>(action.action_name)] = action.action_status;
         }
 
+        constexpr void Reset(void) noexcept
+        {
+                for (auto &action_status : this->m_action_status_buffer) {
+                        action_status = Lumen::Action::ActionStatus::END;
+                }
+        }
+
         static constexpr bool IsActionHappened(Lumen::Action::ActionStatus action_status) noexcept
         {
                 constexpr const std::array<bool, static_cast<std::size_t>(Lumen::Action::ActionStatus::END) + 1> action_status_map{

@@ -46,6 +46,7 @@ public:
         constexpr void Render(void) noexcept override
         {
                 assert(this->m_is_initialized);
+                if (Lumen::Scene::BaseScene::m_inter_scene_communication_data->change_scene) {std::cout << "[MenuScene] Render change_scene: true\n";}
         }
 
         constexpr void ChangeToThisScene(Lumen::Scene::ChangeSceneArgs &change_scene_args) noexcept override
@@ -123,6 +124,7 @@ private:
                                 auto &change_scene_args = this->m_menu_scene->m_inter_scene_communication_data->change_scene_args;
                                 change_scene_args.from_scene = Lumen::Scene::SceneID::MENU;
                                 change_scene_args.change_to_this_scene = Lumen::Scene::SceneID::GAME_PLAY;
+                                this->m_menu_scene->m_action_manager.ResetActionBuffer();
                                 return Lumen::LayerStack::BaseLayer::DoActionResult::HandledOrBlocked;
                         }
                         
@@ -187,7 +189,7 @@ private:
                                         break;
                                 }
                         }
-                }
+                }//std::cout << "[MenuScene] DoActions end\n";
         }
 };
 

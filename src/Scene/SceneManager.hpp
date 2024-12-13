@@ -122,7 +122,7 @@ public:
         constexpr void Update(void) noexcept
         {
                 assert(this->m_is_initialized);
-                if (this->m_inter_scene_communication_data.change_scene) {
+                if (this->m_inter_scene_communication_data.change_scene) {std::cout << "[SceneManager] change scene\n";
                         this->ChangeScene();
                 }
 

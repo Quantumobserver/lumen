@@ -48,9 +48,9 @@ public:
                 this->CreateActions();
                 this->DoActions();
                 this->Movement();
-                auto &e = this->m_entity_manager_ptr->GetEntityCurrentlyControlledByThePlayer();
-                auto &t = e.GetComponent<Lumen::ECS::Component::Transform>();
-                std::cout << "[GamePlayScene] t.position{ " << t.position.x << ", " << t.position.y << "}\n";
+                //auto &e = this->m_entity_manager_ptr->GetEntityCurrentlyControlledByThePlayer();
+                //auto &t = e.GetComponent<Lumen::ECS::Component::Transform>();
+                //std::cout << "[GamePlayScene] t.position{ " << t.position.x << ", " << t.position.y << "}\n";
         }
 
         constexpr void Render(void) noexcept override
@@ -117,6 +117,7 @@ private:
                                 auto &change_scene_args = this->m_game_play_scene->m_inter_scene_communication_data->change_scene_args;
                                 change_scene_args.from_scene = Lumen::Scene::SceneID::GAME_PLAY;
                                 change_scene_args.change_to_this_scene = Lumen::Scene::SceneID::MENU;
+                                this->m_game_play_scene->m_action_manager.ResetActionBuffer();
                                 return Lumen::LayerStack::BaseLayer::DoActionResult::HandledOrBlocked;
                         }
                         case Lumen::Action::ActionName::MOVE_UP:
@@ -236,7 +237,7 @@ private:
                         
                         velocity.Normalize();
                         velocity *= speed;//std::cout << "[GameWorldLayer] " << __LINE__ << "\n";
-                        std::cout << "[GameWorldLayer] velocity{ " << velocity.x << ", " << velocity.y << "}\n";
+                        //std::cout << "[GameWorldLayer] velocity{ " << velocity.x << ", " << velocity.y << "}\n";
                         transform.velocity = velocity;//std::cout << "[GameWorldLayer] " << __LINE__ << "\n";
                         //std::cout << "[GameWorldLayer] " << __LINE__ << "\n";
                         return Lumen::LayerStack::BaseLayer::DoActionResult::HandledOrBlocked;
