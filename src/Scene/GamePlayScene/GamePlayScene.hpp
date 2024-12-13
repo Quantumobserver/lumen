@@ -36,6 +36,10 @@ public:
                 this->InitActionManager();
                 this->InitLayerStack();
                 this->InitSpawnePlayer();
+                this->InitSpawneBlock();
+
+                auto &entity_manager = *Lumen::Scene::BaseScene::m_entity_manager_ptr;
+                entity_manager.Update();
 
                 this->m_is_initialized = true;
         }
@@ -46,6 +50,9 @@ public:
                 this->CreateActions();
                 this->DoActions();
                 this->Movement();
+
+                auto &entity_manager = *Lumen::Scene::BaseScene::m_entity_manager_ptr;
+                entity_manager.Update();
                 //auto &e = this->m_entity_manager_ptr->GetEntityCurrentlyControlledByThePlayer();
                 //auto &t = e.GetComponent<Lumen::ECS::Component::Transform>();
                 //std::cout << "[GamePlayScene] t.position{ " << t.position.x << ", " << t.position.y << "}\n";
@@ -148,8 +155,28 @@ private:
                 );
 
                 entity_manager.SetEntityCurrentlyControlledByThePlayer(player_entity.GetTag(), player_entity.GetId());
-                entity_manager.Update();
                 std::cout << "[InitSpawnePlayer]\n";
+        }
+
+        constexpr void InitSpawneBlock(void) noexcept
+        {
+                this->SpawneBlock({50.0f, 70.0f}, {{20.0f, 80.0f}});
+                this->SpawneBlock({100.0f, 50.0f}, {{80.0f, 20.0f}});
+        }
+
+        constexpr void SpawneBlock(const Lumen::Core::Math::Vec2f32 &position, const Lumen::ECS::Component::BoundingBox &bounding_box) noexcept
+        {
+                auto &entity_manager = *Lumen::Scene::BaseScene::m_entity_manager_ptr;
+                auto &tile_entity = entity_manager.CreateEntity(Lumen::ECS::Entity::Entity::TagType::TILE);
+                tile_entity.AddComponent<Lumen::ECS::Component::Transform>(
+                        position,
+                        Lumen::Core::Math::Vec2f32{0.0f, 0.0f},
+                        Lumen::Core::Math::Vec2f32{0.0f, 0.0f}
+                );
+
+                tile_entity.AddComponent<Lumen::ECS::Component::BoundingBox>(
+                        bounding_box
+                );
         }
 
         constexpr void CreateActions(void) noexcept
@@ -166,7 +193,7 @@ private:
         constexpr void DoActions(void) noexcept
         {
                 assert(this->m_is_initialized);
-                
+
                 this->DoBasicAction();
                 this->DoMovementAction();
                 this->DoWindowResizeAction();
