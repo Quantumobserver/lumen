@@ -40,14 +40,6 @@ public:
                 this->m_is_initialized = true;
         }
 
-        constexpr void Movement(void) noexcept
-        {
-                assert(this->m_is_initialized);
-                //std::cout << "[GamePlayScene] Movement\n";
-                float delta_time = Lumen::Scene::BaseScene::m_inter_scene_communication_data->delta_time;
-                Lumen::ECS::System::MovementForEach(*Lumen::Scene::BaseScene::m_entity_manager_ptr, delta_time);
-        }
-
         constexpr void Update(void) noexcept override
         {
                 assert(this->m_is_initialized);
@@ -77,6 +69,14 @@ public:
         }
 
 private:
+
+        constexpr void Movement(void) noexcept
+        {
+                assert(this->m_is_initialized);
+                //std::cout << "[GamePlayScene] Movement\n";
+                float delta_time = Lumen::Scene::BaseScene::m_inter_scene_communication_data->delta_time;
+                Lumen::ECS::System::MovementForEach(*Lumen::Scene::BaseScene::m_entity_manager_ptr, delta_time);
+        }
 
         constexpr void SetView(void) noexcept
         {
