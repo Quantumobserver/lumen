@@ -166,6 +166,14 @@ private:
         constexpr void DoActions(void) noexcept
         {
                 assert(this->m_is_initialized);
+                
+                this->DoBasicAction();
+                this->DoMovementAction();
+                this->DoWindowResizeAction();
+        }
+
+        constexpr void DoBasicAction(void) noexcept
+        {
                 for (auto action : Lumen::Scene::BaseScene::m_action_manager) {
                         for (auto layer_stack_it = Lumen::Scene::BaseScene::m_layer_stack.rbegin();
                              layer_stack_it != Lumen::Scene::BaseScene::m_layer_stack.rend();
@@ -176,23 +184,30 @@ private:
                                 }
                         }
                 }
-                do {
-                        const auto movement_action = Lumen::Scene::BaseScene::m_action_manager.GetMovementAction();
-                        for (auto layer_stack_it = Lumen::Scene::BaseScene::m_layer_stack.rbegin();
-                             layer_stack_it != Lumen::Scene::BaseScene::m_layer_stack.rend();
-                             ++layer_stack_it) {
-                                Lumen::LayerStack::LayerPtr &layer_ptr = (*layer_stack_it);
-                                if (Lumen::LayerStack::BaseLayer::DoActionResult::HandledOrBlocked == layer_ptr->DoMovementAction(movement_action)) {
-                                        break;
-                                }
-                        }
-                } while (false);
+        }
 
-                if (Lumen::Scene::BaseScene::m_action_manager.HasWindowResizeAction()) {std::cout << "[GamePlayScene] HasWindowResizeAction\n";
+        constexpr void DoMovementAction(void) noexcept
+        {
+                const auto movement_action = Lumen::Scene::BaseScene::m_action_manager.GetMovementAction();
+                for (auto layer_stack_it = Lumen::Scene::BaseScene::m_layer_stack.rbegin();
+                        layer_stack_it != Lumen::Scene::BaseScene::m_layer_stack.rend();
+                        ++layer_stack_it) {
+                        Lumen::LayerStack::LayerPtr &layer_ptr = (*layer_stack_it);
+                        if (Lumen::LayerStack::BaseLayer::DoActionResult::HandledOrBlocked == layer_ptr->DoMovementAction(movement_action)) {
+                                break;
+                        }
+                }
+        }
+
+        constexpr void DoWindowResizeAction(void) noexcept
+        {
+                if (Lumen::Scene::BaseScene::m_action_manager.HasWindowResizeAction()) {
+                        //std::cout << "[GamePlayScene] HasWindowResizeAction\n";
                         this->SetView();
                         Lumen::Scene::BaseScene::m_action_manager.ResetWindowResizeAction();
                 }
         }
+
 /*private:
 
 public:
