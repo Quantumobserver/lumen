@@ -65,11 +65,12 @@ struct ChangeSceneArgs {
 };
 
 struct InterSceneCommunicationData {
+        float delta_time;
         ChangeSceneArgs change_scene_args;
         bool change_scene : 1;
         bool running : 1;
 
-        constexpr InterSceneCommunicationData(void) noexcept : change_scene{false}, running{true} {}
+        constexpr InterSceneCommunicationData(void) noexcept : delta_time{0.0f}, change_scene{false}, running{true} {}
 };
 
 class BaseScene {

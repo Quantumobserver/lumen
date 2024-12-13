@@ -86,6 +86,11 @@ public:
 
         }
 
+        constexpr void SetDeltaTime(float delta_time) noexcept
+        {
+                this->m_inter_scene_communication_data.delta_time = delta_time;
+        }
+
         /*constexpr SceneType CurrentScene(void) const noexcept
         {
                 return this->m_sceneData.currentScene;
@@ -127,6 +132,7 @@ public:
         constexpr void Render(void) noexcept
         {
                 this->m_current_scene_ptr->Render();
+                this->m_window_ptr->display();
         }
 
         constexpr bool IsRunning(void) const noexcept

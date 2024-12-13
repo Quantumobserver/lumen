@@ -2,6 +2,8 @@
 #pragma once
 
 #include "Scene.hpp"
+#include <ECS/System/Debug/DrawBoundingBox.hpp>
+#include <ECS/System/Movement.hpp>
 
 namespace Lumen {
 namespace Scene {
@@ -32,18 +34,28 @@ public:
                 this->m_is_initialized = true;
         }
 
+        constexpr void Movement(void) noexcept
+        {
+                assert(this->m_is_initialized);
+                //std::cout << "[GamePlayScene] Movement\n";
+                float delta_time = Lumen::Scene::BaseScene::m_inter_scene_communication_data->delta_time;
+                Lumen::ECS::System::MovementForEach(*Lumen::Scene::BaseScene::m_entity_manager_ptr, delta_time);
+        }
 
         constexpr void Update(void) noexcept override
         {
                 assert(this->m_is_initialized);
                 this->CreateActions();
-                
                 this->DoActions();
+                this->Movement();
         }
 
         constexpr void Render(void) noexcept override
         {
                 assert(this->m_is_initialized);
+                //std::cout << "[GamePlayScene] Render\n";
+                Lumen::ECS::System::Debug::DrawBoundingBoxForEach(*Lumen::Scene::BaseScene::m_window_ptr, *Lumen::Scene::BaseScene::m_entity_manager_ptr);
+                //std::cout << "[GamePlayScene] Render end\n";
         }
 
         constexpr void ChangeToThisScene(Lumen::Scene::ChangeSceneArgs &change_scene_args) noexcept override
@@ -181,7 +193,7 @@ private:
                         case Lumen::Action::ActionName::TOGGLE_DRAWING_TEXTURE:
                                 // TODO:
                                 return Lumen::LayerStack::BaseLayer::DoActionResult::HandledOrBlocked;
-                        
+
                         default:
                                 break;
                         }

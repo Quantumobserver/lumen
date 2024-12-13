@@ -8,6 +8,7 @@
 #include <cassert>
 #include <iostream>
 #include <string>
+#include <chrono>
 
 
 namespace Lumen {
@@ -26,6 +27,23 @@ struct Config {
         Window window;
 };
 
+class Timer {
+        std::chrono::time_point<std::chrono::high_resolution_clock> last_update_time_point;
+public:
+        constexpr void Init(void) noexcept
+        {
+                last_update_time_point = std::chrono::high_resolution_clock::now();
+        }
+
+        constexpr float GetElapsed(void) noexcept
+        {
+                auto tmp_time_point = last_update_time_point;
+                last_update_time_point = std::chrono::high_resolution_clock::now();
+                std::chrono::duration<float> elapsed = (last_update_time_point - tmp_time_point);
+                return elapsed.count();
+        }
+};
+
 class Engine {
 private:
         sf::RenderWindow m_window;
@@ -35,6 +53,8 @@ private:
 
         Lumen::Scene::SceneManager m_scene_manager;
         Lumen::ECS::Entity::EntityManager m_entity_manager;
+
+        Lumen::Timer m_timer;
 
         bool m_is_initialized{false};
 
@@ -48,14 +68,23 @@ public:
                 this->LoadInitConfig();
                 this->CreateWindow();
                 this->InitSceneManager();
+                this->m_timer.Init();
                 this->m_is_initialized = true;
         }
 
         void Updata(void)
         {
                 assert(this->m_is_initialized);
+                this->m_scene_manager.SetDeltaTime(this->m_timer.GetElapsed());
                 this->m_scene_manager.Update();
                 //this->TestUpdate();
+        }
+
+        void Render(void)
+        {
+                assert(this->m_is_initialized);
+                this->m_window.clear(sf::Color::Yellow);
+                this->m_scene_manager.Render();
         }
 
         constexpr void Run(void) noexcept
@@ -63,6 +92,7 @@ public:
                 assert(this->m_is_initialized);
                 while (this->IsRunning()) {
                         this->Updata();
+                        this->Render();
                 }
         }
 
