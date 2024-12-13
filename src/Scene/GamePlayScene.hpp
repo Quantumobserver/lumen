@@ -203,6 +203,14 @@ private:
                 [[nodiscard]] constexpr Lumen::LayerStack::BaseLayer::DoActionResult
                 DoMovementAction([[maybe_unused]] Lumen::Action::MovementAction movement_action) noexcept override
                 {
+                        auto &entity_manager = *this->m_game_play_scene->m_entity_manager_ptr;//std::cout << "[GameWorldLayer] " << __LINE__ << "\n";
+                        float speed = entity_manager.GetSpeedOfEntityCurrentlyControlledByThePlayer();//std::cout << "[GameWorldLayer] " << __LINE__ << "\n";
+                        auto &player = entity_manager.GetEntityCurrentlyControlledByThePlayer();//std::cout << "[GameWorldLayer] " << __LINE__ << "\n";
+                        auto &transform = player.GetComponent<Lumen::ECS::Component::Transform>();//std::cout << "[GameWorldLayer] " << __LINE__ << "\n";
+                        if (!movement_action.has_movement) {
+                                transform.velocity = {0.0f, 0.0f};//std::cout << "[GameWorldLayer] " << __LINE__ << "\n";
+                                return Lumen::LayerStack::BaseLayer::DoActionResult::HandledOrBlocked;
+                        }
                         Lumen::Core::Math::Vec2f32 velocity{0.0f, 0.0f};
                         if (movement_action.is_move_up) {
                                 velocity += {0.0f, -1.0f};
@@ -218,12 +226,8 @@ private:
                         }
                         //std::cout << "[GameWorldLayer] velocity{ " << velocity.x << ", " << velocity.y << "}\n";
                         velocity.Normalize();
-                        std::cout << "[GameWorldLayer] velocity{ " << velocity.x << ", " << velocity.y << "}\n";
-                        auto &entity_manager = *this->m_game_play_scene->m_entity_manager_ptr;//std::cout << "[GameWorldLayer] " << __LINE__ << "\n";
-                        float speed = entity_manager.GetSpeedOfEntityCurrentlyControlledByThePlayer();//std::cout << "[GameWorldLayer] " << __LINE__ << "\n";
                         velocity *= speed;//std::cout << "[GameWorldLayer] " << __LINE__ << "\n";
-                        auto &player = entity_manager.GetEntityCurrentlyControlledByThePlayer();//std::cout << "[GameWorldLayer] " << __LINE__ << "\n";
-                        auto &transform = player.GetComponent<Lumen::ECS::Component::Transform>();//std::cout << "[GameWorldLayer] " << __LINE__ << "\n";
+                        std::cout << "[GameWorldLayer] velocity{ " << velocity.x << ", " << velocity.y << "}\n";
                         transform.velocity = velocity;//std::cout << "[GameWorldLayer] " << __LINE__ << "\n";
                         //std::cout << "[GameWorldLayer] " << __LINE__ << "\n";
                         return Lumen::LayerStack::BaseLayer::DoActionResult::HandledOrBlocked;
@@ -284,9 +288,6 @@ private:
                 }
                 do {
                         const auto movement_action = Lumen::Scene::BaseScene::m_action_manager.GetMovementAction();
-                        if (!movement_action.has_movement) {
-                                break;
-                        }
                         for (auto layer_stack_it = Lumen::Scene::BaseScene::m_layer_stack.rbegin();
                              layer_stack_it != Lumen::Scene::BaseScene::m_layer_stack.rend();
                              ++layer_stack_it) {
