@@ -43,7 +43,7 @@ public:
                         return Lumen::LayerStack::BaseLayer::DoActionResult::HandledOrBlocked;
                 }
                 case Lumen::Action::ActionName::MOVE_UP:
-                        std::cout << "[GamePlayScene:TestUILayer]: MOVE_UP\n";
+                        //std::cout << "[GamePlayScene:TestUILayer]: MOVE_UP\n";
                         return Lumen::LayerStack::BaseLayer::DoActionResult::HandledOrBlocked;
                 
                 default:

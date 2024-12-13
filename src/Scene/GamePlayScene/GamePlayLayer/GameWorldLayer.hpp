@@ -96,6 +96,7 @@ public:
                 //std::cout << "[GameWorldLayer] velocity{ " << velocity.x << ", " << velocity.y << "}\n";
                 transform.velocity = velocity;//std::cout << "[GameWorldLayer] " << __LINE__ << "\n";
                 //std::cout << "[GameWorldLayer] " << __LINE__ << "\n";
+                this->m_game_play_scene->m_view_changed = true;
                 return Lumen::LayerStack::BaseLayer::DoActionResult::HandledOrBlocked;
         }
 

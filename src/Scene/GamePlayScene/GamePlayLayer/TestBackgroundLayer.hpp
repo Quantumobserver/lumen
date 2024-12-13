@@ -23,7 +23,7 @@ public:
         {
                 switch (action.action_name) {
                 case Lumen::Action::ActionName::MOVE_RIGHT:
-                        std::cout << "[GamePlayScene:TestBackgroundLayer]: MOVE_RIGHT\n";
+                        //std::cout << "[GamePlayScene:TestBackgroundLayer]: MOVE_RIGHT\n";
                         return Lumen::LayerStack::BaseLayer::DoActionResult::HandledOrBlocked;
                 
                 default:

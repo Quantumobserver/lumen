@@ -100,6 +100,7 @@ protected:
         Lumen::ECS::Entity::EntityManager *m_entity_manager_ptr;
         Lumen::Scene::InterSceneCommunicationData *m_inter_scene_communication_data;
 
+        bool m_view_changed : 1;
         bool m_is_paused : 1;
         bool m_has_ended : 1;
 
@@ -110,7 +111,8 @@ public:
                             Lumen::Scene::InterSceneCommunicationData *inter_scene_communication_data) noexcept
         : m_scene_id{scene_id}, m_current_frame{0}, m_window_ptr{window_ptr},
           m_entity_manager_ptr{entity_manager_ptr},
-          m_inter_scene_communication_data{inter_scene_communication_data} {}
+          m_inter_scene_communication_data{inter_scene_communication_data},
+          m_view_changed{true}, m_is_paused{false}, m_has_ended{false} {}
 
         constexpr virtual ~BaseScene(void) noexcept {}
 
