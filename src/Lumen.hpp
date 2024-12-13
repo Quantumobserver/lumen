@@ -1,6 +1,7 @@
 
 #include <ECS/Entity/EntityManager.hpp>
 #include <Scene/SceneManager.hpp>
+#include "VisualProfiling/VisualProfiler.hpp"
 
 #include <SFML/Graphics/RenderWindow.hpp>
 #include <glm/vec2.hpp>
@@ -61,6 +62,7 @@ private:
 public:
         constexpr void Init(void) noexcept
         {
+                LUMEN_VISUAL_PROFILE_FUNCTION();
                 if (this->m_is_initialized) {
                         return;
                 }
@@ -74,6 +76,7 @@ public:
 
         void Updata(void)
         {
+                LUMEN_VISUAL_PROFILE_FUNCTION();
                 assert(this->m_is_initialized);
                 this->m_scene_manager.SetDeltaTime(this->m_timer.GetElapsed());
                 this->m_scene_manager.Update();
@@ -82,6 +85,7 @@ public:
 
         void Render(void)
         {
+                LUMEN_VISUAL_PROFILE_FUNCTION();
                 assert(this->m_is_initialized);
                 this->m_window.clear(sf::Color::Yellow);
                 this->m_scene_manager.Render();
@@ -89,6 +93,7 @@ public:
 
         constexpr void Run(void) noexcept
         {
+                LUMEN_VISUAL_PROFILE_FUNCTION();
                 assert(this->m_is_initialized);
                 while (this->IsRunning()) {
                         this->Updata();
@@ -108,6 +113,7 @@ private:
 
         constexpr void CreateWindow(void) noexcept
         {
+                LUMEN_VISUAL_PROFILE_FUNCTION();
                 assert(!this->m_is_initialized);
                 this->m_window.create(
                         sf::VideoMode{
@@ -118,6 +124,7 @@ private:
 
         constexpr void InitSceneManager(void) noexcept
         {
+                LUMEN_VISUAL_PROFILE_FUNCTION();
                 assert(!this->m_is_initialized);
                 this->m_scene_manager.Init(&this->m_window, &this->m_entity_manager);
         }
