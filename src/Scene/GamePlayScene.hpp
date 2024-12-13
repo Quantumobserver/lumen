@@ -48,6 +48,9 @@ public:
                 this->CreateActions();
                 this->DoActions();
                 this->Movement();
+                auto &e = this->m_entity_manager_ptr->GetEntityCurrentlyControlledByThePlayer();
+                auto &t = e.GetComponent<Lumen::ECS::Component::Transform>();
+                std::cout << "[GamePlayScene] t.position{ " << t.position.x << ", " << t.position.y << "}\n";
         }
 
         constexpr void Render(void) noexcept override
@@ -225,6 +228,12 @@ private:
                                 velocity += {1.0f, 0.0f};
                         }
                         //std::cout << "[GameWorldLayer] velocity{ " << velocity.x << ", " << velocity.y << "}\n";
+                        constexpr float FLOAT_ZERO = 0.001f;
+                        if (((velocity.x < FLOAT_ZERO) && (velocity.x > -FLOAT_ZERO)) &&
+                            (velocity.y < FLOAT_ZERO) && (velocity.y > -FLOAT_ZERO)) {
+                                return Lumen::LayerStack::BaseLayer::DoActionResult::HandledOrBlocked;
+                        }
+                        
                         velocity.Normalize();
                         velocity *= speed;//std::cout << "[GameWorldLayer] " << __LINE__ << "\n";
                         std::cout << "[GameWorldLayer] velocity{ " << velocity.x << ", " << velocity.y << "}\n";
