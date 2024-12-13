@@ -8,13 +8,10 @@
 
 namespace Lumen {
 namespace Scene {
-
-class MenuScene;
-
 namespace MenuLayer {
 
 class TestBackgroundLayer : public Lumen::LayerStack::BaseLayer {
-        friend Lumen::Scene::MenuScene;
+public:
 
         constexpr void Update(void) noexcept override
         {

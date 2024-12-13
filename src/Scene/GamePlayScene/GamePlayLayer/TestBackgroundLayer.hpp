@@ -9,12 +9,10 @@
 namespace Lumen {
 namespace Scene {
 
-class GamePlayScene;
-
 namespace GamePlayLayer {
 
 class TestBackgroundLayer : public Lumen::LayerStack::BaseLayer {
-        friend Lumen::Scene::GamePlayScene;
+public:
 
         constexpr void Update(void) noexcept override
         {

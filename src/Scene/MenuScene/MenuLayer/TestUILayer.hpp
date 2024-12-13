@@ -8,14 +8,10 @@
 
 namespace Lumen {
 namespace Scene {
-
-class MenuScene;
-
 namespace MenuLayer {
 
 class TestUILayer : public Lumen::LayerStack::BaseLayer {
 private:
-        friend Lumen::Scene::MenuScene;
 
         Lumen::Scene::BaseScene *m_menu_scene;
 public:
@@ -25,7 +21,6 @@ public:
                 assert(nullptr != this->m_menu_scene);
         }
 
-private:
         constexpr void Update(void) noexcept override
         {
                 //std::cout << "[ExampleLayer1]: Update\n";

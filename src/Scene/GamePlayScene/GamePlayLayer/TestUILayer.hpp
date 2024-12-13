@@ -9,13 +9,10 @@
 namespace Lumen {
 namespace Scene {
 
-class GamePlayScene;
-
 namespace GamePlayLayer {
 
 class TestUILayer : public Lumen::LayerStack::BaseLayer {
 private:
-        friend Lumen::Scene::GamePlayScene;
 
         Lumen::Scene::BaseScene *m_game_play_scene;
 
@@ -25,8 +22,6 @@ public:
         {
                 assert(nullptr != this->m_game_play_scene);
         }
-
-private:
 
         constexpr void Update(void) noexcept override
         {

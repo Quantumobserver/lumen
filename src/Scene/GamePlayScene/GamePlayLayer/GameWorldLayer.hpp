@@ -9,14 +9,10 @@
 namespace Lumen {
 namespace Scene {
 
-class GamePlayScene;
-
 namespace GamePlayLayer {
 
 class GameWorldLayer : public Lumen::LayerStack::BaseLayer {
 private:
-        friend Lumen::Scene::GamePlayScene;
-
         Lumen::Scene::BaseScene *m_game_play_scene;
 public:
         constexpr GameWorldLayer(Lumen::Scene::BaseScene *game_play_scene) noexcept
@@ -24,8 +20,6 @@ public:
         {
                 assert(nullptr != this->m_game_play_scene);
         }
-
-private:
 
         constexpr void Update(void) noexcept override
         {
@@ -104,6 +98,8 @@ private:
                 //std::cout << "[GameWorldLayer] " << __LINE__ << "\n";
                 return Lumen::LayerStack::BaseLayer::DoActionResult::HandledOrBlocked;
         }
+
+private:
 };
 
 } // namespace GamePlayLayer
