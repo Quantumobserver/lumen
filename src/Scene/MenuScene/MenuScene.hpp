@@ -1,7 +1,9 @@
 
 #pragma once
 
-#include "Scene.hpp"
+#include <Scene/Scene.hpp>
+#include "MenuLayer/TestUILayer.hpp"
+#include "MenuLayer/TestBackgroundLayer.hpp"
 
 #include <iostream>
 
@@ -88,82 +90,11 @@ private:
                 //}
         }
 
-        class TestUILayer : public Lumen::LayerStack::BaseLayer {
-        private:
-                MenuScene *m_menu_scene;
-        public:
-                constexpr TestUILayer(MenuScene *menu_scene) noexcept
-                : m_menu_scene{menu_scene}
-                {
-                        assert(nullptr != this->m_menu_scene);
-                }
-
-                constexpr void Update(void) noexcept override
-                {
-                        //std::cout << "[ExampleLayer1]: Update\n";
-                }
-
-                [[nodiscard]] constexpr Lumen::LayerStack::BaseLayer::DoActionResult DoAction(Lumen::Action::Action action) noexcept override
-                {
-                        switch (action.action_name) {
-                        case Lumen::Action::ActionName::QUIT:
-                                std::cout << "[MenuScene:TestUILayer]: QUIT\n";
-                                assert(nullptr != this->m_menu_scene);
-                                assert(nullptr != this->m_menu_scene->m_inter_scene_communication_data);
-                                this->m_menu_scene->m_inter_scene_communication_data->running = false;
-                                return Lumen::LayerStack::BaseLayer::DoActionResult::HandledOrBlocked;
-                        case Lumen::Action::ActionName::MOVE_UP:
-                                std::cout << "[MenuScene:TestUILayer]: MOVE_UP\n";
-                                return Lumen::LayerStack::BaseLayer::DoActionResult::HandledOrBlocked;
-                        
-                        case Lumen::Action::ActionName::START_SELECTED_LEVEL: {
-                                std::cout << "[MenuScene:TestUILayer]: START_SELECTED_LEVEL\n";
-                                assert(nullptr != this->m_menu_scene);
-                                assert(nullptr != this->m_menu_scene->m_inter_scene_communication_data);
-                                this->m_menu_scene->m_inter_scene_communication_data->change_scene = true;
-                                auto &change_scene_args = this->m_menu_scene->m_inter_scene_communication_data->change_scene_args;
-                                change_scene_args.from_scene = Lumen::Scene::SceneID::MENU;
-                                change_scene_args.change_to_this_scene = Lumen::Scene::SceneID::GAME_PLAY;
-                                this->m_menu_scene->m_action_manager.ResetActionBuffer();
-                                return Lumen::LayerStack::BaseLayer::DoActionResult::HandledOrBlocked;
-                        }
-                        
-                        default:
-                                break;
-                        }
-                        return Lumen::LayerStack::BaseLayer::DoActionResult::NotHandedOrNotBlocked;
-                }
-        };
-
-        class TestBackgroundLayer : public Lumen::LayerStack::BaseLayer {
-        public:
-
-                constexpr void Update(void) noexcept override
-                {
-                        //std::cout << "[ExampleLayer2]: Update\n";
-                }
-
-                [[nodiscard]] constexpr Lumen::LayerStack::BaseLayer::DoActionResult DoAction(Lumen::Action::Action action) noexcept override
-                {
-                        switch (action.action_name) {
-                        case Lumen::Action::ActionName::MOVE_RIGHT:
-                                std::cout << "[MenuScene:TestBackgroundLayer]: MOVE_RIGHT\n";
-                                return Lumen::LayerStack::BaseLayer::DoActionResult::HandledOrBlocked;
-                        
-                        default:
-                                break;
-                        }
-                        return Lumen::LayerStack::BaseLayer::DoActionResult::NotHandedOrNotBlocked;
-                }
-        };
-
-        friend TestUILayer;
-        
         constexpr void InitLayerStack(void) noexcept
         {
                 assert(!this->m_is_initialized);
-                Lumen::Scene::BaseScene::m_layer_stack.PushBackLayer(Lumen::LayerStack::MakeLayer<TestUILayer>(this));
-                Lumen::Scene::BaseScene::m_layer_stack.PushBackLayer(Lumen::LayerStack::MakeLayer<TestBackgroundLayer>());
+                Lumen::Scene::BaseScene::m_layer_stack.PushBackLayer(Lumen::LayerStack::MakeLayer<MenuLayer::TestUILayer>(this));
+                Lumen::Scene::BaseScene::m_layer_stack.PushBackLayer(Lumen::LayerStack::MakeLayer<MenuLayer::TestBackgroundLayer>());
         }
 
         constexpr void CreateActions(void) noexcept

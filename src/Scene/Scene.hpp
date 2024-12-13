@@ -73,7 +73,23 @@ struct InterSceneCommunicationData {
         constexpr InterSceneCommunicationData(void) noexcept : delta_time{0.0f}, change_scene{false}, running{true} {}
 };
 
+namespace GamePlayLayer {
+
+class TestUILayer;
+class GameWorldLayer;
+
+} // namespace GamePlayLayer
+
+namespace MenuLayer {
+
+class TestUILayer;
+
+} // namespace MenuLayer
+
 class BaseScene {
+        friend Lumen::Scene::GamePlayLayer::TestUILayer;
+        friend Lumen::Scene::GamePlayLayer::GameWorldLayer;
+        friend Lumen::Scene::MenuLayer::TestUILayer;
 protected:
         Lumen::Scene::SceneID m_scene_id;
 

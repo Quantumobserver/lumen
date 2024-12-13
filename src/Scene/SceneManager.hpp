@@ -2,8 +2,8 @@
 #pragma once
 
 #include "Scene.hpp"
-#include "MenuScene.hpp"
-#include "GamePlayScene.hpp"
+#include "MenuScene/MenuScene.hpp"
+#include "GamePlayScene/GamePlayScene.hpp"
 
 #include <cassert>
 #include <cstdlib>
