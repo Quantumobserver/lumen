@@ -8,6 +8,7 @@
 #include <Scene/Scene.hpp>
 #include <ECS/System/Debug/DrawBoundingBox.hpp>
 #include <ECS/System/Movement.hpp>
+#include <ECS/System/LifespanUpdate.hpp>
 
 namespace Lumen {
 namespace Scene {
@@ -37,6 +38,7 @@ public:
                 this->InitLayerStack();
                 this->InitSpawnePlayer();
                 this->InitSpawneBlock();
+                this->InitSpawneLifesanBlock();
 
                 auto &entity_manager = *Lumen::Scene::BaseScene::m_entity_manager_ptr;
                 entity_manager.Update();
@@ -50,6 +52,7 @@ public:
                 this->CreateActions();
                 this->DoActions();
                 this->Movement();
+                this->LifespanUpdate();
 
                 auto &entity_manager = *Lumen::Scene::BaseScene::m_entity_manager_ptr;
                 entity_manager.Update();
@@ -79,6 +82,13 @@ public:
         }
 
 private:
+
+        constexpr void LifespanUpdate(void) noexcept
+        {
+                assert(this->m_is_initialized);
+                float delta_time = Lumen::Scene::BaseScene::m_inter_scene_communication_data->delta_time;
+                Lumen::ECS::System::LifespanUpdateForEach(*Lumen::Scene::BaseScene::m_entity_manager_ptr, delta_time);
+        }
 
         constexpr void Movement(void) noexcept
         {
@@ -162,6 +172,26 @@ private:
         {
                 this->SpawneBlock({50.0f, 70.0f}, {{20.0f, 80.0f}});
                 this->SpawneBlock({100.0f, 50.0f}, {{80.0f, 20.0f}});
+        }
+
+        constexpr void InitSpawneLifesanBlock(void) noexcept
+        {
+                auto &entity_manager = *Lumen::Scene::BaseScene::m_entity_manager_ptr;
+                auto &tile_entity = entity_manager.CreateEntity(Lumen::ECS::Entity::Entity::TagType::TILE);
+                tile_entity.AddComponent<Lumen::ECS::Component::Transform>(
+                        Lumen::Core::Math::Vec2f32{200.0f, 50.0f},
+                        Lumen::Core::Math::Vec2f32{0.0f, 0.0f},
+                        Lumen::Core::Math::Vec2f32{0.0f, 0.0f}
+                );
+
+                tile_entity.AddComponent<Lumen::ECS::Component::BoundingBox>(
+                        {Lumen::Core::Math::Vec2f32{50.0f, 10.0f},
+                         Lumen::ECS::Component::BoundingBox::BlockVision{false}}
+                );
+
+                tile_entity.AddComponent<Lumen::ECS::Component::Lifespan>(
+                        3.0f
+                );
         }
 
         constexpr void SpawneBlock(const Lumen::Core::Math::Vec2f32 &position, const Lumen::ECS::Component::BoundingBox &bounding_box) noexcept
