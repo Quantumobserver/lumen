@@ -55,7 +55,10 @@ public:
         {
                 assert(this->m_is_initialized);
 
-                this->SetView();
+                if (Lumen::Scene::BaseScene::m_view_changed) {
+                        this->SetView();
+                        Lumen::Scene::BaseScene::m_view_changed = false;
+                }
 
                 //std::cout << "[GamePlayScene] Render\n";
                 Lumen::ECS::System::Debug::DrawBoundingBoxForEach(*Lumen::Scene::BaseScene::m_window_ptr, *Lumen::Scene::BaseScene::m_entity_manager_ptr);
@@ -80,10 +83,6 @@ private:
 
         constexpr void SetView(void) noexcept
         {
-                if (!Lumen::Scene::BaseScene::m_view_changed) {
-                        return;
-                }std::cout << "SetView\n";
-
                 auto &window = *Lumen::Scene::BaseScene::m_window_ptr;
                 auto view = window.getView();
                 const auto window_size = window.getSize();
@@ -92,7 +91,6 @@ private:
                 const auto player_position = GetPlayerPosition();
                 view.setCenter({player_position.x, player_position.y});
                 window.setView(view);
-                Lumen::Scene::BaseScene::m_view_changed = false;
         }
 
         constexpr Lumen::Core::Math::Vec2f32 GetPlayerPosition(void) const noexcept
@@ -189,6 +187,11 @@ private:
                                 }
                         }
                 } while (false);
+
+                if (Lumen::Scene::BaseScene::m_action_manager.HasWindowResizeAction()) {std::cout << "[GamePlayScene] HasWindowResizeAction\n";
+                        this->SetView();
+                        Lumen::Scene::BaseScene::m_action_manager.ResetWindowResizeAction();
+                }
         }
 /*private:
 

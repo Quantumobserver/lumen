@@ -85,6 +85,21 @@ public:
                 return this->m_action_status_buffer.GetMovementAction();
         }
 
+        constexpr bool HasWindowResizeAction(void) const noexcept
+        {
+                return this->m_action_status_buffer.HasWindowResizeAction();
+        }
+
+        constexpr sf::Event::Resized GetWindowResizeAction(void) const noexcept
+        {
+                return this->m_action_status_buffer.GetWindowResizeAction();
+        }
+
+        constexpr void ResetWindowResizeAction(void) noexcept
+        {
+                this->m_action_status_buffer.ResetWindowResizeAction();
+        }
+
         constexpr void CreateActionFromEvent(sf::Event &event) noexcept
         {
                 Lumen::Action::Action action{};
@@ -98,6 +113,8 @@ public:
                         const sf::Event::KeyReleased &key_released_data = *event.getIf<sf::Event::KeyReleased>();
                         action.action_name = this->m_key_to_action_map.GetActionName(key_released_data.code);
                         action.action_status = Lumen::Action::ActionStatus::END;
+                } else if (event.is<sf::Event::Resized>()) {
+                        this->m_action_status_buffer.SetWindowResizeAction(*event.getIf<sf::Event::Resized>());
                 } // TODO: Mouse Input
 //std::cout << "[CreateActionFromEvent]: { " << fmt(action.action_name) << ", " << fmt(action.action_status) << " }\n";
                 this->m_action_status_buffer.SetActionStatus(action);

@@ -7,6 +7,9 @@
 
 #include "Action.hpp"
 
+#include <SFML/Window/Event.hpp>
+
+#include <iostream>
 #ifdef LUMEN_DEBUG_ACTION_FORMAT_ENABLED
         #include <iostream>
 #endif // LUMEN_DEBUG_ACTION_FORMAT_ENABLED
@@ -21,6 +24,11 @@ private:
         std::array<Lumen::Action::ActionStatus,
                    NUMBER_OF_ACTIONS
                    > m_action_status_buffer;
+
+        struct WindowResizeAction {
+                bool has_resize_action;
+                sf::Event::Resized data;
+        } m_window_resize_action;
 
         class ActionStatusBufferIterator {
         private:
@@ -67,7 +75,7 @@ private:
 public:
         using iterator = ActionStatusBufferIterator;
 
-        constexpr ActionStatusBuffer(void) noexcept : m_action_status_buffer{}
+        constexpr ActionStatusBuffer(void) noexcept : m_action_status_buffer{}, m_window_resize_action{}
         {
                 for (std::size_t i = 0; i < this->m_action_status_buffer.size(); ++i) {
                         this->m_action_status_buffer[i] = Lumen::Action::ActionStatus::END;
@@ -75,7 +83,9 @@ public:
         }
 
         constexpr ActionStatusBuffer(const ActionStatusBuffer &) noexcept = delete;
-        constexpr ActionStatusBuffer(ActionStatusBuffer &&other) noexcept : m_action_status_buffer{std::move(other.m_action_status_buffer)} {}
+        constexpr ActionStatusBuffer(ActionStatusBuffer &&other) noexcept
+        : m_action_status_buffer{std::move(other.m_action_status_buffer)},
+          m_window_resize_action{std::move(other.m_window_resize_action)} {}
 
         constexpr ActionStatusBuffer &operator=(const ActionStatusBuffer &) noexcept = delete;
         constexpr ActionStatusBuffer &operator=(ActionStatusBuffer &&other) noexcept
@@ -85,6 +95,27 @@ public:
                 }
                 this->m_action_status_buffer = std::move(other.m_action_status_buffer);
                 return *this;
+        }
+
+        constexpr void SetWindowResizeAction(const sf::Event::Resized &window_resize_data) noexcept
+        {std::cout << "SetWindowResizeAction\n";
+                this->m_window_resize_action.has_resize_action = true;
+                this->m_window_resize_action.data = window_resize_data;
+        }
+
+        constexpr void ResetWindowResizeAction(void) noexcept
+        {
+                this->m_window_resize_action.has_resize_action = false;
+        }
+
+        constexpr bool HasWindowResizeAction(void) const noexcept
+        {
+                return this->m_window_resize_action.has_resize_action;
+        }
+
+        constexpr sf::Event::Resized GetWindowResizeAction(void) const noexcept
+        {
+                return this->m_window_resize_action.data;
         }
 
         constexpr void SetActionStatus(Lumen::Action::Action action) noexcept
@@ -102,6 +133,7 @@ public:
                 for (auto &action_status : this->m_action_status_buffer) {
                         action_status = Lumen::Action::ActionStatus::END;
                 }
+                this->m_window_resize_action.has_resize_action = false;
         }
 
         static constexpr bool IsActionHappened(Lumen::Action::ActionStatus action_status) noexcept
