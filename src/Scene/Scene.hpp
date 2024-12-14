@@ -77,6 +77,7 @@ namespace GamePlayLayer {
 
 class TestUILayer;
 class GameWorldLayer;
+class TestBackgroundLayer;
 
 } // namespace GamePlayLayer
 
@@ -90,6 +91,7 @@ class BaseScene {
         friend Lumen::Scene::GamePlayLayer::TestUILayer;
         friend Lumen::Scene::GamePlayLayer::GameWorldLayer;
         friend Lumen::Scene::MenuLayer::TestUILayer;
+        friend Lumen::Scene::GamePlayLayer::TestBackgroundLayer;
 protected:
         Lumen::Scene::SceneID m_scene_id;
 

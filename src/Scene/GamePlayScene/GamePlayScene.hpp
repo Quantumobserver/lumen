@@ -70,6 +70,10 @@ public:
                         Lumen::Scene::BaseScene::m_view_changed = false;
                 }
 
+                for (auto &layer : Lumen::Scene::BaseScene::m_layer_stack) {
+                        layer->Render();
+                }
+
                 //std::cout << "[GamePlayScene] Render\n";
                 Lumen::ECS::System::Debug::DrawBoundingBoxForEach(*Lumen::Scene::BaseScene::m_window_ptr, *Lumen::Scene::BaseScene::m_entity_manager_ptr);
                 //std::cout << "[GamePlayScene] Render end\n";
@@ -147,7 +151,7 @@ private:
                 assert(!this->m_is_initialized);
                 Lumen::Scene::BaseScene::m_layer_stack.PushBackLayer(Lumen::LayerStack::MakeLayer<GamePlayLayer::TestUILayer>(this));
                 Lumen::Scene::BaseScene::m_layer_stack.PushBackLayer(Lumen::LayerStack::MakeLayer<GamePlayLayer::GameWorldLayer>(this));
-                Lumen::Scene::BaseScene::m_layer_stack.PushBackLayer(Lumen::LayerStack::MakeLayer<GamePlayLayer::TestBackgroundLayer>());
+                Lumen::Scene::BaseScene::m_layer_stack.PushBackLayer(Lumen::LayerStack::MakeLayer<GamePlayLayer::TestBackgroundLayer>(this));
         }
 
         constexpr void InitSpawnePlayer(void) noexcept
