@@ -9,6 +9,7 @@
 #include <ECS/System/Debug/DrawBoundingBox.hpp>
 #include <ECS/System/Movement.hpp>
 #include <ECS/System/LifespanUpdate.hpp>
+#include <ECS/System/Collision.hpp>
 
 namespace Lumen {
 namespace Scene {
@@ -51,6 +52,7 @@ public:
                 assert(this->m_is_initialized);
                 this->CreateActions();
                 this->DoActions();
+                this->Collision();
                 this->Movement();
                 this->LifespanUpdate();
 
@@ -86,6 +88,13 @@ public:
         }
 
 private:
+
+        constexpr void Collision(void) noexcept
+        {
+                assert(this->m_is_initialized);
+                //std::cout << "[GamePlayScene] Collision\n";
+                Lumen::ECS::System::CollisionForEach(*Lumen::Scene::BaseScene::m_entity_manager_ptr);
+        }
 
         constexpr void LifespanUpdate(void) noexcept
         {
