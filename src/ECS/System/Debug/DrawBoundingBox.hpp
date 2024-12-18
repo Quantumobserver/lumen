@@ -40,7 +40,7 @@ constexpr void DrawBoundingBox(sf::RenderWindow &window, const Lumen::ECS::Entit
         const auto &transform = entity.GetComponent<Lumen::ECS::Component::Transform>();
         const auto &bounding_box = entity.GetComponent<Lumen::ECS::Component::BoundingBox>();
         sf::RectangleShape rectangle_shape{};
-        rectangle_shape.setSize({bounding_box.size.x, bounding_box.size.y});
+        rectangle_shape.setSize({bounding_box.size.x - 10.0f, bounding_box.size.y - 10.0f});
         rectangle_shape.setFillColor(sf::Color::Transparent);
         rectangle_shape.setOutlineColor(GetBoundingBoxColor(bounding_box));
         rectangle_shape.setOutlineThickness(5.0f);
