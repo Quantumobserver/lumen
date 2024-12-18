@@ -12,3 +12,5 @@ add_subdirectory(LayerStack)
 add_subdirectory(Log)
 
 add_subdirectory(Utility)
+
+add_subdirectory(ResourceManager)

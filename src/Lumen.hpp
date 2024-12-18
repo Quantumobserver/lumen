@@ -1,6 +1,7 @@
 
 #include <ECS/Entity/EntityManager.hpp>
 #include <Scene/SceneManager.hpp>
+#include <ResourceManager/ResourceManager.hpp>
 #include "VisualProfiling/VisualProfiler.hpp"
 
 #include <SFML/Graphics/RenderWindow.hpp>
@@ -54,6 +55,7 @@ private:
 
         Lumen::Scene::SceneManager m_scene_manager;
         Lumen::ECS::Entity::EntityManager m_entity_manager;
+        Lumen::ResourceManager::ResourceManager m_Resource_manager;
 
         Lumen::Timer m_timer;
 
