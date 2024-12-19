@@ -32,6 +32,8 @@ private:
 
         bool m_window_close_action{false};
 
+        Lumen::Action::SelectionAction m_selection_action;
+
         class ActionStatusBufferIterator {
         private:
                 friend ActionStatusBuffer;
@@ -137,6 +139,7 @@ public:
                 }
                 this->m_window_resize_action.has_resize_action = false;
                 this->m_window_close_action = false;
+                this->m_selection_action.Clear();
         }
 
         static constexpr bool IsActionHappened(Lumen::Action::ActionStatus action_status) noexcept
@@ -145,6 +148,16 @@ public:
                         true, true, false, false
                 };
                 return action_status_map[static_cast<std::size_t>(action_status)];
+        }
+
+        constexpr void SetSelectionAction(const Lumen::Action::SelectionAction &selection_action) noexcept
+        {
+                this->m_selection_action = selection_action;
+        }
+
+        constexpr const Lumen::Action::SelectionAction &GetSelectionAction(void) const noexcept
+        {
+                return this->m_selection_action;
         }
 
 private:

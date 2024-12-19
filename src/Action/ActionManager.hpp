@@ -23,6 +23,8 @@ namespace Action {
 
 class ActionManager {
 private:
+        using this_t = ActionManager;
+
         Lumen::Action::ActionStatusBuffer m_action_status_buffer;
         Lumen::Action::KeyToActionMap m_key_to_action_map;
         Lumen::Action::ActionKindRecord m_action_kind_record;
@@ -105,24 +107,103 @@ public:
                 this->m_action_status_buffer.ResetWindowResizeAction();
         }
 
+        constexpr const Lumen::Action::SelectionAction &GetSelectionAction(void) const noexcept
+        {
+                return this->m_action_status_buffer.GetSelectionAction();
+        }
+
+private:
+        static constexpr Lumen::Action::SelectionAction::ClickTypeTag
+        SfmlMouseButtonTypeToClickType(sf::Mouse::Button button_type) noexcept
+        {
+                switch (button_type) {
+                case sf::Mouse::Button::Left:
+                        return Lumen::Action::SelectionAction::ClickTypeTag::LEFT_CLICK;
+                case sf::Mouse::Button::Right:
+                        return Lumen::Action::SelectionAction::ClickTypeTag::RIGHT_CLICK;
+                case sf::Mouse::Button::Middle:
+                        return Lumen::Action::SelectionAction::ClickTypeTag::MIDDLE_CLICK;
+                default:
+                        break;
+                }
+                return Lumen::Action::SelectionAction::ClickTypeTag::UNKNOWN;
+        }
+
+        static constexpr Lumen::Action::SelectionAction::WheelScroll::ScrollDirectionTag
+        SfmlMouseWheelScrolledToWheelScroll(const sf::Mouse::Wheel &mouse_wheel_scroll_type) noexcept
+        {
+                switch (mouse_wheel_scroll_type) {
+                case sf::Mouse::Wheel::Vertical:
+                        return Lumen::Action::SelectionAction::WheelScroll::ScrollDirectionTag::VERTICAL;
+                case sf::Mouse::Wheel::Horizontal:
+                        return Lumen::Action::SelectionAction::WheelScroll::ScrollDirectionTag::HORIZONTAL;
+                }
+                std::abort();
+        }
+
+public:
+
         constexpr void CreateActionFromEvent(sf::Event &event) noexcept
         {
                 Lumen::Action::Action action{};
 
                 if (event.is<sf::Event::KeyPressed>()) {
-                        const sf::Event::KeyPressed &key_pressed_data = *event.getIf<sf::Event::KeyPressed>();
+                        const auto &key_pressed_data = *event.getIf<sf::Event::KeyPressed>();
                         action.action_name = this->m_key_to_action_map.GetActionName(key_pressed_data.code);
                         action.action_status = this->m_action_kind_record.GetActionStartStatus(action.action_name);
 
                 } else if (event.is<sf::Event::KeyReleased>()) {
-                        const sf::Event::KeyReleased &key_released_data = *event.getIf<sf::Event::KeyReleased>();
+                        const auto &key_released_data = *event.getIf<sf::Event::KeyReleased>();
                         action.action_name = this->m_key_to_action_map.GetActionName(key_released_data.code);
                         action.action_status = Lumen::Action::ActionStatus::END;
                 } else if (event.is<sf::Event::Resized>()) {
                         this->m_action_status_buffer.SetWindowResizeAction(*event.getIf<sf::Event::Resized>());
                 } else if (event.is<sf::Event::Closed>()) {
                         this->m_action_status_buffer.SetWindowCloseAction();
-                } // TODO: Mouse Input
+                } else if (event.is<sf::Event::MouseButtonPressed>()) {
+                        const auto &mouse_button_pressed_data = *event.getIf<sf::Event::MouseButtonPressed>();
+                        
+                        const auto click_type = this_t::SfmlMouseButtonTypeToClickType(mouse_button_pressed_data.button);
+
+                        Lumen::Action::SelectionAction selection_action{
+                                Lumen::Action::SelectionAction::SelectionActionTypeTag::PRESS,
+                                { mouse_button_pressed_data.position.x, mouse_button_pressed_data.position.y},
+                                click_type,
+                        };
+
+                        this->m_action_status_buffer.SetSelectionAction(selection_action);
+                } else if (event.is<sf::Event::MouseButtonReleased>()) {
+                        const auto &mouse_button_released_data = *event.getIf<sf::Event::MouseButtonReleased>();
+
+                        const auto click_type = this_t::SfmlMouseButtonTypeToClickType(mouse_button_released_data.button);
+
+                        Lumen::Action::SelectionAction selection_action{
+                                Lumen::Action::SelectionAction::SelectionActionTypeTag::RELEASE,
+                                { mouse_button_released_data.position.x, mouse_button_released_data.position.y},
+                                click_type,
+                        };
+                        this->m_action_status_buffer.SetSelectionAction(selection_action);
+                } else if (event.is<sf::Event::MouseMoved>()) {
+                        const auto &mouse_moved_data = *event.getIf<sf::Event::MouseMoved>();
+
+                        Lumen::Action::SelectionAction selection_action{
+                            Lumen::Action::SelectionAction::SelectionActionTypeTag::CURSOR_MOVEMENT,
+                            { mouse_moved_data.position.x, mouse_moved_data.position.y},
+                        };
+
+                        this->m_action_status_buffer.SetSelectionAction(selection_action);
+                } else if (event.is<sf::Event::MouseWheelScrolled>()) {
+                        const auto &mouse_wheel_scrolled_data = *event.getIf<sf::Event::MouseWheelScrolled>();
+
+                        const auto wheel_scroll_type = this_t::SfmlMouseWheelScrolledToWheelScroll(mouse_wheel_scrolled_data.wheel);
+
+                        Lumen::Action::SelectionAction selection_action{
+                            Lumen::Action::SelectionAction::SelectionActionTypeTag::WHEEL_SCROLL,
+                            { mouse_wheel_scrolled_data.position.x, mouse_wheel_scrolled_data.position.y},
+                            { wheel_scroll_type, mouse_wheel_scrolled_data.delta, },
+                        };
+                        this->m_action_status_buffer.SetSelectionAction(selection_action);
+                }
 //std::cout << "[CreateActionFromEvent]: { " << fmt(action.action_name) << ", " << fmt(action.action_status) << " }\n";
                 this->m_action_status_buffer.SetActionStatus(action);
         }

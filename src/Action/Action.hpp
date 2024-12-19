@@ -1,6 +1,8 @@
 
 #pragma once
 
+#include <Core/Math/Vector.hpp>
+
 #ifdef LUMEN_DEBUG_ACTION_FORMAT_ENABLED
         #include <string>
 #endif // LUMEN_DEBUG_ACTION_FORMAT_ENABLED
@@ -143,6 +145,126 @@ struct MovementAction {
         bool is_move_right : 1;
         bool has_movement : 1;
 };
+
+struct SelectionAction {
+        enum class SelectionActionTypeTag {
+                NONE,
+                PRESS,
+                RELEASE,
+                WHEEL_SCROLL,
+                CURSOR_MOVEMENT,
+        } selection_action_type;
+
+        Lumen::Core::Math::Vec2i position;
+
+        struct Void {};
+        enum class ClickTypeTag {
+                UNKNOWN,
+                LEFT_CLICK,
+                RIGHT_CLICK,
+                MIDDLE_CLICK,
+        };
+        struct WheelScroll {
+                enum class ScrollDirectionTag {
+                        VERTICAL,
+                        HORIZONTAL,
+                } scroll_direction;
+
+                float wheel_offset;
+        };
+        union {
+                Void no_data;
+
+                ClickTypeTag click_type;
+
+                WheelScroll wheel_scroll;
+        };
+
+        constexpr SelectionAction(void) noexcept
+        : selection_action_type{SelectionActionTypeTag::NONE}, no_data{} {}
+        constexpr SelectionAction(SelectionActionTypeTag selection_action_type,
+                                  const Lumen::Core::Math::Vec2i &position) noexcept
+        : selection_action_type{selection_action_type}, position{position}
+        {
+                assert(SelectionActionTypeTag::CURSOR_MOVEMENT == selection_action_type);
+        }
+
+        constexpr SelectionAction(SelectionActionTypeTag selection_action_type,
+                                  const Lumen::Core::Math::Vec2i &position,
+                                  ClickTypeTag click_type) noexcept
+        : selection_action_type{selection_action_type}, position{position}, click_type{click_type}
+        {
+                assert((SelectionActionTypeTag::PRESS == selection_action_type) ||
+                       (SelectionActionTypeTag::RELEASE == selection_action_type));
+        }
+        
+        constexpr SelectionAction(SelectionActionTypeTag selection_action_type,
+                                  const Lumen::Core::Math::Vec2i &position,
+                                  const WheelScroll &wheel_scroll) noexcept
+        : selection_action_type{selection_action_type}, position{position}, wheel_scroll{wheel_scroll}
+        {
+                assert(SelectionActionTypeTag::WHEEL_SCROLL == selection_action_type);
+        }
+
+        constexpr void Clear(void) noexcept
+        {
+                this->selection_action_type = SelectionActionTypeTag::NONE;
+                this->no_data = Void{};
+        }
+};
+
+#ifdef LUMEN_DEBUG_ACTION_FORMAT_ENABLED
+
+std::string fmt(SelectionAction::SelectionActionTypeTag sst) noexcept
+{
+        switch (sst) {
+        case SelectionAction::SelectionActionTypeTag::NONE:
+                return "NONE";
+        
+        case SelectionAction::SelectionActionTypeTag::PRESS:
+                return "PRESS";
+
+        case SelectionAction::SelectionActionTypeTag::RELEASE:
+                return "RELEASE";
+
+        case SelectionAction::SelectionActionTypeTag::WHEEL_SCROLL:
+                return "WHEEL_SCROLL";
+
+        case SelectionAction::SelectionActionTypeTag::CURSOR_MOVEMENT:
+                return "CURSOR_MOVEMENT";
+        }
+}
+
+std::string fmt(SelectionAction::ClickTypeTag ctt) noexcept
+{
+        switch (ctt) {
+        case SelectionAction::ClickTypeTag::UNKNOWN:
+                return "UNKNOWN";
+        
+        case SelectionAction::ClickTypeTag::LEFT_CLICK:
+                return "LEFT_CLICK";
+
+        case SelectionAction::ClickTypeTag::RIGHT_CLICK:
+                return "RIGHT_CLICK";
+
+        case SelectionAction::ClickTypeTag::MIDDLE_CLICK:
+                return "MIDDLE_CLICK";
+        }
+}
+
+std::string fmt(SelectionAction::WheelScroll::ScrollDirectionTag sdt) noexcept
+{
+        switch (sdt) {
+        case SelectionAction::WheelScroll::ScrollDirectionTag::VERTICAL:
+                return "VERTICAL";
+        
+        case SelectionAction::WheelScroll::ScrollDirectionTag::HORIZONTAL:
+                return "HORIZONTAL";
+        }
+}
+
+
+#endif // LUMEN_DEBUG_ACTION_FORMAT_ENABLED
 
 } // namespace Action
 } // namespace Lumen
