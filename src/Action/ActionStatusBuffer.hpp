@@ -30,6 +30,8 @@ private:
                 sf::Event::Resized data;
         } m_window_resize_action;
 
+        bool m_window_close_action{false};
+
         class ActionStatusBufferIterator {
         private:
                 friend ActionStatusBuffer;
@@ -98,7 +100,7 @@ public:
         }
 
         constexpr void SetWindowResizeAction(const sf::Event::Resized &window_resize_data) noexcept
-        {std::cout << "SetWindowResizeAction\n";
+        {//std::cout << "SetWindowResizeAction\n";
                 this->m_window_resize_action.has_resize_action = true;
                 this->m_window_resize_action.data = window_resize_data;
         }
@@ -134,6 +136,7 @@ public:
                         action_status = Lumen::Action::ActionStatus::END;
                 }
                 this->m_window_resize_action.has_resize_action = false;
+                this->m_window_close_action = false;
         }
 
         static constexpr bool IsActionHappened(Lumen::Action::ActionStatus action_status) noexcept
@@ -144,6 +147,7 @@ public:
                 return action_status_map[static_cast<std::size_t>(action_status)];
         }
 
+private:
         constexpr bool IsMoveUp(void) const noexcept
         {
                 const auto action_status = this->m_action_status_buffer[static_cast<std::size_t>(Lumen::Action::ActionName::MOVE_UP)];
@@ -167,7 +171,7 @@ public:
                 const auto action_status = this->m_action_status_buffer[static_cast<std::size_t>(Lumen::Action::ActionName::MOVE_RIGHT)];
                 return this_t::IsActionHappened(action_status);
         }
-
+public:
         constexpr Lumen::Action::MovementAction GetMovementAction(void) const noexcept
         {
                 Lumen::Action::MovementAction movement_action{
@@ -180,6 +184,16 @@ public:
                 movement_action.has_movement = movement_action.is_move_up || movement_action.is_move_down ||
                                                movement_action.is_move_left || movement_action.is_move_right;
                 return movement_action;
+        }
+
+        constexpr void SetWindowCloseAction(void) noexcept
+        {
+                this->m_window_close_action = true;
+        }
+
+        constexpr bool IsWindowCloseActionHappened(void) const noexcept
+        {
+                return this->m_window_close_action;
         }
 
         constexpr ActionStatusBufferIterator begin(void) noexcept

@@ -111,6 +111,14 @@ private:
         constexpr void DoActions(void) noexcept
         {
                 assert(this->m_is_initialized);
+                //std::cout << "[MenuScene] DoActions end\n";
+                this->DoBasicAction();
+                this->DoWindowResizeAction();
+                this->DoWindowCloseAction();
+        }
+
+        constexpr void DoBasicAction(void) noexcept
+        {
                 for (auto action : Lumen::Scene::BaseScene::m_action_manager) {
                         for (auto layer_stack_it = Lumen::Scene::BaseScene::m_layer_stack.rbegin();
                              layer_stack_it != Lumen::Scene::BaseScene::m_layer_stack.rend();
@@ -120,8 +128,40 @@ private:
                                         break;
                                 }
                         }
-                }//std::cout << "[MenuScene] DoActions end\n";
+                }
         }
+
+        constexpr void SetView(void) noexcept
+        {
+                auto &window = *Lumen::Scene::BaseScene::m_window_ptr;
+                auto view = window.getView();
+                const auto window_size = window.getSize();
+                view.setSize({static_cast<float>(window_size.x), static_cast<float>(window_size.y)});
+
+                //const auto player_position = GetPlayerPosition();
+                //view.setCenter({player_position.x, player_position.y});
+                window.setView(view);
+        }
+
+        constexpr void DoWindowResizeAction(void) noexcept
+        {
+                if (Lumen::Scene::BaseScene::m_action_manager.HasWindowResizeAction()) {
+                        //std::cout << "[GamePlayScene] HasWindowResizeAction\n";
+                        this->SetView();
+                        Lumen::Scene::BaseScene::m_action_manager.ResetWindowResizeAction();
+                }
+        }
+
+        constexpr void DoWindowCloseAction(void) noexcept
+        {
+                if (Lumen::Scene::BaseScene::m_action_manager.IsWindowCloseActionHappened()) {
+                        //std::cout << "[GamePlayScene] IsWindowCloseActionHappened\n";
+                        Lumen::Scene::BaseScene::m_inter_scene_communication_data->running = false;
+                        Lumen::Scene::BaseScene::m_action_manager.ResetActionBuffer();
+                        std::cout << "[MenuScene] IsWindowCloseActionHappened\n";
+                }
+        }
+
 };
 
 } // namespace Scene

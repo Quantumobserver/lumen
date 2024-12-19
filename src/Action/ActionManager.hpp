@@ -95,6 +95,11 @@ public:
                 return this->m_action_status_buffer.GetWindowResizeAction();
         }
 
+        constexpr bool IsWindowCloseActionHappened(void) const noexcept
+        {
+                return this->m_action_status_buffer.IsWindowCloseActionHappened();
+        }
+
         constexpr void ResetWindowResizeAction(void) noexcept
         {
                 this->m_action_status_buffer.ResetWindowResizeAction();
@@ -115,6 +120,8 @@ public:
                         action.action_status = Lumen::Action::ActionStatus::END;
                 } else if (event.is<sf::Event::Resized>()) {
                         this->m_action_status_buffer.SetWindowResizeAction(*event.getIf<sf::Event::Resized>());
+                } else if (event.is<sf::Event::Closed>()) {
+                        this->m_action_status_buffer.SetWindowCloseAction();
                 } // TODO: Mouse Input
 //std::cout << "[CreateActionFromEvent]: { " << fmt(action.action_name) << ", " << fmt(action.action_status) << " }\n";
                 this->m_action_status_buffer.SetActionStatus(action);

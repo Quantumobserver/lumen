@@ -240,6 +240,7 @@ private:
                 this->DoBasicAction();
                 this->DoMovementAction();
                 this->DoWindowResizeAction();
+                this->DoWindowCloseAction();
         }
 
         constexpr void DoBasicAction(void) noexcept
@@ -277,6 +278,17 @@ private:
                         Lumen::Scene::BaseScene::m_action_manager.ResetWindowResizeAction();
                 }
         }
+
+        constexpr void DoWindowCloseAction(void) noexcept
+        {
+                if (Lumen::Scene::BaseScene::m_action_manager.IsWindowCloseActionHappened()) {
+                        //std::cout << "[GamePlayScene] IsWindowCloseActionHappened\n";
+                        Lumen::Scene::BaseScene::m_inter_scene_communication_data->running = false;
+                        Lumen::Scene::BaseScene::m_action_manager.ResetActionBuffer();
+                        std::cout << "[GamePlayScene] IsWindowCloseActionHappened\n";
+                }
+        }
+
 
 /*private:
 
