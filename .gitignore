@@ -31,6 +31,9 @@
 *.out
 *.app
 
+# macOS directory attributes
+.DS_Store
+
 # Vscode Settings
 /.vscode/
 
