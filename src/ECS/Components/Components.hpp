@@ -3,6 +3,10 @@
 
 #include <Core/Math/Vector.hpp>
 
+#include <SFML/Graphics/Sprite.hpp>
+#include <SFML/Graphics/Rect.hpp>
+#include <SFML/Graphics/Texture.hpp>
+
 #include <cassert>
 #include <cstddef>
 
@@ -100,45 +104,45 @@ struct Lifespan {
 };
 
 //#include <iostream>
-/*template<typename Rectangle, typename Sprite>
-class BasicAnimation {
+class Animation {
 private:
-        std::size_t m_numberOfFramesThisAnimationHas;
-        std::size_t m_numberOfFramesThisEntityHasLivedInGame;
-        std::size_t m_frameDuration;
-        Vec2f32 m_size;
-        Sprite m_sprite;
-        bool m_isNonRepeatingAnimation;
+        std::size_t m_number_of_frames_this_animation_has;
+        float m_the_time_of_this_entity_has_lived_in_game;
+        float m_frame_duration;
+        Lumen::Core::Math::Vec2f32 m_size;
+        sf::Sprite m_sprite;
+        bool m_is_non_repeating_animation;
 
 public:
-        constexpr BasicAnimation(void) noexcept
-        : m_numberOfFramesThisAnimationHas{0}, m_numberOfFramesThisEntityHasLivedInGame{0},
-          m_frameDuration{0}, m_isNonRepeatingAnimation{false} {}
-        constexpr BasicAnimation(
-                std::size_t numberOfFramesThisAnimationHas,
-                std::size_t frameDuration,
-                Vec2f32 size,
-                const Sprite &sprite,
-                bool isNonRepeatingAnimation) noexcept
-        : m_numberOfFramesThisAnimationHas{numberOfFramesThisAnimationHas},
-          m_numberOfFramesThisEntityHasLivedInGame{0},
-          m_frameDuration{frameDuration}, m_size{size}, m_sprite{sprite},
-          m_isNonRepeatingAnimation{isNonRepeatingAnimation}
+        constexpr Animation(void) noexcept
+        : m_number_of_frames_this_animation_has{0}, m_the_time_of_this_entity_has_lived_in_game{0},
+          m_frame_duration{0.0f}, m_is_non_repeating_animation{false} {}
+
+        constexpr Animation(
+                std::size_t number_of_frames_this_animation_has,
+                float frame_duration,
+                Lumen::Core::Math::Vec2f32 size,
+                const sf::Sprite &sprite,
+                bool is_non_repeating_animation) noexcept
+        : m_number_of_frames_this_animation_has{number_of_frames_this_animation_has},
+          m_the_time_of_this_entity_has_lived_in_game{0.0f},
+          m_frame_duration{frame_duration}, m_size{size}, m_sprite{sprite},
+          m_is_non_repeating_animation{is_non_repeating_animation}
         {
-                assert(0 != this->m_frameDuration);
+                assert(this->m_frame_duration > 0.0f);
                 const auto &texture = this->m_sprite.getTexture();
-                const auto textureSize = texture.getSize();
-                const float animationSizeX = static_cast<float>(textureSize.x / this->m_numberOfFramesThisAnimationHas);
-                const float scaleFactorX = this->m_size.x / animationSizeX;
-                const float scaleFactorY = this->m_size.y / static_cast<float>(textureSize.y);
-                this->m_sprite.setScale({scaleFactorX, scaleFactorY});
-                this->m_sprite.setOrigin({animationSizeX / 2.0f, static_cast<float>(textureSize.y) / 2.0f});
+                const auto texture_size = texture.getSize();
+                const float animation_size_x = static_cast<float>(texture_size.x / this->m_number_of_frames_this_animation_has);
+                const float scale_factor_x = this->m_size.x / animation_size_x;
+                const float scale_factor_y = this->m_size.y / static_cast<float>(texture_size.y);
+                this->m_sprite.setScale({scale_factor_x, scale_factor_y});
+                this->m_sprite.setOrigin({animation_size_x / 2.0f, static_cast<float>(texture_size.y) / 2.0f});
         }
 
-        constexpr void ChangeAnimation(const BasicAnimation &animation) noexcept
+        constexpr void ChangeAnimation(const Animation &animation) noexcept
         {
-                this->m_numberOfFramesThisAnimationHas = animation.m_numberOfFramesThisAnimationHas;
-                this->m_frameDuration = animation.m_frameDuration;
+                this->m_number_of_frames_this_animation_has = animation.m_number_of_frames_this_animation_has;
+                this->m_frame_duration = animation.m_frame_duration;
                 this->m_size = animation.m_size;
 
                 //auto facingDirection = this->m_sprite.getScale();
@@ -150,35 +154,36 @@ public:
                 //scale.y *= facingDirection.y;
                 //this->m_sprite.setScale(scale);
 
-                this->m_isNonRepeatingAnimation = animation.m_isNonRepeatingAnimation;
-                assert(0 != this->m_frameDuration);
+                this->m_is_non_repeating_animation = animation.m_is_non_repeating_animation;
+                assert(this->m_frame_duration > 0.0f);
         }
 
         constexpr void ResetNumberOfFramesThisEntityHasLivedInGame(void) noexcept
         {
-                this->m_numberOfFramesThisEntityHasLivedInGame = 0;
+                this->m_the_time_of_this_entity_has_lived_in_game = 0;
         }
 
         constexpr std::size_t GetAnimationFrame(void) const noexcept
         {
-                assert(0 != this->m_frameDuration);
-//if (dbg_print) {std::cout << "animationFrame: " << (this->m_numberOfFramesThisEntityHasLivedInGame / this->m_frameDuration) % this->m_numberOfFramesThisAnimationHas << " numberOfFramesThisEntityHasLivedInGame: " << this->m_numberOfFramesThisEntityHasLivedInGame << " frameDuration: " << this->m_frameDuration << " numberOfFramesThisAnimationHas: " << this->m_numberOfFramesThisAnimationHas << '\n'; }
-                return (this->m_numberOfFramesThisEntityHasLivedInGame /
-                        this->m_frameDuration) %
-                       this->m_numberOfFramesThisAnimationHas;
+                assert(this->m_frame_duration > 0.0f);
+//if (dbg_print) {std::cout << "animation_frame: " << (this->m_the_time_of_this_entity_has_lived_in_game / this->m_frame_duration) % this->m_number_of_frames_this_animation_has << " numberOfFramesThisEntityHasLivedInGame: " << this->m_the_time_of_this_entity_has_lived_in_game << " frame_duration: " << this->m_frame_duration << " number_of_frames_this_animation_has: " << this->m_number_of_frames_this_animation_has << '\n'; }
+                return static_cast<std::size_t>(
+                        this->m_the_time_of_this_entity_has_lived_in_game /
+                        this->m_frame_duration) %
+                       this->m_number_of_frames_this_animation_has;
         }
-        constexpr void Update(void) noexcept
+        constexpr void Update(float delta_time) noexcept
         {
-                ++this->m_numberOfFramesThisEntityHasLivedInGame;
-                const std::size_t animationFrame = this->GetAnimationFrame();
+                this->m_the_time_of_this_entity_has_lived_in_game += delta_time;
+                const std::size_t animation_frame = this->GetAnimationFrame();
                 const auto &texture = this->m_sprite.getTexture();
-                const auto &textureSize = texture.getSize();
-                const auto framSizeX = textureSize.x / this->m_numberOfFramesThisAnimationHas;
-                Rectangle rectangleToDraw{
-                        { static_cast<int>(animationFrame * framSizeX), 0, },
-                        { static_cast<int>(framSizeX), static_cast<int>(textureSize.y), },
+                const auto &texture_size = texture.getSize();
+                const auto fram_size_x = texture_size.x / this->m_number_of_frames_this_animation_has;
+                sf::IntRect rectangle_to_draw{
+                        { static_cast<int>(animation_frame * fram_size_x), 0, },
+                        { static_cast<int>(fram_size_x), static_cast<int>(texture_size.y), },
                 };
-                m_sprite.setTextureRect(rectangleToDraw);
+                m_sprite.setTextureRect(rectangle_to_draw);
         }
 
         constexpr void SetPosition(float x, float y) noexcept
@@ -186,14 +191,14 @@ public:
                 this->m_sprite.setPosition({x, y});
         }
 
-        constexpr void SetPosition(const Vec2f32 &position) noexcept
+        constexpr void SetPosition(const Lumen::Core::Math::Vec2f32 &position) noexcept
         {
-                this->m_sprite.setPosition(position);
+                this->m_sprite.setPosition({position.x, position.y});
         }
 
-        constexpr void SetScale(const Vec2f32 &factor) noexcept
+        constexpr void SetScale(const Lumen::Core::Math::Vec2f32 &factor) noexcept
         {
-                this->m_sprite.setScale(factor);
+                this->m_sprite.setScale({factor.x, factor.y});
         }
 
         constexpr void ClearSprite(void) noexcept
@@ -204,60 +209,61 @@ public:
                 this->m_sprite.setScale({0.0f, 0.0f});
         }
 
-        constexpr Vec2f32 GetScale(void) const noexcept
+        constexpr Lumen::Core::Math::Vec2f32 GetScale(void) const noexcept
         {
-                const auto scaleFactor = this->m_sprite.getScale();
-                return Vec2f32{scaleFactor.x, scaleFactor.y};
+                const auto scale_factor = this->m_sprite.getScale();
+                return {scale_factor.x, scale_factor.y};
         }
 
-        constexpr void SetSprite(const Sprite &sprite) noexcept
+        constexpr void SetSprite(const sf::Sprite &sprite) noexcept
         {
                 this->m_sprite = sprite;
         }
 
-        constexpr void SetSize(const Vec2f32 &size) noexcept
+        constexpr void SetSize(const Lumen::Core::Math::Vec2f32 &size) noexcept
         {
                 this->m_size = size;
         }
 
-        constexpr const Sprite &GetSprite(void) const noexcept
+        constexpr const sf::Sprite &GetSprite(void) const noexcept
         {
                 return this->m_sprite;
         }
 
-        constexpr const Vec2f32 &GetSize(void) const noexcept
+        constexpr const Lumen::Core::Math::Vec2f32 &GetSize(void) const noexcept
         {
                 return this->m_size;
         }
 
         [[nodiscard]] constexpr bool IsLastAnimationFrame(void) const noexcept
         {
-                const std::size_t currentAnimationFrame = this->GetAnimationFrame() + 1;
-//std::cout << "currentAnimationFrame: " << currentAnimationFrame << "this->m_numberOfFramesThisAnimationHas: " << this->m_numberOfFramesThisAnimationHas << "\n";
-                return currentAnimationFrame == this->m_numberOfFramesThisAnimationHas;
+                const std::size_t current_animation_frame = this->GetAnimationFrame() + 1;
+//std::cout << "current_animation_frame: " << current_animation_frame << "this->m_number_of_frames_this_animation_has: " << this->m_number_of_frames_this_animation_has << "\n";
+                return current_animation_frame == this->m_number_of_frames_this_animation_has;
         }
 
         [[nodiscard]] constexpr bool IsNextUpdateLastAnimationFrame(void) const noexcept
         {
-                const std::size_t currentAnimationFrame = this->GetNextAnimationFrame() + 1;
-                return currentAnimationFrame == this->m_numberOfFramesThisAnimationHas;
+                const std::size_t current_animation_frame = this->GetNextAnimationFrame() + 1;
+                return current_animation_frame == this->m_number_of_frames_this_animation_has;
         }
 
         [[nodiscard]] constexpr bool HasEnded(void) const noexcept
         {
-//std::cout << "this->m_isNonRepeatingAnimation: " << this->m_isNonRepeatingAnimation << "\n";
-                return this->m_isNonRepeatingAnimation && this->IsLastAnimationFrame();
+//std::cout << "this->m_is_non_repeating_animation: " << this->m_is_non_repeating_animation << "\n";
+                return this->m_is_non_repeating_animation && this->IsLastAnimationFrame();
         }
 
 private:
         constexpr std::size_t GetNextAnimationFrame(void) const noexcept
         {
-                assert(0 != this->m_frameDuration);
-                return ((this->m_numberOfFramesThisEntityHasLivedInGame + 1) /
-                        this->m_frameDuration) %
-                       this->m_numberOfFramesThisAnimationHas;
+                assert(0 != this->m_frame_duration);
+                return static_cast<std::size_t>(
+                        (this->m_the_time_of_this_entity_has_lived_in_game + this->m_frame_duration) /
+                        this->m_frame_duration) %
+                       this->m_number_of_frames_this_animation_has;
         }
-};*/
+};
 //bool dbg_print = false;
 
 } // namespace Component
