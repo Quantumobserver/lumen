@@ -24,47 +24,81 @@ void TestMenuCase1(void) noexcept
                 sf::RenderWindow &window;
         } do_button_action_data{i, window};
 
-        auto button_1 = std::make_unique<Lumen::UI::Component::Button>(
-                "test", sf::Sprite{}, Lumen::UI::Component::BoundingBox{{50, 70}},
-                Lumen::UI::Component::Transform{{100, 200}}, &window,
-                &do_button_action_data, [](void *data) {
+        auto menu_button_1 = Lumen::UI::Component::Detail::MenuButton{
+                "test", sf::Sprite{},
+                &do_button_action_data, [](void *data, const Lumen::Action::SelectionAction &selection_action) {
                         assert(nullptr != data);
-                        DoButtonActionData &do_button_action_data = *static_cast<DoButtonActionData *>(data);
-                        if (do_button_action_data.i > 10) {
-                                do_button_action_data.window.close();
-                        }
-                        std::cout << "[DoButtonActionFn]: " << do_button_action_data.i << "\n";
-                        ++do_button_action_data.i;
-                }
-        );
 
-        auto button_2 = std::make_unique<Lumen::UI::Component::Button>(
-                "test", sf::Sprite{}, Lumen::UI::Component::BoundingBox{{50, 70}},
-                Lumen::UI::Component::Transform{{400, 100}}, &window,
-                &do_button_action_data, [](void *data) {
+                        DoButtonActionData &do_button_action_data = *static_cast<DoButtonActionData *>(data);
+
+                        switch (selection_action.selection_action_type) {
+                        case Lumen::Action::SelectionAction::SelectionActionTypeTag::NONE:
+                                //std::cout << "Button None\n";
+                                break;
+                        case Lumen::Action::SelectionAction::SelectionActionTypeTag::PRESS:
+                                std::cout << "[MenuButton_1]: Button Pressed " << do_button_action_data.i << "\n";
+                                ++do_button_action_data.i;
+                                break;
+                        case Lumen::Action::SelectionAction::SelectionActionTypeTag::RELEASE:
+                                std::cout << "[MenuButton_1]:Button Released\n";
+                                if (do_button_action_data.i > 5) {
+                                        do_button_action_data.window.close();
+                                }
+                                break;
+                        case Lumen::Action::SelectionAction::SelectionActionTypeTag::CURSOR_MOVEMENT:
+                                break;
+                        case Lumen::Action::SelectionAction::SelectionActionTypeTag::WHEEL_SCROLL:
+                                std::cout << "Button Wheel Scroll\n";
+                                break;
+                        }
+                }
+        };
+
+        auto menu_button_2 = Lumen::UI::Component::Detail::MenuButton{
+                "test", sf::Sprite{},
+                &do_button_action_data, [](void *data, const Lumen::Action::SelectionAction &selection_action) {
                         assert(nullptr != data);
+
                         DoButtonActionData &do_button_action_data = *static_cast<DoButtonActionData *>(data);
-                        if (do_button_action_data.i < -5) {
-                                do_button_action_data.window.close();
+
+                        switch (selection_action.selection_action_type) {
+                        case Lumen::Action::SelectionAction::SelectionActionTypeTag::NONE:
+                                //std::cout << "Button None\n";
+                                break;
+                        case Lumen::Action::SelectionAction::SelectionActionTypeTag::PRESS:
+                                std::cout << "[MenuButton_2]: Button Pressed " << do_button_action_data.i << "\n";
+                                --do_button_action_data.i;
+                                break;
+                        case Lumen::Action::SelectionAction::SelectionActionTypeTag::RELEASE:
+                                std::cout << "[MenuButton_2]:Button Released\n";
+                                if (do_button_action_data.i < -5) {
+                                        do_button_action_data.window.close();
+                                }
+                                break;
+                        case Lumen::Action::SelectionAction::SelectionActionTypeTag::CURSOR_MOVEMENT:
+                                break;
+                        case Lumen::Action::SelectionAction::SelectionActionTypeTag::WHEEL_SCROLL:
+                                std::cout << "Button Wheel Scroll\n";
+                                break;
                         }
-                        std::cout << "[DoButtonActionFn 2]: " << do_button_action_data.i << "\n";
-                        --do_button_action_data.i;
                 }
 
-        );
+        };
 
         //auto button_3 = std::move(button_1);
 
-        auto buttons = std::vector<std::unique_ptr<Lumen::UI::Component::Button> >{
+        auto buttons = std::vector<Lumen::UI::Component::Detail::MenuButton>{
                 //std::move(button_1),
                 //std::move(button_2),
         };
-        buttons.push_back(std::move(button_1));
-        buttons.push_back(std::move(button_2));
+        buttons.push_back(std::move(menu_button_1));
+        buttons.push_back(std::move(menu_button_2));
 
+        constexpr const int scale = 2;
         Lumen::UI::Component::Menu menu{
-                Lumen::UI::Component::Transform{{0, 0}},
-                Lumen::UI::Component::BoundingBox{{50, 70}},
+                Lumen::UI::Component::Transform{{400, 300}},
+                Lumen::UI::Component::BoundingBox{{50 * scale, 70 * scale}},
+                Lumen::UI::Component::BoundingBox{{50 * scale, 10 * scale}},
                 &window,
                 std::move(buttons),
         };

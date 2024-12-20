@@ -131,6 +131,21 @@ constexpr bool IsSelected(const Lumen::Action::SelectionAction &selection_action
 
 }
 
+
+constexpr bool IsSelected(const Lumen::UI::Component::Transform &selection_position,
+                          const Lumen::UI::Component::BoundingBox &bounding_box,
+                          const Lumen::UI::Component::Transform &transform) noexcept
+{
+        Lumen::Core::Math::Vec2i distance = transform.position - selection_position.position;
+
+        distance.x = Lumen::Core::Math::Abs(distance.x);
+        distance.y = Lumen::Core::Math::Abs(distance.y);
+
+        return (distance.x < bounding_box.half_size.x) &&
+               (distance.y < bounding_box.half_size.y);
+
+}
+
 } // namespace Component
 } // namespace UI
 } // namespace Lumen
