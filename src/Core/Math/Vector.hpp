@@ -13,7 +13,7 @@ namespace Core {
 namespace Math {
 
 template<typename Number>
-constexpr float Abs(Number number) noexcept
+constexpr Number Abs(Number number) noexcept
 {
         return glm::abs(number);
 }

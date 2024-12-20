@@ -14,3 +14,5 @@ add_subdirectory(Log)
 add_subdirectory(Utility)
 
 add_subdirectory(ResourceManager)
+
+add_subdirectory(UI)
