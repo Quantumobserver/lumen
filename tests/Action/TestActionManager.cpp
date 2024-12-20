@@ -55,7 +55,7 @@ void TestActionManagerCase1(void) noexcept
         }
 }
 
-void TestActionManagerCase2(void) noexcept 
+void TestButtonCase1(void) noexcept 
 {
         sf::RenderWindow window{sf::VideoMode{{800, 600}}, {"My window"}};
                 Lumen::Action::ActionManager action_manager{};
@@ -124,6 +124,6 @@ void TestActionManagerCase2(void) noexcept
 int main(void)
 {
         //TestActionManagerCase1();
-        TestActionManagerCase2();
+        TestButtonCase1();
         std::cout << "Done\n";
 }

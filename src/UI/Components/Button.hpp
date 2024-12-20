@@ -19,6 +19,7 @@ private:
         sf::Sprite m_sprite;
         Lumen::UI::Component::BoundingBox m_bounding_box;
         Lumen::UI::Component::Transform m_transform;
+        Lumen::Core::Math::Vec2i m_position_offset;
         void *m_do_button_action_data_ptr;
         std::function<void(void *)> fn_do_button_action;
 
@@ -30,18 +31,22 @@ public:
                const Lumen::UI::Component::Transform &transform,
                sf::RenderWindow *window_ptr,
                void *do_button_action_data_ptr = nullptr,
-               std::function<void(void *)> &&do_button_action = nullptr
+               std::function<void(void *)> &&do_button_action = nullptr,
+               const Lumen::Core::Math::Vec2i &position_offset = {0, 0}
                ) noexcept
         : Lumen::UI::Component::BasicUIComponent{Lumen::UI::Component::UIComponentTypeTag::BUTTON, window_ptr},
           m_text{std::move(text)}, m_sprite{sprite}, m_bounding_box{bounding_box}, m_transform{transform},
+          m_position_offset{position_offset},
           m_do_button_action_data_ptr{do_button_action_data_ptr},
           fn_do_button_action{std::move(do_button_action)}
           {}
 
         Button(const Button &other) noexcept = delete;
         Button(Button &&other) noexcept
-        : m_text{std::move(other.m_text)}, m_sprite{std::move(other.m_sprite)},
+        : Lumen::UI::Component::BasicUIComponent{std::move(other)},
+          m_text{std::move(other.m_text)}, m_sprite{std::move(other.m_sprite)},
           m_bounding_box{std::move(other.m_bounding_box)}, m_transform{std::move(other.m_transform)},
+          m_position_offset{std::move(other.m_position_offset)},
           m_do_button_action_data_ptr{other.m_do_button_action_data_ptr},
           fn_do_button_action{std::move(other.fn_do_button_action)}
         {
@@ -54,10 +59,15 @@ public:
                 if (this == &other) {
                         return *this;
                 }
+
+                Lumen::UI::Component::BasicUIComponent::operator=(std::move(other));
+
                 this->m_text = std::move(other.m_text);
                 this->m_sprite = std::move(other.m_sprite);
                 this->m_bounding_box = std::move(other.m_bounding_box);
                 this->m_transform = std::move(other.m_transform);
+
+                this->m_position_offset = std::move(other.m_position_offset);
 
                 this->m_do_button_action_data_ptr = other.m_do_button_action_data_ptr;
                 this->fn_do_button_action = std::move(other.fn_do_button_action);
@@ -77,7 +87,9 @@ public:
                 sf::RectangleShape rectangle_shape;
                 constexpr const float outline_thickness = 3.0f;
                 rectangle_shape.setOutlineThickness(outline_thickness);
-                rectangle_shape.setPosition({static_cast<float>(this->m_transform.position.x), static_cast<float>(this->m_transform.position.y)});
+                rectangle_shape.setPosition({
+                        static_cast<float>(this->m_transform.position.x + this->m_position_offset.x),
+                        static_cast<float>(this->m_transform.position.y + this->m_position_offset.y)});
                 rectangle_shape.setSize({static_cast<float>(this->m_bounding_box.size.x) - (outline_thickness * 2.0f),
                                          static_cast<float>(this->m_bounding_box.size.y) - (outline_thickness * 2.0f)
                                         });
@@ -93,7 +105,7 @@ public:
         }
         constexpr virtual void DoSelectionAction(const Lumen::Action::SelectionAction &selection_action) noexcept override
         {
-                if (!Lumen::UI::Component::IsSelected(selection_action, this->m_bounding_box, this->m_transform)) {
+                if (!Lumen::UI::Component::IsSelected(selection_action, this->m_bounding_box, this->m_transform, this->m_position_offset)) {
                         this->m_outline_color = sf::Color::Green;
                         return;
                 }
@@ -160,6 +172,15 @@ public:
                 return std::optional<sf::Sprite>(this->m_sprite);
         }
 
+        constexpr void SetPositionOffset(const Lumen::Core::Math::Vec2i &position_offset) noexcept
+        {
+                this->m_position_offset = position_offset;
+        }
+
+        constexpr const Lumen::Core::Math::Vec2i & GetPositionOffset(void) const noexcept
+        {
+                return this->m_position_offset;
+        }
 };
 
 } // namespace Component

@@ -1,6 +1,7 @@
 
 #include <Action/ActionManager.hpp>
 #include <UI/Components/Button.hpp>
+#include <UI/Components/Menu.hpp>
 
 #include <SFML/Graphics/RenderWindow.hpp>
 
@@ -9,14 +10,11 @@
 #include <SFML/Window/Window.hpp>
 #include <SFML/Window/Keyboard.hpp>
 
-void TestButtonCase1(void) noexcept 
+void TestMenuCase1(void) noexcept 
 {
-        //sf::RenderWindow window{sf::VideoMode{{1920, 1080}}, {"My window"}, sf::Style::Default, sf::State::Fullscreen,};
-        sf::RenderWindow window{sf::VideoMode{{1920, 1080}}, {"My window"}};
-
+        sf::RenderWindow window{sf::VideoMode{{800, 600}}, {"My window"}};
 
         Lumen::Action::ActionManager action_manager{};
-
         action_manager.Init();
 
         int i{0};
@@ -26,7 +24,7 @@ void TestButtonCase1(void) noexcept
                 sf::RenderWindow &window;
         } do_button_action_data{i, window};
 
-        Lumen::UI::Component::Button button{
+        auto button_1 = std::make_unique<Lumen::UI::Component::Button>(
                 "test", sf::Sprite{}, Lumen::UI::Component::BoundingBox{{50, 70}},
                 Lumen::UI::Component::Transform{{100, 200}}, &window,
                 &do_button_action_data, [](void *data) {
@@ -38,7 +36,37 @@ void TestButtonCase1(void) noexcept
                         std::cout << "[DoButtonActionFn]: " << do_button_action_data.i << "\n";
                         ++do_button_action_data.i;
                 }
+        );
 
+        auto button_2 = std::make_unique<Lumen::UI::Component::Button>(
+                "test", sf::Sprite{}, Lumen::UI::Component::BoundingBox{{50, 70}},
+                Lumen::UI::Component::Transform{{400, 100}}, &window,
+                &do_button_action_data, [](void *data) {
+                        assert(nullptr != data);
+                        DoButtonActionData &do_button_action_data = *static_cast<DoButtonActionData *>(data);
+                        if (do_button_action_data.i < -5) {
+                                do_button_action_data.window.close();
+                        }
+                        std::cout << "[DoButtonActionFn 2]: " << do_button_action_data.i << "\n";
+                        --do_button_action_data.i;
+                }
+
+        );
+
+        //auto button_3 = std::move(button_1);
+
+        auto buttons = std::vector<std::unique_ptr<Lumen::UI::Component::Button> >{
+                //std::move(button_1),
+                //std::move(button_2),
+        };
+        buttons.push_back(std::move(button_1));
+        buttons.push_back(std::move(button_2));
+
+        Lumen::UI::Component::Menu menu{
+                Lumen::UI::Component::Transform{{0, 0}},
+                Lumen::UI::Component::BoundingBox{{50, 70}},
+                &window,
+                std::move(buttons),
         };
 
         while (window.isOpen()) {
@@ -58,7 +86,7 @@ void TestButtonCase1(void) noexcept
                         action_manager.CreateActionFromEvent(event);
                 }
                 const auto &selection_action = action_manager.GetSelectionAction();
-                button.DoSelectionAction(selection_action);
+                menu.DoSelectionAction(selection_action);
                 /*switch (selection_action.selection_action_type) {
                 case Lumen::Action::SelectionAction::SelectionActionTypeTag::NONE:
                         //std::cout << "[SelectionAction] None: \n";
@@ -101,14 +129,14 @@ void TestButtonCase1(void) noexcept
                 action_manager.ResetActionBuffer();
 
                 window.clear();
-                button.Render();
+                menu.Render();
                 window.display();
         }
 }
 
 int main(void)
 {
-        //TestActionManagerCase1();
-        TestButtonCase1();
+        //TestMenuCase1();
+        TestMenuCase1();
         std::cout << "Done\n";
 }
