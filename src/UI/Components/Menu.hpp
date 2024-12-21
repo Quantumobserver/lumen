@@ -17,11 +17,12 @@ namespace Component {
 namespace Detail {
 
 class MenuButton {
+public:
+        using MenuButtonActionHandler = std::function<void(void *, const Lumen::UI::Component::RelativeSelectionAction &)>;
 private:
         std::string m_text;
         sf::Sprite m_icon;
         void *m_do_menu_button_action_data_ptr{nullptr};
-        using MenuButtonActionHandler = std::function<void(void *, const Lumen::Action::SelectionAction &)>;
         MenuButtonActionHandler fn_do_menu_button_action;
 
         sf::Color m_outline_color_menu_button{sf::Color::Yellow};
@@ -58,10 +59,10 @@ public:
                 return *this;
         }
 
-        constexpr void DoSelectionAction(const Lumen::Action::SelectionAction &selection_action) noexcept
+        constexpr void DoSelectionAction(const Lumen::UI::Component::RelativeSelectionAction &relative_selection_action) noexcept
         {
                 if (this->fn_do_menu_button_action) {
-                        this->fn_do_menu_button_action(this->m_do_menu_button_action_data_ptr, selection_action);
+                        this->fn_do_menu_button_action(this->m_do_menu_button_action_data_ptr, relative_selection_action);
                 }
         }
 
@@ -79,20 +80,45 @@ public:
 } // namespace Detail
 
 class Menu : public Lumen::UI::Component::BasicUIComponent {
+public:
+        enum class MenuLayoutTypeTag {
+                VERTICAL_UNIFORM_DISTRIBUTION,
+                VERTICAL_UNIFORM_SPACING_AUTO,
+                //HORIZONTAL,
+        };
+
+        using MenuButtonActionHandler = typename Lumen::UI::Component::Detail::MenuButton::MenuButtonActionHandler;
+
 private:
-        Lumen::UI::Component::Transform m_transform;
+        struct MenuLayout {
+                MenuLayoutTypeTag menu_layout_type;
+
+                struct Void {};
+                struct VerticalUniformSpacingAutoData {
+                        int uniform_spacing_header_y;
+                        int uniform_spacing_footer_y;
+                        int uniform_spacing;
+                };
+                union {
+                        Void no_data;
+                        VerticalUniformSpacingAutoData vertical_uniform_spacing_auto;
+                };
+
+                constexpr MenuLayout(void) noexcept : menu_layout_type{MenuLayoutTypeTag::VERTICAL_UNIFORM_DISTRIBUTION}, no_data{} {}
+
+                constexpr MenuLayout(MenuLayoutTypeTag menu_layout_type) noexcept : menu_layout_type{menu_layout_type}, no_data{}
+                {
+                        assert(MenuLayoutTypeTag::VERTICAL_UNIFORM_DISTRIBUTION == this->menu_layout_type);
+                }
+        };
+
+        Lumen::UI::Component::TransformCenter m_transform_center;
+        Lumen::UI::Component::TransformTopLeft m_transform_top_left;
         Lumen::UI::Component::BoundingBox m_bounding_box_menu;
         Lumen::UI::Component::BoundingBox m_bounding_box_menu_button;
         std::vector<Lumen::UI::Component::Detail::MenuButton> m_buttons;
 
-public:
-        enum class MenuLayoutTypeTag {
-                VERTICAL_UNIFORM_DISTRIBUTION,
-                //HORIZONTAL,
-        };
-
-private:
-        MenuLayoutTypeTag m_menu_layout_type;
+        MenuLayout m_menu_layout;
         //std::vector<std::unique_ptr<Lumen::UI::Component::Label> > m_lebels;
 
         sf::Color m_outline_color_menu{sf::Color::Green};
@@ -100,7 +126,8 @@ private:
 
 public:
         Menu(void) noexcept = default;
-        Menu(const Lumen::UI::Component::Transform &transform,
+
+        Menu(const Lumen::UI::Component::TransformCenter &transform_center,
              const Lumen::UI::Component::BoundingBox &bounding_box_menu,
              const Lumen::UI::Component::BoundingBox &bounding_box_menu_button,
              sf::RenderWindow *window_ptr,
@@ -109,9 +136,50 @@ public:
              MenuLayoutTypeTag menu_layout_type = MenuLayoutTypeTag::VERTICAL_UNIFORM_DISTRIBUTION
                 ) noexcept
         : Lumen::UI::Component::BasicUIComponent{Lumen::UI::Component::UIComponentTypeTag::MENU, window_ptr},
-          m_transform{transform}, m_bounding_box_menu{bounding_box_menu},
+          m_transform_center{transform_center},
+          m_transform_top_left{transform_center.center_position - bounding_box_menu.half_size},
+          m_bounding_box_menu{bounding_box_menu},
           m_bounding_box_menu_button{bounding_box_menu_button}, m_buttons{std::move(buttons)},
-          m_menu_layout_type{menu_layout_type} {}
+          m_menu_layout{menu_layout_type} {}
+        
+        Menu(const Lumen::UI::Component::TransformTopLeft &transform_top_left,
+             const Lumen::UI::Component::BoundingBox &bounding_box_menu,
+             const Lumen::UI::Component::BoundingBox &bounding_box_menu_button,
+             sf::RenderWindow *window_ptr,
+             std::vector<Lumen::UI::Component::Detail::MenuButton> &&buttons =
+                std::vector<Lumen::UI::Component::Detail::MenuButton>{},
+             MenuLayoutTypeTag menu_layout_type = MenuLayoutTypeTag::VERTICAL_UNIFORM_DISTRIBUTION
+                ) noexcept
+        : Lumen::UI::Component::BasicUIComponent{Lumen::UI::Component::UIComponentTypeTag::MENU, window_ptr},
+          m_transform_center{transform_top_left.top_left_position + bounding_box_menu.half_size},
+          m_transform_top_left{transform_top_left},
+          m_bounding_box_menu{bounding_box_menu},
+          m_bounding_box_menu_button{bounding_box_menu_button}, m_buttons{std::move(buttons)},
+          m_menu_layout{menu_layout_type} {}
+        
+        Menu(const Lumen::UI::Component::TransformCenter &transform_center,
+             const Lumen::UI::Component::BoundingBox &bounding_box_menu_button,
+             sf::RenderWindow *window_ptr,
+             std::vector<Lumen::UI::Component::Detail::MenuButton> &&buttons =
+                std::vector<Lumen::UI::Component::Detail::MenuButton>{},
+             MenuLayoutTypeTag menu_layout_type = MenuLayoutTypeTag::VERTICAL_UNIFORM_DISTRIBUTION
+                ) noexcept
+        : Lumen::UI::Component::BasicUIComponent{Lumen::UI::Component::UIComponentTypeTag::MENU, window_ptr},
+          m_transform_center{transform_center},
+          //m_transform_top_left{transform_center.center_position - bounding_box_menu.half_size},
+          //m_bounding_box_menu{bounding_box_menu},
+          m_bounding_box_menu_button{bounding_box_menu_button}, m_buttons{std::move(buttons)},
+          m_menu_layout{menu_layout_type}
+        {
+                this->m_bounding_box_menu = {{
+                        this->m_bounding_box_menu_button.size.x,
+                        this->m_bounding_box_menu_button.size.y * static_cast<int>(this->m_buttons.size()),
+                }};
+
+                this->m_transform_top_left = {
+                        this->m_transform_center.center_position - this->m_bounding_box_menu_button.half_size
+                };
+        }
 
         Menu(const Menu &) noexcept = delete;
         Menu(Menu &&other) noexcept = default;
@@ -132,11 +200,12 @@ public:
                 constexpr const float OUTLINE_THICKNESS_MENU = 3.0f;
                 this->m_rectangle_shape.setOutlineThickness(OUTLINE_THICKNESS_MENU);
                 this->m_rectangle_shape.setPosition({
-                        static_cast<float>(this->m_transform.position.x),
-                        static_cast<float>(this->m_transform.position.y)});
-                this->m_rectangle_shape.setSize({static_cast<float>(this->m_bounding_box_menu.size.x) - (OUTLINE_THICKNESS_MENU * 2.0f),
-                                         static_cast<float>(this->m_bounding_box_menu.size.y) - (OUTLINE_THICKNESS_MENU * 2.0f)
-                                        });
+                        static_cast<float>(this->m_transform_center.center_position.x),
+                        static_cast<float>(this->m_transform_center.center_position.y)});
+                this->m_rectangle_shape.setSize({
+                        static_cast<float>(this->m_bounding_box_menu.size.x) - (OUTLINE_THICKNESS_MENU * 2.0f),
+                        static_cast<float>(this->m_bounding_box_menu.size.y) - (OUTLINE_THICKNESS_MENU * 2.0f)
+                });
                 this->m_rectangle_shape.setOutlineColor(this->m_outline_color_menu);
                 this->m_rectangle_shape.setFillColor(sf::Color::Transparent);
                 this->m_rectangle_shape.setOrigin(this->m_rectangle_shape.getSize() / 2.0f);
@@ -158,10 +227,11 @@ public:
         {
                 constexpr const float outline_thickness_menu_button = 1.0f;
                 m_rectangle_shape.setOutlineThickness(outline_thickness_menu_button);
-                const auto menu_button_position = this->GetMenuButtonPosition(index);
+                const auto menu_button_ralative_center_position = this->GetMenuButtonRelativeCenterPosition(index);
+                const auto menu_button_position = this->m_transform_top_left.top_left_position + menu_button_ralative_center_position.center_position;
                 m_rectangle_shape.setPosition({
-                        static_cast<float>(menu_button_position.position.x),
-                        static_cast<float>(menu_button_position.position.y)});
+                        static_cast<float>(menu_button_position.x),
+                        static_cast<float>(menu_button_position.y)});
                 m_rectangle_shape.setSize({
                         static_cast<float>(this->m_bounding_box_menu_button.size.x) - (outline_thickness_menu_button * 2.0f),
                         static_cast<float>(this->m_bounding_box_menu_button.size.y) - (outline_thickness_menu_button * 2.0f)
@@ -180,15 +250,20 @@ public:
         }
 
 private:
-        constexpr bool IsMenuSelected(const Lumen::Action::SelectionAction &selection_action) const noexcept
+        constexpr bool IsMenuSelected(
+                const Lumen::UI::Component::RelativeSelectionAction &relative_selection_action) const noexcept
         {
-                return Lumen::UI::Component::IsSelected(selection_action.position, this->m_bounding_box_menu, this->m_transform);
+                return Lumen::UI::Component::IsSelected(
+                        relative_selection_action.relative_position_to_the_parent_ui_component,
+                        this->m_bounding_box_menu,
+                        this->m_transform_center
+                );
         }
 
-        constexpr Lumen::UI::Component::Transform GetMenuButtonPosition(
+        constexpr Lumen::UI::Component::TransformCenter GetMenuButtonRelativeCenterPosition(
                 const typename std::iterator_traits<decltype(m_buttons)::iterator>::difference_type index) const noexcept
         {
-                /*auto calculate_button_position_vertical_uniform_distribution =
+                /*auto calculate_button_relative_position_vertical_uniform_distribution =
                         [&](void) -> Lumen::UI::Component::Transform {
                         const auto menu_top_position_y = this->m_transform.position.y - this->m_bounding_box_menu.half_size.y;
                         const auto menu_button_at_index_zero_position_y = menu_top_position_y + this->m_bounding_box_menu_button.half_size.y;
@@ -196,34 +271,25 @@ private:
                                 (menu_button_at_index_zero_position_y +
                                  (this->m_bounding_box_menu_button.size.y * static_cast<int>(index)))}};
                 };*/
-                auto calculate_button_position_vertical_uniform_distribution =
-                        [&](void) -> Lumen::UI::Component::Transform {
-                        const auto menu_top_position_y = this->m_transform.position.y - this->m_bounding_box_menu.half_size.y;
-                        /*
-                        const auto menu_button_at_index_zero_position_y = menu_top_position_y + this->m_bounding_box_menu_button.half_size.y;
-                        return {{(this->m_transform.position.x),
-                                (menu_button_at_index_zero_position_y +
-                                 (this->m_bounding_box_menu_button.size.y * static_cast<int>(index)))}};*/
-                        /*const auto menu_height_div_n = this->m_bounding_box_menu.size.y / static_cast<int>(this->m_buttons.size());
-                        const auto offset_y = menu_height_div_n / 2;
-                        const auto offset_y_at_current_index = offset_y + index * menu_height_div_n;*/
+                auto calculate_button_relative_center_position_vertical_uniform_distribution =
+                        [&](void) -> Lumen::UI::Component::TransformCenter {
                         const auto used_space_y = static_cast<int>(this->m_buttons.size()) *
                                                                    this->m_bounding_box_menu_button.size.y;
-                        const auto free_soqce_y = this->m_bounding_box_menu.size.y - used_space_y;
-                        assert(free_soqce_y >= 0);
-                        const auto uniform_space = free_soqce_y / static_cast<int>(this->m_buttons.size() + 1);
+                        const auto free_space_y = this->m_bounding_box_menu.size.y - used_space_y;
+                        assert(free_space_y >= 0);
+                        const auto uniform_space = free_space_y / static_cast<int>(this->m_buttons.size() + 1);
                         const auto offset_y = (static_cast<int>(index + 1) * uniform_space) +
                                               (static_cast<int>(index) * this->m_bounding_box_menu_button.size.y) +
                                               this->m_bounding_box_menu_button.half_size.y;
                         return {{
-                                (this->m_transform.position.x),
-                                (offset_y + menu_top_position_y),
+                                (this->m_bounding_box_menu.half_size.x),
+                                (offset_y),
                         }};
                 };
 
-                switch (this->m_menu_layout_type) {
+                switch (this->m_menu_layout.menu_layout_type) {
                 case MenuLayoutTypeTag::VERTICAL_UNIFORM_DISTRIBUTION:{
-                        return calculate_button_position_vertical_uniform_distribution();
+                        return calculate_button_relative_center_position_vertical_uniform_distribution();
                         break;
                 }
 
@@ -234,17 +300,20 @@ private:
         }
 
         constexpr bool IsMenuButtonSelected(
-                const Lumen::Action::SelectionAction &selection_action,
+                const Lumen::UI::Component::RelativeSelectionAction &relative_selection_action,
                 const typename std::iterator_traits<decltype(m_buttons)::iterator>::difference_type index) const noexcept
         {
-                return Lumen::UI::Component::IsSelected(selection_action.position, this->m_bounding_box_menu_button,
-                                                        this->GetMenuButtonPosition(index));
+                return Lumen::UI::Component::IsSelected(
+                        relative_selection_action.relative_position_to_the_parent_ui_component,
+                        this->m_bounding_box_menu_button,
+                        this->GetMenuButtonRelativeCenterPosition(index));
         }
 
 public:
-        constexpr void DoSelectionAction(const Lumen::Action::SelectionAction &selection_action) noexcept override
+        constexpr void DoSelectionAction(
+                const Lumen::UI::Component::RelativeSelectionAction &relative_selection_action_to_parent) noexcept override
         {
-                if (!this->IsMenuSelected(selection_action)) {
+                if (!this->IsMenuSelected(relative_selection_action_to_parent)) {
                         this->m_outline_color_menu = sf::Color::Green;
                         for (auto iterator = this->m_buttons.begin(); iterator != this->m_buttons.end(); ++iterator) {
                                 iterator->SetColor(sf::Color::Blue);
@@ -253,15 +322,21 @@ public:
                 }
                 this->m_outline_color_menu = sf::Color::Red;
 
+                const Lumen::UI::Component::RelativeSelectionAction relative_selection_to_menu{
+                        relative_selection_action_to_parent.selection_action,
+                        (relative_selection_action_to_parent.relative_position_to_the_parent_ui_component -
+                        this->m_transform_top_left.top_left_position),
+                };
+
                 for (auto iterator = this->m_buttons.begin(); iterator != this->m_buttons.end(); ++iterator) {
                         const auto index = std::distance(this->m_buttons.begin(), iterator);
         
-                        if (!this->IsMenuButtonSelected(selection_action, index)) {
+                        if (!this->IsMenuButtonSelected(relative_selection_to_menu, index)) {
                                 iterator->SetColor(sf::Color::Blue);
                                 continue;
                         }
                         iterator->SetColor(sf::Color::Yellow);
-                        iterator->DoSelectionAction(selection_action);
+                        iterator->DoSelectionAction(relative_selection_to_menu);
                 }
         }
 
@@ -272,7 +347,8 @@ public:
 
         constexpr void SetPosition(const Lumen::Core::Math::Vec2i &position) noexcept override
         {
-                this->m_transform.position = position;
+                this->m_transform_center.center_position = position;
+                this->m_transform_top_left.top_left_position = position - this->m_bounding_box_menu.half_size;
         }
 
         constexpr virtual void SetSize(const Lumen::Core::Math::Vec2i &size) noexcept override
@@ -285,7 +361,7 @@ public:
 
         constexpr std::optional<Lumen::Core::Math::Vec2i> GetPosition(void) const noexcept override
         {
-                return std::nullopt;
+                return {this->m_transform_center.center_position};
         }
 
         constexpr std::optional<Lumen::Core::Math::Vec2i> GetSize(void) const noexcept override

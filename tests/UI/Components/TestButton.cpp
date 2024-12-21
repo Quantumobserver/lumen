@@ -28,7 +28,7 @@ void TestButtonCase1(void) noexcept
 
         Lumen::UI::Component::Button button{
                 "test", sf::Sprite{}, Lumen::UI::Component::BoundingBox{{50, 70}},
-                Lumen::UI::Component::Transform{{100, 200}}, &window,
+                Lumen::UI::Component::TransformCenter{{100, 200}}, &window,
                 &do_button_action_data, [](void *data) {
                         assert(nullptr != data);
                         DoButtonActionData &do_button_action_data = *static_cast<DoButtonActionData *>(data);
@@ -58,7 +58,7 @@ void TestButtonCase1(void) noexcept
                         action_manager.CreateActionFromEvent(event);
                 }
                 const auto &selection_action = action_manager.GetSelectionAction();
-                button.DoSelectionAction(selection_action);
+                button.DoSelectionAction({selection_action, selection_action.position});
                 /*switch (selection_action.selection_action_type) {
                 case Lumen::Action::SelectionAction::SelectionActionTypeTag::NONE:
                         //std::cout << "[SelectionAction] None: \n";

@@ -24,6 +24,11 @@ enum class UIComponentTypeTag {
         MENU,
 };
 
+struct RelativeSelectionAction {
+        const Lumen::Action::SelectionAction &selection_action;
+        Lumen::Core::Math::Vec2i relative_position_to_the_parent_ui_component;
+};
+
 class BasicUIComponent {
 protected:
         UIComponentTypeTag m_ui_component_type;
@@ -60,7 +65,7 @@ public:
         constexpr virtual void Update(void) noexcept = 0;
         constexpr virtual void Render(void) noexcept = 0;
         constexpr virtual void DoWindowResizeAction(const Lumen::Core::Math::Vec2i &window_new_size) noexcept = 0;
-        constexpr virtual void DoSelectionAction(const Lumen::Action::SelectionAction &selection_action) noexcept = 0;
+        constexpr virtual void DoSelectionAction(const Lumen::UI::Component::RelativeSelectionAction &selection_action) noexcept = 0;
 
         constexpr virtual void AddComponent([[maybe_unused]] Lumen::UI::Component::BasicUIComponent &&basic_ui_component) noexcept {}
 
@@ -106,37 +111,31 @@ struct BoundingBox {
         constexpr BoundingBox &operator=(const BoundingBox &other) noexcept = default;
 };
 
-struct Transform {
-        Lumen::Core::Math::Vec2i position;
+struct TransformCenter {
+        Lumen::Core::Math::Vec2i center_position;
 
-        constexpr Transform(void) noexcept {}
-        constexpr Transform(const Lumen::Core::Math::Vec2i &position) noexcept
-        : position{position} {}
-        constexpr Transform(const Transform &other) noexcept = default;
-        constexpr Transform &operator=(const Transform &other) noexcept = default;
+        constexpr TransformCenter(void) noexcept {}
+        constexpr TransformCenter(const Lumen::Core::Math::Vec2i &center_position) noexcept
+        : center_position{center_position} {}
+        constexpr TransformCenter(const TransformCenter &other) noexcept = default;
+        constexpr TransformCenter &operator=(const TransformCenter &other) noexcept = default;
 };
 
-constexpr bool IsSelected(const Lumen::Action::SelectionAction &selection_action,
+struct TransformTopLeft {
+        Lumen::Core::Math::Vec2i top_left_position;
+
+        constexpr TransformTopLeft(void) noexcept {}
+        constexpr TransformTopLeft(const Lumen::Core::Math::Vec2i &top_left_position) noexcept
+        : top_left_position{top_left_position} {}
+        constexpr TransformTopLeft(const TransformTopLeft &other) noexcept = default;
+        constexpr TransformTopLeft &operator=(const TransformTopLeft &other) noexcept = default;
+};
+
+constexpr bool IsSelected(const Lumen::UI::Component::TransformCenter &selection_position,
                           const Lumen::UI::Component::BoundingBox &bounding_box,
-                          const Lumen::UI::Component::Transform &transform,
-                          const Lumen::Core::Math::Vec2i &position_offset) noexcept
+                          const Lumen::UI::Component::TransformCenter &transform_center) noexcept
 {
-        Lumen::Core::Math::Vec2i distance = (transform.position + position_offset) - selection_action.position;
-
-        distance.x = Lumen::Core::Math::Abs(distance.x);
-        distance.y = Lumen::Core::Math::Abs(distance.y);
-
-        return (distance.x < bounding_box.half_size.x) &&
-               (distance.y < bounding_box.half_size.y);
-
-}
-
-
-constexpr bool IsSelected(const Lumen::UI::Component::Transform &selection_position,
-                          const Lumen::UI::Component::BoundingBox &bounding_box,
-                          const Lumen::UI::Component::Transform &transform) noexcept
-{
-        Lumen::Core::Math::Vec2i distance = transform.position - selection_position.position;
+        Lumen::Core::Math::Vec2i distance = transform_center.center_position - selection_position.center_position;
 
         distance.x = Lumen::Core::Math::Abs(distance.x);
         distance.y = Lumen::Core::Math::Abs(distance.y);

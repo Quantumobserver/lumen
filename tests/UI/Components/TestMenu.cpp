@@ -26,12 +26,12 @@ void TestMenuCase1(void) noexcept
 
         auto menu_button_1 = Lumen::UI::Component::Detail::MenuButton{
                 "test", sf::Sprite{},
-                &do_button_action_data, [](void *data, const Lumen::Action::SelectionAction &selection_action) {
+                &do_button_action_data, [](void *data, const Lumen::UI::Component::RelativeSelectionAction &relative_selection_action) {
                         assert(nullptr != data);
 
                         DoButtonActionData &do_button_action_data = *static_cast<DoButtonActionData *>(data);
 
-                        switch (selection_action.selection_action_type) {
+                        switch (relative_selection_action.selection_action.selection_action_type) {
                         case Lumen::Action::SelectionAction::SelectionActionTypeTag::NONE:
                                 //std::cout << "Button None\n";
                                 break;
@@ -56,12 +56,12 @@ void TestMenuCase1(void) noexcept
 
         auto menu_button_2 = Lumen::UI::Component::Detail::MenuButton{
                 "test", sf::Sprite{},
-                &do_button_action_data, [](void *data, const Lumen::Action::SelectionAction &selection_action) {
+                &do_button_action_data, [](void *data, const Lumen::UI::Component::RelativeSelectionAction &relative_selection_action) {
                         assert(nullptr != data);
 
                         DoButtonActionData &do_button_action_data = *static_cast<DoButtonActionData *>(data);
 
-                        switch (selection_action.selection_action_type) {
+                        switch (relative_selection_action.selection_action.selection_action_type) {
                         case Lumen::Action::SelectionAction::SelectionActionTypeTag::NONE:
                                 //std::cout << "Button None\n";
                                 break;
@@ -96,7 +96,7 @@ void TestMenuCase1(void) noexcept
 
         constexpr const int scale = 2;
         Lumen::UI::Component::Menu menu{
-                Lumen::UI::Component::Transform{{400, 300}},
+                Lumen::UI::Component::TransformCenter{{400, 300}},
                 Lumen::UI::Component::BoundingBox{{50 * scale, 70 * scale}},
                 Lumen::UI::Component::BoundingBox{{50 * scale, 10 * scale}},
                 &window,
@@ -120,7 +120,13 @@ void TestMenuCase1(void) noexcept
                         action_manager.CreateActionFromEvent(event);
                 }
                 const auto &selection_action = action_manager.GetSelectionAction();
-                menu.DoSelectionAction(selection_action);
+                menu.DoSelectionAction({selection_action, selection_action.position});
+
+                if (2 == i) {
+                        menu.SetPosition({std::abs(i) * 100, std::abs(i) * 100});
+                } else if (-2 == i) {
+                        menu.SetPosition({400, 300});
+                }
                 /*switch (selection_action.selection_action_type) {
                 case Lumen::Action::SelectionAction::SelectionActionTypeTag::NONE:
                         //std::cout << "[SelectionAction] None: \n";
