@@ -95,12 +95,23 @@ void TestMenuCase1(void) noexcept
         buttons.push_back(std::move(menu_button_2));
 
         constexpr const int scale = 2;
-        Lumen::UI::Component::Menu menu{
+        /*Lumen::UI::Component::Menu menu{
                 Lumen::UI::Component::TransformCenter{{400, 300}},
                 Lumen::UI::Component::BoundingBox{{50 * scale, 70 * scale}},
                 Lumen::UI::Component::BoundingBox{{50 * scale, 10 * scale}},
                 &window,
                 std::move(buttons),
+        };*/
+        Lumen::UI::Component::Menu menu{
+                Lumen::UI::Component::TransformCenter{{400, 300}},
+                Lumen::UI::Component::BoundingBox{{50 * scale, 10 * scale}},
+                &window,
+                std::move(buttons),
+                Lumen::UI::Component::Menu::MenuLayout::VerticalFixedSpacingAutoData{
+                        .fixed_spacing_header_y = 30,
+                        .fixed_spacing_y = 50,
+                        .fixed_spacing_footer_y = 100
+                },
         };
 
         while (window.isOpen()) {

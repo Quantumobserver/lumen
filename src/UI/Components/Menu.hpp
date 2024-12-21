@@ -83,25 +83,24 @@ class Menu : public Lumen::UI::Component::BasicUIComponent {
 public:
         enum class MenuLayoutTypeTag {
                 VERTICAL_UNIFORM_DISTRIBUTION,
-                VERTICAL_UNIFORM_SPACING_AUTO,
+                VERTICAL_FIXED_SPACING_AUTO,
                 //HORIZONTAL,
         };
 
         using MenuButtonActionHandler = typename Lumen::UI::Component::Detail::MenuButton::MenuButtonActionHandler;
 
-private:
         struct MenuLayout {
                 MenuLayoutTypeTag menu_layout_type;
 
                 struct Void {};
-                struct VerticalUniformSpacingAutoData {
-                        int uniform_spacing_header_y;
-                        int uniform_spacing_footer_y;
-                        int uniform_spacing;
+                struct VerticalFixedSpacingAutoData {
+                        int fixed_spacing_header_y;
+                        int fixed_spacing_y;
+                        int fixed_spacing_footer_y;
                 };
                 union {
                         Void no_data;
-                        VerticalUniformSpacingAutoData vertical_uniform_spacing_auto;
+                        VerticalFixedSpacingAutoData vertical_fixed_spacing_auto_data;
                 };
 
                 constexpr MenuLayout(void) noexcept : menu_layout_type{MenuLayoutTypeTag::VERTICAL_UNIFORM_DISTRIBUTION}, no_data{} {}
@@ -110,7 +109,13 @@ private:
                 {
                         assert(MenuLayoutTypeTag::VERTICAL_UNIFORM_DISTRIBUTION == this->menu_layout_type);
                 }
+
+                constexpr MenuLayout(const VerticalFixedSpacingAutoData &vertical_fixed_spacing_auto_data) noexcept
+                : menu_layout_type{MenuLayoutTypeTag::VERTICAL_FIXED_SPACING_AUTO},
+                  vertical_fixed_spacing_auto_data{vertical_fixed_spacing_auto_data} {}
         };
+
+private:
 
         Lumen::UI::Component::TransformCenter m_transform_center;
         Lumen::UI::Component::TransformTopLeft m_transform_top_left;
@@ -162,23 +167,34 @@ public:
              sf::RenderWindow *window_ptr,
              std::vector<Lumen::UI::Component::Detail::MenuButton> &&buttons =
                 std::vector<Lumen::UI::Component::Detail::MenuButton>{},
-             MenuLayoutTypeTag menu_layout_type = MenuLayoutTypeTag::VERTICAL_UNIFORM_DISTRIBUTION
+             const MenuLayout::VerticalFixedSpacingAutoData &vertical_fixed_spacing_auto_data = {0, 0, 0}
                 ) noexcept
         : Lumen::UI::Component::BasicUIComponent{Lumen::UI::Component::UIComponentTypeTag::MENU, window_ptr},
           m_transform_center{transform_center},
           //m_transform_top_left{transform_center.center_position - bounding_box_menu.half_size},
           //m_bounding_box_menu{bounding_box_menu},
           m_bounding_box_menu_button{bounding_box_menu_button}, m_buttons{std::move(buttons)},
-          m_menu_layout{menu_layout_type}
+          m_menu_layout{vertical_fixed_spacing_auto_data}
         {
+                assert(MenuLayoutTypeTag::VERTICAL_FIXED_SPACING_AUTO == this->m_menu_layout.menu_layout_type);
+
+                const auto menu_layout = this->m_menu_layout;
+                const auto menu_layout_data = menu_layout.vertical_fixed_spacing_auto_data;
+                const auto fixed_spacing_header_y = menu_layout_data.fixed_spacing_header_y;
+                const auto fixed_spacing_footer_y = menu_layout_data.fixed_spacing_footer_y;
+                const auto fixed_spacing_y = menu_layout_data.fixed_spacing_y;
+
                 this->m_bounding_box_menu = {{
                         this->m_bounding_box_menu_button.size.x,
-                        this->m_bounding_box_menu_button.size.y * static_cast<int>(this->m_buttons.size()),
+                        fixed_spacing_header_y + fixed_spacing_footer_y +
+                        (this->m_bounding_box_menu_button.size.y) * static_cast<int>(this->m_buttons.size()) +
+                        (fixed_spacing_y * static_cast<int>(this->m_buttons.size() - 1)),
                 }};
 
                 this->m_transform_top_left = {
-                        this->m_transform_center.center_position - this->m_bounding_box_menu_button.half_size
+                        this->m_transform_center.center_position - this->m_bounding_box_menu.half_size
                 };
+                
         }
 
         Menu(const Menu &) noexcept = delete;
@@ -199,9 +215,11 @@ public:
         {
                 constexpr const float OUTLINE_THICKNESS_MENU = 3.0f;
                 this->m_rectangle_shape.setOutlineThickness(OUTLINE_THICKNESS_MENU);
+
                 this->m_rectangle_shape.setPosition({
                         static_cast<float>(this->m_transform_center.center_position.x),
                         static_cast<float>(this->m_transform_center.center_position.y)});
+
                 this->m_rectangle_shape.setSize({
                         static_cast<float>(this->m_bounding_box_menu.size.x) - (OUTLINE_THICKNESS_MENU * 2.0f),
                         static_cast<float>(this->m_bounding_box_menu.size.y) - (OUTLINE_THICKNESS_MENU * 2.0f)
@@ -272,7 +290,7 @@ private:
                                  (this->m_bounding_box_menu_button.size.y * static_cast<int>(index)))}};
                 };*/
                 auto calculate_button_relative_center_position_vertical_uniform_distribution =
-                        [&](void) -> Lumen::UI::Component::TransformCenter {
+                        [this, index](void) -> Lumen::UI::Component::TransformCenter {
                         const auto used_space_y = static_cast<int>(this->m_buttons.size()) *
                                                                    this->m_bounding_box_menu_button.size.y;
                         const auto free_space_y = this->m_bounding_box_menu.size.y - used_space_y;
@@ -287,9 +305,30 @@ private:
                         }};
                 };
 
+                auto calculate_button_relative_center_position_vertical_fixed_spacing = 
+                        [this, index](void) -> Lumen::UI::Component::TransformCenter {
+                        const auto &menu_layout = this->m_menu_layout;
+                        const auto menu_layout_data = menu_layout.vertical_fixed_spacing_auto_data;
+                        const auto fixed_spacing_header_y = menu_layout_data.fixed_spacing_header_y;
+                        const auto fixed_spacing_y = menu_layout_data.fixed_spacing_y;
+
+                        const auto offset_y = fixed_spacing_header_y +
+                                              ((this->m_bounding_box_menu_button.size.y + fixed_spacing_y) * static_cast<int>(index)) +
+                                              this->m_bounding_box_menu_button.half_size.y;
+                        return {{
+                                (this->m_bounding_box_menu.half_size.x),
+                                (offset_y),
+                        }};
+                };
+
                 switch (this->m_menu_layout.menu_layout_type) {
                 case MenuLayoutTypeTag::VERTICAL_UNIFORM_DISTRIBUTION:{
                         return calculate_button_relative_center_position_vertical_uniform_distribution();
+                        break;
+                }
+
+                case MenuLayoutTypeTag::VERTICAL_FIXED_SPACING_AUTO:{
+                        return calculate_button_relative_center_position_vertical_fixed_spacing();
                         break;
                 }
 
