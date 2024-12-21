@@ -84,6 +84,15 @@ private:
         Lumen::UI::Component::BoundingBox m_bounding_box_menu;
         Lumen::UI::Component::BoundingBox m_bounding_box_menu_button;
         std::vector<Lumen::UI::Component::Detail::MenuButton> m_buttons;
+
+public:
+        enum class MenuLayoutTypeTag {
+                VERTICAL_UNIFORM_DISTRIBUTION,
+                //HORIZONTAL,
+        };
+
+private:
+        MenuLayoutTypeTag m_menu_layout_type;
         //std::vector<std::unique_ptr<Lumen::UI::Component::Label> > m_lebels;
 
         sf::Color m_outline_color_menu{sf::Color::Green};
@@ -96,10 +105,13 @@ public:
              const Lumen::UI::Component::BoundingBox &bounding_box_menu_button,
              sf::RenderWindow *window_ptr,
              std::vector<Lumen::UI::Component::Detail::MenuButton> &&buttons =
-                std::vector<Lumen::UI::Component::Detail::MenuButton>{}) noexcept
+                std::vector<Lumen::UI::Component::Detail::MenuButton>{},
+             MenuLayoutTypeTag menu_layout_type = MenuLayoutTypeTag::VERTICAL_UNIFORM_DISTRIBUTION
+                ) noexcept
         : Lumen::UI::Component::BasicUIComponent{Lumen::UI::Component::UIComponentTypeTag::MENU, window_ptr},
           m_transform{transform}, m_bounding_box_menu{bounding_box_menu},
-          m_bounding_box_menu_button{bounding_box_menu_button}, m_buttons{std::move(buttons)} {}
+          m_bounding_box_menu_button{bounding_box_menu_button}, m_buttons{std::move(buttons)},
+          m_menu_layout_type{menu_layout_type} {}
 
         Menu(const Menu &) noexcept = delete;
         Menu(Menu &&other) noexcept = default;
@@ -146,12 +158,10 @@ public:
         {
                 constexpr const float outline_thickness_menu_button = 1.0f;
                 m_rectangle_shape.setOutlineThickness(outline_thickness_menu_button);
+                const auto menu_button_position = this->GetMenuButtonPosition(index);
                 m_rectangle_shape.setPosition({
-                        static_cast<float>(this->m_transform.position.x),
-                        static_cast<float>(
-                                (this->m_transform.position.y - this->m_bounding_box_menu.half_size.y +
-                                        this->m_bounding_box_menu_button.half_size.y) +
-                                (this->m_bounding_box_menu_button.size.y * index))});
+                        static_cast<float>(menu_button_position.position.x),
+                        static_cast<float>(menu_button_position.position.y)});
                 m_rectangle_shape.setSize({
                         static_cast<float>(this->m_bounding_box_menu_button.size.x) - (outline_thickness_menu_button * 2.0f),
                         static_cast<float>(this->m_bounding_box_menu_button.size.y) - (outline_thickness_menu_button * 2.0f)
@@ -178,12 +188,49 @@ private:
         constexpr Lumen::UI::Component::Transform GetMenuButtonPosition(
                 const typename std::iterator_traits<decltype(m_buttons)::iterator>::difference_type index) const noexcept
         {
-                const auto menu_top_position_y = this->m_transform.position.y - this->m_bounding_box_menu.half_size.y;
-                const auto menu_button_at_index_zero_position_y = menu_top_position_y + this->m_bounding_box_menu_button.half_size.y;
+                /*auto calculate_button_position_vertical_uniform_distribution =
+                        [&](void) -> Lumen::UI::Component::Transform {
+                        const auto menu_top_position_y = this->m_transform.position.y - this->m_bounding_box_menu.half_size.y;
+                        const auto menu_button_at_index_zero_position_y = menu_top_position_y + this->m_bounding_box_menu_button.half_size.y;
+                        return {{(this->m_transform.position.x),
+                                (menu_button_at_index_zero_position_y +
+                                 (this->m_bounding_box_menu_button.size.y * static_cast<int>(index)))}};
+                };*/
+                auto calculate_button_position_vertical_uniform_distribution =
+                        [&](void) -> Lumen::UI::Component::Transform {
+                        const auto menu_top_position_y = this->m_transform.position.y - this->m_bounding_box_menu.half_size.y;
+                        /*
+                        const auto menu_button_at_index_zero_position_y = menu_top_position_y + this->m_bounding_box_menu_button.half_size.y;
+                        return {{(this->m_transform.position.x),
+                                (menu_button_at_index_zero_position_y +
+                                 (this->m_bounding_box_menu_button.size.y * static_cast<int>(index)))}};*/
+                        /*const auto menu_height_div_n = this->m_bounding_box_menu.size.y / static_cast<int>(this->m_buttons.size());
+                        const auto offset_y = menu_height_div_n / 2;
+                        const auto offset_y_at_current_index = offset_y + index * menu_height_div_n;*/
+                        const auto used_space_y = static_cast<int>(this->m_buttons.size()) *
+                                                                   this->m_bounding_box_menu_button.size.y;
+                        const auto free_soqce_y = this->m_bounding_box_menu.size.y - used_space_y;
+                        assert(free_soqce_y >= 0);
+                        const auto uniform_space = free_soqce_y / static_cast<int>(this->m_buttons.size() + 1);
+                        const auto offset_y = (static_cast<int>(index + 1) * uniform_space) +
+                                              (static_cast<int>(index) * this->m_bounding_box_menu_button.size.y) +
+                                              this->m_bounding_box_menu_button.half_size.y;
+                        return {{
+                                (this->m_transform.position.x),
+                                (offset_y + menu_top_position_y),
+                        }};
+                };
 
-                return {{(this->m_transform.position.x),
-                         (menu_button_at_index_zero_position_y +
-                          (this->m_bounding_box_menu_button.size.y * static_cast<int>(index)))}};
+                switch (this->m_menu_layout_type) {
+                case MenuLayoutTypeTag::VERTICAL_UNIFORM_DISTRIBUTION:{
+                        return calculate_button_position_vertical_uniform_distribution();
+                        break;
+                }
+
+                default:
+                        break;
+                }
+                std::abort();
         }
 
         constexpr bool IsMenuButtonSelected(
