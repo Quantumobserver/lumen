@@ -150,6 +150,12 @@ public:
                 return action_status_map[static_cast<std::size_t>(action_status)];
         }
 
+        constexpr bool IsSelectionActionHappened(void) const noexcept
+        {
+                return Lumen::Action::SelectionAction::SelectionActionTypeTag::NONE != this->m_selection_action.selection_action_type;
+        }
+
+
         constexpr void SetSelectionAction(const Lumen::Action::SelectionAction &selection_action) noexcept
         {
                 this->m_selection_action = selection_action;

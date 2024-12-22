@@ -112,6 +112,11 @@ public:
                 return this->m_action_status_buffer.GetSelectionAction();
         }
 
+        constexpr bool IsSelectionActionHappened(void) const noexcept
+        {
+                return this->m_action_status_buffer.IsSelectionActionHappened();
+        }
+
 private:
         static constexpr Lumen::Action::SelectionAction::ClickTypeTag
         SfmlMouseButtonTypeToClickType(sf::Mouse::Button button_type) noexcept

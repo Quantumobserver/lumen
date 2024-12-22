@@ -130,14 +130,7 @@ void TestMenuCase1(void) noexcept
 
                         action_manager.CreateActionFromEvent(event);
                 }
-                const auto &selection_action = action_manager.GetSelectionAction();
-                menu.DoSelectionAction({selection_action, selection_action.position});
-
-                if (2 == i) {
-                        menu.SetPosition({std::abs(i) * 100, std::abs(i) * 100});
-                } else if (-2 == i) {
-                        menu.SetPosition({400, 300});
-                }
+                
                 /*switch (selection_action.selection_action_type) {
                 case Lumen::Action::SelectionAction::SelectionActionTypeTag::NONE:
                         //std::cout << "[SelectionAction] None: \n";
@@ -177,11 +170,23 @@ void TestMenuCase1(void) noexcept
                         break;
                 }*/
 
-                action_manager.ResetActionBuffer();
 
                 window.clear();
                 menu.Render();
                 window.display();
+
+                if (!action_manager.IsSelectionActionHappened()) {
+                        continue;
+                }
+                const auto &selection_action = action_manager.GetSelectionAction();
+                menu.DoSelectionAction({selection_action, selection_action.position});
+
+                if (2 == i) {
+                        menu.SetPosition({std::abs(i) * 100, std::abs(i) * 100});
+                } else if (-2 == i) {
+                        menu.SetPosition({400, 300});
+                }
+                action_manager.ResetActionBuffer();
         }
 }
 
