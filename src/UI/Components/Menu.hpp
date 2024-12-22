@@ -20,6 +20,8 @@ class MenuButton {
 public:
         using MenuButtonActionHandler = std::function<void(void *, const Lumen::UI::Component::RelativeSelectionAction &)>;
 private:
+        Lumen::UI::Component::TransformCenter m_transform_center_relative_to_menu_top_left;
+        Lumen::UI::Component::TransformTopLeft m_transform_top_left_relative_to_menu_top_left;
         std::string m_text;
         sf::Sprite m_icon;
         void *m_do_menu_button_action_data_ptr{nullptr};
@@ -37,7 +39,9 @@ public:
 
         constexpr MenuButton(const MenuButton &) noexcept = delete;
         constexpr MenuButton(MenuButton &&other) noexcept
-        : m_text{std::move(other.m_text)}, m_icon{std::move(other.m_icon)},
+        : m_transform_center_relative_to_menu_top_left{std::move(other.m_transform_center_relative_to_menu_top_left)},
+          m_transform_top_left_relative_to_menu_top_left{std::move(other.m_transform_top_left_relative_to_menu_top_left)},
+          m_text{std::move(other.m_text)}, m_icon{std::move(other.m_icon)},
           m_do_menu_button_action_data_ptr{other.m_do_menu_button_action_data_ptr},
           fn_do_menu_button_action{std::move(other.fn_do_menu_button_action)}
         {
@@ -64,6 +68,30 @@ public:
                 if (this->fn_do_menu_button_action) {
                         this->fn_do_menu_button_action(this->m_do_menu_button_action_data_ptr, relative_selection_action);
                 }
+        }
+
+        constexpr void SetPosition(const Lumen::UI::Component::TransformCenter &center_position_relative_to_menu_top_left,
+                                   const Lumen::UI::Component::TransformTopLeft &top_left_position_relative_to_menu_top_left) noexcept
+        {
+                this->m_transform_center_relative_to_menu_top_left = center_position_relative_to_menu_top_left;
+                this->m_transform_top_left_relative_to_menu_top_left = top_left_position_relative_to_menu_top_left;
+        }
+
+
+        constexpr void Move(const Lumen::Core::Math::Vec2i &offset) noexcept
+        {
+                this->m_transform_center_relative_to_menu_top_left.center_position += offset;
+                this->m_transform_top_left_relative_to_menu_top_left.top_left_position += offset;
+        }
+
+        constexpr const Lumen::UI::Component::TransformCenter &GetCenterTransformRelativeToMenuTopLeft(void) const noexcept
+        {
+                return this->m_transform_center_relative_to_menu_top_left;
+        }
+
+        constexpr const Lumen::UI::Component::TransformTopLeft &GetTopLeftTransformRelativeToMenuTopLeft(void) const noexcept
+        {
+                return this->m_transform_top_left_relative_to_menu_top_left;
         }
 
         constexpr void SetColor(const sf::Color &color) noexcept
@@ -145,7 +173,11 @@ public:
           m_transform_top_left{transform_center.center_position - bounding_box_menu.half_size},
           m_bounding_box_menu{bounding_box_menu},
           m_bounding_box_menu_button{bounding_box_menu_button}, m_buttons{std::move(buttons)},
-          m_menu_layout{menu_layout_type} {}
+          m_menu_layout{menu_layout_type}
+        {
+                std::cout << "))))))))))))))))))))))))))))\n";
+                this->Init();
+        }
         
         Menu(const Lumen::UI::Component::TransformTopLeft &transform_top_left,
              const Lumen::UI::Component::BoundingBox &bounding_box_menu,
@@ -160,7 +192,11 @@ public:
           m_transform_top_left{transform_top_left},
           m_bounding_box_menu{bounding_box_menu},
           m_bounding_box_menu_button{bounding_box_menu_button}, m_buttons{std::move(buttons)},
-          m_menu_layout{menu_layout_type} {}
+          m_menu_layout{menu_layout_type}
+        {
+                std::cout << "_____________________\n";
+                this->Init();
+        }
         
         Menu(const Lumen::UI::Component::TransformCenter &transform_center,
              const Lumen::UI::Component::BoundingBox &bounding_box_menu_button,
@@ -194,6 +230,8 @@ public:
                 this->m_transform_top_left = {
                         this->m_transform_center.center_position - this->m_bounding_box_menu.half_size
                 };
+
+                this->Init();
                 
         }
 
@@ -203,8 +241,36 @@ public:
         Menu &operator=(const Menu &) noexcept = delete;
         Menu &operator=(Menu &&other) noexcept = default;
 
-        constexpr void Init(void) noexcept override {}
-        constexpr void Update(void) noexcept override {}
+        constexpr void InitMenuButtonPosition(void) noexcept
+        {
+                for (auto iterator = this->m_buttons.begin(); iterator != this->m_buttons.end(); ++iterator) {
+                        const auto index = std::distance(this->m_buttons.begin(), iterator);
+
+                        const auto menu_button_center_position_relative_to_menu_top_left =
+                                this->GetMenuButtonRelativeCenterPosition(index).center_position;
+                        const auto menu_button_top_left_position_relative_to_menu_top_left =
+                                menu_button_center_position_relative_to_menu_top_left - this->m_bounding_box_menu_button.half_size;
+
+                        std::cout << "menu_button_center_position_relative_to_menu_top_left[" << index << "]: { "
+                                  << menu_button_center_position_relative_to_menu_top_left.x << ", "
+                                  << menu_button_center_position_relative_to_menu_top_left.y << " }\n";
+
+                        iterator->SetPosition(menu_button_center_position_relative_to_menu_top_left,
+                                              menu_button_top_left_position_relative_to_menu_top_left);
+                }
+        }
+
+
+        constexpr void Init(void) noexcept override
+        {
+                this->InitMenuButtonPosition();
+        }
+
+        constexpr void Update(const Lumen::Core::Math::Vec2i &position_move_offset) noexcept override
+        {
+                this->Move(position_move_offset);
+        }
+
         constexpr void Render(void) noexcept override
         {
                 this->DrawMenuBoundingBox();
@@ -232,24 +298,30 @@ public:
 
         constexpr void  DrawMenuButtonBoundingBoxForEach(void) noexcept
         {
-                for (auto iterator = this->m_buttons.begin(); iterator != this->m_buttons.end(); ++iterator) {
-                        const auto index = std::distance(this->m_buttons.begin(), iterator);
+                //for (auto iterator = this->m_buttons.begin(); iterator != this->m_buttons.end(); ++iterator) {
+                //        const auto index = std::distance(this->m_buttons.begin(), iterator);
+                for (const auto &menu_button : this->m_buttons) {
 
-                        this->DrawMenuButtonBoundingBox(index, *iterator);
+                        //this->DrawMenuButtonBoundingBox(index, *iterator);
+                        this->DrawMenuButtonBoundingBox(menu_button);
                 }
         }
 
         constexpr void DrawMenuButtonBoundingBox(
-                const typename std::iterator_traits<decltype(m_buttons)::iterator>::difference_type index,
+                //const typename std::iterator_traits<decltype(m_buttons)::iterator>::difference_type index,
                 const Lumen::UI::Component::Detail::MenuButton &menu_button) noexcept
         {
                 constexpr const float outline_thickness_menu_button = 1.0f;
                 m_rectangle_shape.setOutlineThickness(outline_thickness_menu_button);
-                const auto menu_button_ralative_center_position = this->GetMenuButtonRelativeCenterPosition(index);
-                const auto menu_button_position = this->m_transform_top_left.top_left_position + menu_button_ralative_center_position.center_position;
+                //const auto menu_button_ralative_center_position = this->GetMenuButtonRelativeCenterPosition(index);
+                //const auto menu_button_position = this->m_transform_top_left.top_left_position + menu_button_ralative_center_position.center_position;
+                const auto menu_button_center_position_relative_to_menu_top_left =
+                        menu_button.GetCenterTransformRelativeToMenuTopLeft().center_position;
+                const auto menu_button_center_position = this->m_transform_top_left.top_left_position +
+                                                         menu_button_center_position_relative_to_menu_top_left;
                 m_rectangle_shape.setPosition({
-                        static_cast<float>(menu_button_position.x),
-                        static_cast<float>(menu_button_position.y)});
+                        static_cast<float>(menu_button_center_position.x),
+                        static_cast<float>(menu_button_center_position.y)});
                 m_rectangle_shape.setSize({
                         static_cast<float>(this->m_bounding_box_menu_button.size.x) - (outline_thickness_menu_button * 2.0f),
                         static_cast<float>(this->m_bounding_box_menu_button.size.y) - (outline_thickness_menu_button * 2.0f)
@@ -340,12 +412,12 @@ private:
 
         constexpr bool IsMenuButtonSelected(
                 const Lumen::UI::Component::RelativeSelectionAction &relative_selection_action,
-                const typename std::iterator_traits<decltype(m_buttons)::iterator>::difference_type index) const noexcept
+                const Lumen::UI::Component::Detail::MenuButton &menu_button) const noexcept
         {
                 return Lumen::UI::Component::IsSelected(
                         relative_selection_action.relative_position_to_the_parent_ui_component,
                         this->m_bounding_box_menu_button,
-                        this->GetMenuButtonRelativeCenterPosition(index));
+                        menu_button.GetCenterTransformRelativeToMenuTopLeft());
         }
 
 public:
@@ -367,15 +439,14 @@ public:
                         this->m_transform_top_left.top_left_position),
                 };
 
-                for (auto iterator = this->m_buttons.begin(); iterator != this->m_buttons.end(); ++iterator) {
-                        const auto index = std::distance(this->m_buttons.begin(), iterator);
+                for (auto &menu_button : this->m_buttons) {
         
-                        if (!this->IsMenuButtonSelected(relative_selection_to_menu, index)) {
-                                iterator->SetColor(sf::Color::Blue);
+                        if (!this->IsMenuButtonSelected(relative_selection_to_menu, menu_button)) {
+                                menu_button.SetColor(sf::Color::Blue);
                                 continue;
                         }
-                        iterator->SetColor(sf::Color::Yellow);
-                        iterator->DoSelectionAction(relative_selection_to_menu);
+                        menu_button.SetColor(sf::Color::Yellow);
+                        menu_button.DoSelectionAction(relative_selection_to_menu);
                 }
         }
 
@@ -386,9 +457,16 @@ public:
 
         constexpr void SetPosition(const Lumen::Core::Math::Vec2i &position) noexcept override
         {
-                this->m_transform_center.center_position = position;
-                this->m_transform_top_left.top_left_position = position - this->m_bounding_box_menu.half_size;
+                const auto position_move_offset = position - this->m_transform_center.center_position;
+                this->Move(position_move_offset);
         }
+
+        constexpr void Move(const Lumen::Core::Math::Vec2i &position_move_offset) noexcept
+        {
+                this->m_transform_center.center_position += position_move_offset;
+                this->m_transform_top_left.top_left_position += position_move_offset;
+        }
+
 
         constexpr virtual void SetSize(const Lumen::Core::Math::Vec2i &size) noexcept override
         {

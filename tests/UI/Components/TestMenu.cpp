@@ -95,14 +95,14 @@ void TestMenuCase1(void) noexcept
         buttons.push_back(std::move(menu_button_2));
 
         constexpr const int scale = 2;
-        /*Lumen::UI::Component::Menu menu{
+        Lumen::UI::Component::Menu menu{
                 Lumen::UI::Component::TransformCenter{{400, 300}},
                 Lumen::UI::Component::BoundingBox{{50 * scale, 70 * scale}},
                 Lumen::UI::Component::BoundingBox{{50 * scale, 10 * scale}},
                 &window,
                 std::move(buttons),
-        };*/
-        Lumen::UI::Component::Menu menu{
+        };
+        /*Lumen::UI::Component::Menu menu{
                 Lumen::UI::Component::TransformCenter{{400, 300}},
                 Lumen::UI::Component::BoundingBox{{50 * scale, 10 * scale}},
                 &window,
@@ -112,7 +112,7 @@ void TestMenuCase1(void) noexcept
                         .fixed_spacing_y = 50,
                         .fixed_spacing_footer_y = 100
                 },
-        };
+        };*/
 
         while (window.isOpen()) {
                 for (std::optional<sf::Event> optional_event = window.pollEvent(); optional_event.has_value(); optional_event = window.pollEvent()) {
@@ -180,6 +180,7 @@ void TestMenuCase1(void) noexcept
                 }
                 const auto &selection_action = action_manager.GetSelectionAction();
                 menu.DoSelectionAction({selection_action, selection_action.position});
+                menu.Update({0, 0});
 
                 if (2 == i) {
                         menu.SetPosition({std::abs(i) * 100, std::abs(i) * 100});

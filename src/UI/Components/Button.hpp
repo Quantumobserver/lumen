@@ -72,7 +72,7 @@ public:
         }
 
         constexpr void Init(void) noexcept override {}
-        constexpr void Update(void) noexcept override
+        constexpr void Update(const Lumen::Core::Math::Vec2i &) noexcept override
         {
                 // TODO
         }
