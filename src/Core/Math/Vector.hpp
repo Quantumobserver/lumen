@@ -1,6 +1,8 @@
 
 #pragma once
 
+#include <LumenDef/ConstexprIf.hpp>
+
 #include <cmath>
 #include <type_traits>
 
@@ -18,6 +20,25 @@ constexpr Number Abs(Number number) noexcept
         return glm::abs(number);
 }
 
+struct Vec2f32;
+
+namespace Detail {
+
+namespace Vec2f32 {
+template<typename U>
+struct BaseCastIfImpl {
+        using type = U;
+};
+
+
+template<>
+struct BaseCastIfImpl<Lumen::Core::Math::Vec2f32> {
+        using type = glm::vec2;
+};
+
+} // namespace Vec2f32
+} // namespace Detail
+
 struct Vec2f32 : private glm::vec2 {
 private:
         template<typename GlmVecQualifier, GlmVecQualifier qualifier>
@@ -27,18 +48,9 @@ private:
         template<typename T>
         struct BaseCastIf {
         private:
-                template<typename U>
-                struct BaseCastIfImpl {
-                        using type = U;
-                };
-
-                template<>
-                struct BaseCastIfImpl<Vec2f32> {
-                        using type = glm::vec2;
-                };
         
         public:
-                using type = typename BaseCastIfImpl<
+                using type = typename Lumen::Core::Math::Detail::Vec2f32::BaseCastIfImpl<
                                 typename std::remove_cv<
                                         typename std::remove_reference<T>::type
                                 >::type>::type;
@@ -59,7 +71,7 @@ public:
 
         constexpr Vec2f32 &operator=(const Vec2f32 &vec2f) noexcept = default;
 
-        constexpr Vec2f32 &Normalize(void) noexcept
+        CONSTEXPR_IF_GLM_NORMALIZE Vec2f32 &Normalize(void) noexcept
         {
                 *this = glm::normalize(*this);
                 return *this;
@@ -184,6 +196,25 @@ public:
 #undef LUMEN_CORE_MATH_VEC2F_BINARY_OPERATOR_GENERATOR
 };
 
+struct Vec2i;
+
+namespace Detail {
+
+namespace Vec2i {
+
+template<typename U>
+struct BaseCastIfImpl {
+        using type = U;
+};
+
+template<>
+struct BaseCastIfImpl<Lumen::Core::Math::Vec2i> {
+        using type = glm::ivec2;
+};
+
+} // namespace Vec2i
+} // namespace Detail
+
 struct Vec2i : private glm::ivec2 {
 private:
         template<typename GlmVecQualifier, GlmVecQualifier qualifier>
@@ -193,18 +224,9 @@ private:
         template<typename T>
         struct BaseCastIf {
         private:
-                template<typename U>
-                struct BaseCastIfImpl {
-                        using type = U;
-                };
-
-                template<>
-                struct BaseCastIfImpl<Vec2i> {
-                        using type = glm::ivec2;
-                };
         
         public:
-                using type = typename BaseCastIfImpl<
+                using type = typename Lumen::Core::Math::Detail::Vec2i::BaseCastIfImpl<
                                 typename std::remove_cv<
                                         typename std::remove_reference<T>::type
                                 >::type>::type;

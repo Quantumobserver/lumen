@@ -11,5 +11,5 @@ target_link_libraries(Lumen PRIVATE
                       glm::glm
                       SFML::Window
                       SFML::Graphics
-                      SFML::Main
+                      #SFML::Main
                       )
