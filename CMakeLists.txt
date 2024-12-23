@@ -25,7 +25,7 @@ if (NOT DEFINED CMAKE_TOOLCHAIN_FILE)
         include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/SetupToolchain.cmake)
 endif ()
 
-#find_package(SFML 3
+# find_package(SFML 3
 #             COMPONENTS 
 #             system window graphics
 #             network audio
@@ -35,8 +35,9 @@ add_subdirectory(Dependencies)
 
 set(DEPENDENCIES_DIR ${CMAKE_CURRENT_SOURCE_DIR}/Dependencies)
 
+set(LUMEN_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src)
+
 if (LUMEN_BUILD_TESTS)
-        set(LUMEN_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src)
         include(CTest)
         add_subdirectory(tests)
 endif ()
