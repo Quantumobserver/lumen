@@ -22,9 +22,9 @@ private:
         //std::vector<sf::Font> m_fonts;
         std::vector<sf::Sprite> m_sprites;
 public:
-        CONSTEXPR_IF_STD_VECTOR_DEFAULT_CONSTRUCTOR ResourceManager(void) noexcept = default;
+        CONSTEXPR_IF_CXX_20 ResourceManager(void) noexcept = default;
         constexpr ResourceManager(const ResourceManager &) noexcept = delete;
-        CONSTEXPR_IF_STD_VECTOR_MOVE_CONSTRUCTOR ResourceManager(ResourceManager &&other) noexcept
+        CONSTEXPR_IF_CXX_20 ResourceManager(ResourceManager &&other) noexcept
          : m_textures{std::move(other.m_textures)} {}
 
         constexpr void Init(void) noexcept
@@ -52,14 +52,14 @@ public:
                 this->m_textures[static_cast<std::size_t>(texture_id)] = std::move(texture);
         }
 
-        CONSTEXPR_IF_STD_VECTOR_OPERATOR_BRACKET
+        CONSTEXPR_IF_CXX_20
         const sf::Texture &GetTexture(const Lumen::ResourceManager::TextureID texture_id) const noexcept
         {
                 assert(this->m_is_initialized);
                 return this->m_textures[static_cast<std::size_t>(texture_id)];
         }
 
-        CONSTEXPR_IF_STD_VECTOR_OPERATOR_BRACKET
+        CONSTEXPR_IF_CXX_20
         sf::Texture &GetTexture(const Lumen::ResourceManager::TextureID texture_id) noexcept
         {
                 assert(this->m_is_initialized);
@@ -83,14 +83,14 @@ public:
                 this->m_sprites[static_cast<std::size_t>(sprite_id)] = std::move(sprite);
         }
 
-        CONSTEXPR_IF_STD_VECTOR_OPERATOR_BRACKET
+        CONSTEXPR_IF_CXX_20
         const sf::Sprite &GetSprite(const Lumen::ResourceManager::SpriteID sprite_id) const noexcept
         {
                 assert(this->m_is_initialized);
                 return this->m_sprites[static_cast<std::size_t>(sprite_id)];
         }
 
-        CONSTEXPR_IF_STD_VECTOR_OPERATOR_BRACKET
+        CONSTEXPR_IF_CXX_20
         sf::Sprite &GetSprite(const Lumen::ResourceManager::SpriteID sprite_id) noexcept
         {
                 assert(this->m_is_initialized);
