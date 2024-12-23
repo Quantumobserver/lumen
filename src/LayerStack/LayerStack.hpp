@@ -1,6 +1,8 @@
 
 #pragma once
 
+#include <LumenDef/ConstexprIf.hpp>
+
 #include <cassert>
 #include <cstddef>
 #include <vector>
@@ -21,30 +23,32 @@ public:
         using MutableReverseIterator = std::vector<Lumen::LayerStack::LayerPtr>::reverse_iterator;
         using ConstReverseIterator = std::vector<Lumen::LayerStack::LayerPtr>::const_reverse_iterator;
 
-        constexpr LayerStack(void) noexcept {}
-        constexpr ~LayerStack(void) noexcept
-        {
+        CONSTEXPR_IF_CXX_20 LayerStack(void) noexcept {}
+        //constexpr ~LayerStack(void) noexcept
+        //{
                 // TODO: 
-        }
+        //}
 
         constexpr LayerStack(const Lumen::LayerStack::LayerStack &) noexcept = delete;
-        constexpr LayerStack(Lumen::LayerStack::LayerStack &&other) noexcept = default;
+        CONSTEXPR_IF_CXX_23 LayerStack(Lumen::LayerStack::LayerStack &&other) noexcept = default;
 
         constexpr Lumen::LayerStack::LayerStack &operator=(const Lumen::LayerStack::LayerStack &) noexcept = delete;
-        constexpr Lumen::LayerStack::LayerStack &operator=(Lumen::LayerStack::LayerStack &&other) noexcept = default;
+        CONSTEXPR_IF_CXX_23 Lumen::LayerStack::LayerStack &operator=(Lumen::LayerStack::LayerStack &&other) noexcept = default;
 
-        constexpr void PushBackLayer(Lumen::LayerStack::LayerPtr &&layer) noexcept
+        CONSTEXPR_IF_CXX_23
+        void PushBackLayer(Lumen::LayerStack::LayerPtr &&layer) noexcept
         {
                 this->m_layers.push_back(std::move(layer));
         }
 
         template<typename Layer, typename ...Args>
-        constexpr void EmplaceBackLayer(Args &&...args) noexcept
+        CONSTEXPR_IF_CXX_23
+        void EmplaceBackLayer(Args &&...args) noexcept
         {
                 this->m_layers.emplace_back(MakeLayer<Layer>(std::forward<Args>(args)...));
         }
 
-        constexpr Lumen::LayerStack::LayerPtr &PopBackLayer(void) noexcept
+        CONSTEXPR_IF_CXX_23 Lumen::LayerStack::LayerPtr &PopBackLayer(void) noexcept
         {
                 assert(!this->m_layers.empty());
 
