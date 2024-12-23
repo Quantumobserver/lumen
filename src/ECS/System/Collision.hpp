@@ -35,6 +35,7 @@ constexpr Lumen::Core::Math::Vec2f32 GetPrevOverlap(Lumen::ECS::Entity::Entity &
         return Lumen::Physics::AABB::GetPrevOverlap<Lumen::ECS::Component::Transform,
                                                     Lumen::ECS::Component::BoundingBox>(entity_1, entity_2);
 }
+
 constexpr void PlayerCollideWithTile(Lumen::ECS::Entity::Entity &player, Lumen::ECS::Entity::Entity &tile) noexcept
 {
         assert(player.HasComponent<Lumen::ECS::Component::Transform>());
@@ -69,9 +70,9 @@ constexpr void PlayerCollideWithTile(Lumen::ECS::Entity::Entity &player, Lumen::
         }
 }
 
-CONSTEXPR_IF_STD_VECTOR_ITERATOR
+CONSTEXPR_IF_CXX_20
 void PlayerCollideWithTilesForEach(std::vector<Lumen::ECS::Entity::Entity> &players,
-                                             std::vector<Lumen::ECS::Entity::Entity> &tiles) noexcept
+                                   std::vector<Lumen::ECS::Entity::Entity> &tiles) noexcept
 {
         for (auto &player : players) {
                 for (auto &tile : tiles) {
@@ -80,7 +81,7 @@ void PlayerCollideWithTilesForEach(std::vector<Lumen::ECS::Entity::Entity> &play
         }
 }
 
-CONSTEXPR_IF_STD_VECTOR_ITERATOR
+CONSTEXPR_IF_CXX_20
 void CollisionForEach(Lumen::ECS::Entity::EntityManager &entity_manager) noexcept
 {
         auto &players = entity_manager.GetEntityVector(Lumen::ECS::Entity::Entity::TagType::PLAYER);
