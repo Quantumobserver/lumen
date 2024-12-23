@@ -1,5 +1,7 @@
 #pragma once
 
+#include <LumenDef/ConstexprIf.hpp>
+
 #include <ECS/Entity/EntityManager.hpp>
 #include <Physics/AABB.hpp>
 
@@ -67,7 +69,8 @@ constexpr void PlayerCollideWithTile(Lumen::ECS::Entity::Entity &player, Lumen::
         }
 }
 
-constexpr void PlayerCollideWithTilesForEach(std::vector<Lumen::ECS::Entity::Entity> &players,
+CONSTEXPR_IF_STD_VECTOR_ITERATOR
+void PlayerCollideWithTilesForEach(std::vector<Lumen::ECS::Entity::Entity> &players,
                                              std::vector<Lumen::ECS::Entity::Entity> &tiles) noexcept
 {
         for (auto &player : players) {
@@ -77,7 +80,8 @@ constexpr void PlayerCollideWithTilesForEach(std::vector<Lumen::ECS::Entity::Ent
         }
 }
 
-constexpr void CollisionForEach(Lumen::ECS::Entity::EntityManager &entity_manager) noexcept
+CONSTEXPR_IF_STD_VECTOR_ITERATOR
+void CollisionForEach(Lumen::ECS::Entity::EntityManager &entity_manager) noexcept
 {
         auto &players = entity_manager.GetEntityVector(Lumen::ECS::Entity::Entity::TagType::PLAYER);
         auto &tiles = entity_manager.GetEntityVector(Lumen::ECS::Entity::Entity::TagType::TILE);

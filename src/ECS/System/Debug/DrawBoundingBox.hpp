@@ -1,6 +1,8 @@
 
 #pragma once
 
+#include <LumenDef/ConstexprIf.hpp>
+
 #include <ECS/Entity/EntityManager.hpp>
 
 #include <SFML/Graphics/Color.hpp>
@@ -31,7 +33,8 @@ constexpr sf::Color GetBoundingBoxColor(const Lumen::ECS::Component::BoundingBox
         return sf::Color::White;
 }
 
-constexpr void DrawBoundingBox(sf::RenderWindow &window, const Lumen::ECS::Entity::Entity &entity) noexcept
+CONSTEXPR_IF_SF_RECTANGLE_SHAPE_CONSTRUCTOR
+void DrawBoundingBox(sf::RenderWindow &window, const Lumen::ECS::Entity::Entity &entity) noexcept
 {
         if (!entity.HasComponent<Lumen::ECS::Component::Transform>() ||
             !entity.HasComponent<Lumen::ECS::Component::BoundingBox>()) {
