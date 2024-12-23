@@ -5,6 +5,7 @@
 
 #ifdef LUMEN_DEBUG_ACTION_FORMAT_ENABLED
         #include <string>
+        #include <cstdlib>
 #endif // LUMEN_DEBUG_ACTION_FORMAT_ENABLED
 
 namespace Lumen {
@@ -69,6 +70,8 @@ std::string fmt(ActionName an) noexcept
 
 #undef FMT_CASE
         }
+
+        std::abort();
 }
 
 #endif // LUMEN_DEBUG_ACTION_FORMAT_ENABLED
@@ -89,6 +92,8 @@ std::string fmt(ActionKind ak) noexcept
         case ActionKind::TRIGGER:
                 return "TRIGGER";
         }
+
+        std::abort();
 }
 
 #endif // LUMEN_DEBUG_ACTION_FORMAT_ENABLED
@@ -129,6 +134,8 @@ std::string fmt(ActionStatus as) noexcept
         case ActionStatus::END:
                 return "END";
         }
+
+        std::abort();
 }
 
 #endif // LUMEN_DEBUG_ACTION_FORMAT_ENABLED
@@ -233,6 +240,8 @@ std::string fmt(SelectionAction::SelectionActionTypeTag sst) noexcept
         case SelectionAction::SelectionActionTypeTag::CURSOR_MOVEMENT:
                 return "CURSOR_MOVEMENT";
         }
+
+        std::abort();
 }
 
 std::string fmt(SelectionAction::ClickTypeTag ctt) noexcept
@@ -250,6 +259,8 @@ std::string fmt(SelectionAction::ClickTypeTag ctt) noexcept
         case SelectionAction::ClickTypeTag::MIDDLE_CLICK:
                 return "MIDDLE_CLICK";
         }
+
+        std::abort();
 }
 
 std::string fmt(SelectionAction::WheelScroll::ScrollDirectionTag sdt) noexcept
@@ -261,6 +272,8 @@ std::string fmt(SelectionAction::WheelScroll::ScrollDirectionTag sdt) noexcept
         case SelectionAction::WheelScroll::ScrollDirectionTag::HORIZONTAL:
                 return "HORIZONTAL";
         }
+
+        std::abort();
 }
 
 
