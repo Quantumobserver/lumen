@@ -33,11 +33,11 @@ public:
         {
 #ifdef LUMEN_DEBUG_ACTION_FORMAT_ENABLED
 
-                std::cout << "[ActionKindRecord]: ";
+                //std::cout << "[ActionKindRecord]: ";
                 for (std::size_t i = 0; i < this->m_action_kind_record.size(); ++i) {
                         std::cout << fmt(this->m_action_kind_record[i]) << " ";
                 }
-                std::cout << "\n";
+                //std::cout << "\n";
 
 #endif // LUMEN_DEBUG_ACTION_FORMAT_ENABLED
         }

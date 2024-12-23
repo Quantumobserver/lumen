@@ -148,7 +148,8 @@ private:
 
 public:
 
-        constexpr void CreateActionFromEvent(sf::Event &event) noexcept
+        CONSTEXPR_IF_SF_EVENT
+        void CreateActionFromEvent(sf::Event &event) noexcept
         {
                 Lumen::Action::Action action{};
 
