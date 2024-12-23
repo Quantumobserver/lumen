@@ -3,6 +3,7 @@
 
 #include <cstdint>
 #include <cstdlib>
+#include <cstring>
 #include <random>
 #include <thread>
 #include <chrono>
@@ -75,7 +76,7 @@ constexpr RandomSeed GenerateRandomSeedImpl(
 
 } // namespace Detail
 
-constexpr RandomSeed GenerateRandomSeed(void) noexcept
+RandomSeed GenerateRandomSeed(void) noexcept
 {
         std::random_device random_device{};
         auto random_device_reslut = random_device();
