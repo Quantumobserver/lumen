@@ -1,5 +1,7 @@
 #pragma once
 
+#include <LumenDef/ConstexprIf.hpp>
+
 #include <SFML/Graphics/Texture.hpp>
 #include <SFML/Graphics/Sprite.hpp>
 #include <SFML/Graphics/Rect.hpp>
@@ -20,9 +22,10 @@ private:
         //std::vector<sf::Font> m_fonts;
         std::vector<sf::Sprite> m_sprites;
 public:
-        constexpr ResourceManager(void) noexcept = default;
+        CONSTEXPR_IF_STD_VECTOR_DEFAULT_CONSTRUCTOR ResourceManager(void) noexcept = default;
         constexpr ResourceManager(const ResourceManager &) noexcept = delete;
-        constexpr ResourceManager(ResourceManager &&other) noexcept : m_textures{std::move(other.m_textures)} {}
+        CONSTEXPR_IF_STD_VECTOR_MOVE_CONSTRUCTOR ResourceManager(ResourceManager &&other) noexcept
+         : m_textures{std::move(other.m_textures)} {}
 
         constexpr void Init(void) noexcept
         {
@@ -35,31 +38,36 @@ public:
         }
 
         constexpr ResourceManager &operator=(const ResourceManager &) noexcept = delete;
-        constexpr ResourceManager &operator=(ResourceManager &&other) noexcept
+        CONSTEXPR_IF_STD_VECTOR_MOVE_ASSIGNMENT
+        ResourceManager &operator=(ResourceManager &&other) noexcept
         {
                 this->m_textures = std::move(other.m_textures);
                 return *this;
         }
 
-        constexpr void AddTexture(sf::Texture &&texture, Lumen::ResourceManager::TextureID texture_id) noexcept
+        CONSTEXPR_IF_SF_TEXTURE_MOVE_ASSIGNMENT
+        void AddTexture(sf::Texture &&texture, Lumen::ResourceManager::TextureID texture_id) noexcept
         {
                 assert(this->m_is_initialized);
                 this->m_textures[static_cast<std::size_t>(texture_id)] = std::move(texture);
         }
 
-        constexpr const sf::Texture &GetTexture(const Lumen::ResourceManager::TextureID texture_id) const noexcept
+        CONSTEXPR_IF_STD_VECTOR_OPERATOR_BRACKET
+        const sf::Texture &GetTexture(const Lumen::ResourceManager::TextureID texture_id) const noexcept
         {
                 assert(this->m_is_initialized);
                 return this->m_textures[static_cast<std::size_t>(texture_id)];
         }
 
-        constexpr sf::Texture &GetTexture(const Lumen::ResourceManager::TextureID texture_id) noexcept
+        CONSTEXPR_IF_STD_VECTOR_OPERATOR_BRACKET
+        sf::Texture &GetTexture(const Lumen::ResourceManager::TextureID texture_id) noexcept
         {
                 assert(this->m_is_initialized);
                 return this->m_textures[static_cast<std::size_t>(texture_id)];
         }
 
-        constexpr void LoadTextureFromFile(const std::string &file_name, Lumen::ResourceManager::TextureID texture_id)
+        CONSTEXPR_IF_SF_TEXTURE_DEFAULT_CONSTRUCTOR
+        void LoadTextureFromFile(const std::string &file_name, Lumen::ResourceManager::TextureID texture_id)
         {
                 assert(this->m_is_initialized);
                 sf::Texture texture;
@@ -68,19 +76,22 @@ public:
                 this->AddTexture(std::move(texture), texture_id);
         }
 
-        constexpr void AddSprite(sf::Sprite &&sprite, Lumen::ResourceManager::SpriteID sprite_id) noexcept
+        CONSTEXPR_IF_SF_SPRITE_MOVE_ASSIGNMENT
+        void AddSprite(sf::Sprite &&sprite, Lumen::ResourceManager::SpriteID sprite_id) noexcept
         {
                 assert(this->m_is_initialized);
                 this->m_sprites[static_cast<std::size_t>(sprite_id)] = std::move(sprite);
         }
 
-        constexpr const sf::Sprite &GetSprite(const Lumen::ResourceManager::SpriteID sprite_id) const noexcept
+        CONSTEXPR_IF_STD_VECTOR_OPERATOR_BRACKET
+        const sf::Sprite &GetSprite(const Lumen::ResourceManager::SpriteID sprite_id) const noexcept
         {
                 assert(this->m_is_initialized);
                 return this->m_sprites[static_cast<std::size_t>(sprite_id)];
         }
 
-        constexpr sf::Sprite &GetSprite(const Lumen::ResourceManager::SpriteID sprite_id) noexcept
+        CONSTEXPR_IF_STD_VECTOR_OPERATOR_BRACKET
+        sf::Sprite &GetSprite(const Lumen::ResourceManager::SpriteID sprite_id) noexcept
         {
                 assert(this->m_is_initialized);
                 return this->m_sprites[static_cast<std::size_t>(sprite_id)];
