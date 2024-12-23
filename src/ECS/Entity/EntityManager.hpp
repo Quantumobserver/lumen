@@ -50,12 +50,14 @@ private:
 
         using this_t = EntityManager;
 public:
-        constexpr EntityManager(void) noexcept : m_entities{}, m_total_number_of_entities_created{0}
+        CONSTEXPR_IF_STD_VECTOR_DEFAULT_CONSTRUCTOR EntityManager(void) noexcept
+         : m_entities{}, m_total_number_of_entities_created{0}
         {}
 
 private:
 
-        static constexpr void RemoveDeadEntity(entity_vector_type &entity_vector) noexcept
+        static CONSTEXPR_IF_STD_REMOVE_IF_STD_VECTOR
+        void RemoveDeadEntity(entity_vector_type &entity_vector) noexcept
         {
                 entity_vector
                         .erase(std::remove_if(entity_vector.begin(),
@@ -73,7 +75,7 @@ private:
                 }
         }
 
-        constexpr void AddGoingToBeAddedToEntities(void) noexcept
+        CONSTEXPR_IF_STD_VECTOR_ITERATOR void AddGoingToBeAddedToEntities(void) noexcept
         {
                 for (auto &&entity : this->m_going_to_be_added) {
                         std::size_t index = static_cast<std::size_t>(entity.GetTag());
@@ -85,7 +87,7 @@ private:
 
 public:
         
-        constexpr void Clear(void) noexcept
+        CONSTEXPR_IF_STD_VECTOR_CLEAR void Clear(void) noexcept
         {
                 for (auto &entityVector : this->m_entities) {
                         entityVector.clear();
@@ -94,14 +96,14 @@ public:
                 this->m_total_number_of_entities_created = 0;
         }
 
-        constexpr void Update(void) noexcept
+       CONSTEXPR_IF_STD_VECTOR_ITERATOR void Update(void) noexcept
         {
                 this->RemoveDeadEntities();
                 this->AddGoingToBeAddedToEntities();
         }
 
         // the reference can no longer be used after Updata() is called
-        constexpr entity_type &CreateEntity(const entity_type::TagType tag) noexcept
+        CONSTEXPR_IF_ATOMIC_PLUS_PLUS entity_type &CreateEntity(const entity_type::TagType tag) noexcept
         {
                 const std::size_t entity_id = this->m_total_number_of_entities_created++;
                 this->m_going_to_be_added.emplace_back(
@@ -137,7 +139,7 @@ public:
         }
 
         // TODO: vehicle support
-        constexpr Entity &GetEntityCurrentlyControlledByThePlayer(void) noexcept
+        CONSTEXPR_IF_STD_VECTOR_ITERATOR Entity &GetEntityCurrentlyControlledByThePlayer(void) noexcept
         {
                 for (auto &entity : this->m_entities[static_cast<std::size_t>(entity_type::TagType::PLAYER)]) {
                         if (this->m_entity_currently_controlled_by_the_player.id == entity.m_id) {
@@ -148,7 +150,7 @@ public:
         }
 
         // TODO: vehicle support
-        constexpr const Entity &GetEntityCurrentlyControlledByThePlayer(void) const noexcept
+        CONSTEXPR_IF_STD_VECTOR_ITERATOR const Entity &GetEntityCurrentlyControlledByThePlayer(void) const noexcept
         {
                 for (auto &entity : this->m_entities[static_cast<std::size_t>(entity_type::TagType::PLAYER)]) {
                         if (this->m_entity_currently_controlled_by_the_player.id == entity.m_id) {
