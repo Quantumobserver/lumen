@@ -47,9 +47,6 @@ private:
 
         template<typename T>
         struct BaseCastIf {
-        private:
-        
-        public:
                 using type = typename Lumen::Core::Math::Detail::Vec2f32::BaseCastIfImpl<
                                 typename std::remove_cv<
                                         typename std::remove_reference<T>::type
@@ -223,9 +220,6 @@ private:
 
         template<typename T>
         struct BaseCastIf {
-        private:
-        
-        public:
                 using type = typename Lumen::Core::Math::Detail::Vec2i::BaseCastIfImpl<
                                 typename std::remove_cv<
                                         typename std::remove_reference<T>::type
@@ -338,7 +332,7 @@ public:
 
 };
 
-constexpr Vec2i Abs(const Vec2i &vec2i) noexcept
+CONSTEXPR_IF_CXX_23 Vec2i Abs(const Vec2i &vec2i) noexcept
 {
         return {std::abs(vec2i.x), std::abs(vec2i.y)};
 }

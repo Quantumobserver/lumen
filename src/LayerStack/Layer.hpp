@@ -1,6 +1,8 @@
 
 #pragma once
 
+#include <
+
 #include <type_traits>
 #include <memory>
 #include <utility>
@@ -48,7 +50,8 @@ class LayerPtr {
 private:
         std::unique_ptr<BaseLayer> m_layer_ptr;
 
-        constexpr LayerPtr(std::unique_ptr<BaseLayer> &&layer_ptr) noexcept : m_layer_ptr{std::move(layer_ptr)} {}
+        constexpr LayerPtr(std::unique_ptr<BaseLayer> &&layer_ptr) noexcept
+         : m_layer_ptr{std::move(layer_ptr)} {}
 public:
 
         constexpr LayerPtr(const LayerPtr &) noexcept = delete;
