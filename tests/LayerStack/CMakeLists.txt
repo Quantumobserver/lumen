@@ -10,7 +10,7 @@ target_link_libraries(TestLayerStack PRIVATE
                       glm::glm
                       SFML::Window
                       SFML::Graphics
-                      SFML::Main
+                      #SFML::Main
                       )
 
 add_test(NAME TestLayerStack COMMAND TestLayerStack)

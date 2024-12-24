@@ -10,7 +10,7 @@ target_link_libraries(TestDrawBoundingBox PRIVATE
                       glm::glm
                       SFML::Window
                       SFML::Graphics
-                      SFML::Main
+                      #SFML::Main
                       )
 
 add_test(NAME TestDrawBoundingBox COMMAND TestDrawBoundingBox)

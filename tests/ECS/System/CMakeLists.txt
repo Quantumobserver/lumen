@@ -12,7 +12,7 @@ target_link_libraries(TestMovement PRIVATE
                       glm::glm
                       SFML::Window
                       SFML::Graphics
-                      SFML::Main
+                      #SFML::Main
                       )
 
 add_test(NAME TestMovement COMMAND TestMovement)
@@ -29,7 +29,7 @@ target_link_libraries(TestLifespanUpdate PRIVATE
                       glm::glm
                       SFML::Window
                       SFML::Graphics
-                      SFML::Main
+                      #SFML::Main
                       )
 
 add_test(NAME TestLifespanUpdate COMMAND TestLifespanUpdate)

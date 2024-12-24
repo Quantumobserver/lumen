@@ -10,7 +10,7 @@ target_link_libraries(TestEntityManager PRIVATE
                       glm::glm
                       SFML::Window
                       SFML::Graphics
-                      SFML::Main
+                      #SFML::Main
                       )
 
 add_test(NAME TestEntityManager COMMAND TestEntityManager)

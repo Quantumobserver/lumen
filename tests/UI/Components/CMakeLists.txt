@@ -9,7 +9,7 @@ target_link_libraries(TestButton PRIVATE
                       glm::glm
                       SFML::Window
                       SFML::Graphics
-                      SFML::Main
+                      #SFML::Main
                       )
 
 add_test(NAME TestButton COMMAND TestButton)
@@ -26,7 +26,7 @@ target_link_libraries(TestMenu PRIVATE
                       glm::glm
                       SFML::Window
                       SFML::Graphics
-                      SFML::Main
+                      #SFML::Main
                       )
 
 add_test(NAME TestMenu COMMAND TestMenu)
