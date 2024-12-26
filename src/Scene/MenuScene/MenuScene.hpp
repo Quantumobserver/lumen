@@ -1,6 +1,8 @@
 
 #pragma once
 
+#include <LumenDef/ConstexprIf.hpp>
+
 #include <Scene/Scene.hpp>
 #include "MenuLayer/TestUILayer.hpp"
 #include "MenuLayer/TestBackgroundLayer.hpp"
@@ -14,9 +16,9 @@ class MenuScene : public Lumen::Scene::BaseScene {
 private:
         bool m_is_initialized{false};
 public:
-        constexpr MenuScene(sf::RenderWindow *window_ptr,
-                            Lumen::ECS::Entity::EntityManager *entity_manager_ptr,
-                            Lumen::Scene::InterSceneCommunicationData *inter_scene_communication_data) noexcept
+        MenuScene(sf::RenderWindow *window_ptr,
+                  Lumen::ECS::Entity::EntityManager *entity_manager_ptr,
+                  Lumen::Scene::InterSceneCommunicationData *inter_scene_communication_data) noexcept
          : Lumen::Scene::BaseScene{Lumen::Scene::SceneID::MENU,
                                    window_ptr,
                                    entity_manager_ptr,
@@ -36,7 +38,8 @@ public:
         }
 
 
-        constexpr void Update(void) noexcept override
+        CONSTEXPR_IF_SF_RENDER_WINDOW_POLL_EVENT
+        void Update(void) noexcept override
         {
                 assert(this->m_is_initialized);
 
@@ -48,7 +51,9 @@ public:
         constexpr void Render(void) noexcept override
         {
                 assert(this->m_is_initialized);
-                if (Lumen::Scene::BaseScene::m_inter_scene_communication_data->change_scene) {std::cout << "[MenuScene] Render change_scene: true\n";}
+                if (Lumen::Scene::BaseScene::m_inter_scene_communication_data->change_scene) {
+                        //std::cout << "[MenuScene] Render change_scene: true\n";
+                }
         }
 
         constexpr void ChangeToThisScene(Lumen::Scene::ChangeSceneArgs &change_scene_args) noexcept override
@@ -90,14 +95,15 @@ private:
                 //}
         }
 
-        constexpr void InitLayerStack(void) noexcept
+        CONSTEXPR_IF_CXX_23 void InitLayerStack(void) noexcept
         {
                 assert(!this->m_is_initialized);
                 Lumen::Scene::BaseScene::m_layer_stack.PushBackLayer(Lumen::LayerStack::MakeLayer<MenuLayer::TestUILayer>(this));
                 Lumen::Scene::BaseScene::m_layer_stack.PushBackLayer(Lumen::LayerStack::MakeLayer<MenuLayer::TestBackgroundLayer>());
         }
 
-        constexpr void CreateActions(void) noexcept
+        CONSTEXPR_IF_SF_RENDER_WINDOW_POLL_EVENT
+        void CreateActions(void) noexcept
         {
                 assert(this->m_is_initialized);
                 for (std::optional<sf::Event> optional_event = Lumen::Scene::BaseScene::m_window_ptr->pollEvent();
@@ -131,7 +137,7 @@ private:
                 }
         }
 
-        constexpr void SetView(void) noexcept
+        CONSTEXPR_IF_SF_VIEW_GET_VIEW void SetView(void) noexcept
         {
                 auto &window = *Lumen::Scene::BaseScene::m_window_ptr;
                 auto view = window.getView();
@@ -158,7 +164,7 @@ private:
                         //std::cout << "[GamePlayScene] IsWindowCloseActionHappened\n";
                         Lumen::Scene::BaseScene::m_inter_scene_communication_data->running = false;
                         Lumen::Scene::BaseScene::m_action_manager.ResetActionBuffer();
-                        std::cout << "[MenuScene] IsWindowCloseActionHappened\n";
+                        //std::cout << "[MenuScene] IsWindowCloseActionHappened\n";
                 }
         }
 

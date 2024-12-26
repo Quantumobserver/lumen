@@ -1,6 +1,8 @@
 
 #pragma once
 
+#include <LumenDef/ConstexprIf.hpp>
+
 #include "Scene.hpp"
 #include "MenuScene/MenuScene.hpp"
 #include "GamePlayScene/GamePlayScene.hpp"
@@ -122,14 +124,14 @@ public:
         constexpr void Update(void) noexcept
         {
                 assert(this->m_is_initialized);
-                if (this->m_inter_scene_communication_data.change_scene) {std::cout << "[SceneManager] change scene\n";
+                if (this->m_inter_scene_communication_data.change_scene) {//std::cout << "[SceneManager] change scene\n";
                         this->ChangeScene();
                 }
 
                 this->m_current_scene_ptr->Update();
         }
 
-        constexpr void Render(void) noexcept
+        CONSTEXPR_IF_SF_RENDER_WINDOW_DISPLAY void Render(void) noexcept
         {
                 this->m_current_scene_ptr->Render();
                 this->m_window_ptr->display();
