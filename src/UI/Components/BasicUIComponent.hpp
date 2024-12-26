@@ -9,6 +9,7 @@
 #include <cassert>
 #include <string>
 #include <optional>
+#include <string_view>
 
 namespace Lumen {
 namespace UI {
@@ -84,7 +85,7 @@ public:
                 return std::nullopt;
         }
 
-        constexpr virtual std::optional<const char *> GetText(void) const noexcept
+        constexpr virtual std::optional<std::string_view> GetText(void) const noexcept
         {
                 return std::nullopt;
         }
@@ -102,24 +103,25 @@ public:
 
 struct BoundingBox {
         Lumen::Core::Math::Vec2i size;
-        Lumen::Core::Math::Vec2i half_size;
+        //Lumen::Core::Math::Vec2i half_size;
 
         constexpr BoundingBox(void) noexcept = default;
         constexpr BoundingBox(const Lumen::Core::Math::Vec2i &size) noexcept
-        : size{size}, half_size{size / 2} {}
+        : size{size}//, half_size{size / 2}
+          {}
         constexpr BoundingBox(const BoundingBox &other) noexcept = default;
         constexpr BoundingBox &operator=(const BoundingBox &other) noexcept = default;
 };
 
-struct TransformCenter {
-        Lumen::Core::Math::Vec2i center_position;
+// struct TransformCenter {
+//         Lumen::Core::Math::Vec2i center_position;
 
-        constexpr TransformCenter(void) noexcept {}
-        constexpr TransformCenter(const Lumen::Core::Math::Vec2i &center_position) noexcept
-        : center_position{center_position} {}
-        constexpr TransformCenter(const TransformCenter &other) noexcept = default;
-        constexpr TransformCenter &operator=(const TransformCenter &other) noexcept = default;
-};
+//         constexpr TransformCenter(void) noexcept {}
+//         constexpr TransformCenter(const Lumen::Core::Math::Vec2i &center_position) noexcept
+//         : center_position{center_position} {}
+//         constexpr TransformCenter(const TransformCenter &other) noexcept = default;
+//         constexpr TransformCenter &operator=(const TransformCenter &other) noexcept = default;
+// };
 
 struct TransformTopLeft {
         Lumen::Core::Math::Vec2i top_left_position;
@@ -131,19 +133,72 @@ struct TransformTopLeft {
         constexpr TransformTopLeft &operator=(const TransformTopLeft &other) noexcept = default;
 };
 
-constexpr bool IsSelected(const Lumen::UI::Component::TransformCenter &selection_position,
-                          const Lumen::UI::Component::BoundingBox &bounding_box,
-                          const Lumen::UI::Component::TransformCenter &transform_center) noexcept
+struct TransformBottomRight {
+        Lumen::Core::Math::Vec2i bottom_right_position;
+
+        constexpr TransformBottomRight(void) noexcept {}
+        constexpr TransformBottomRight(const Lumen::Core::Math::Vec2i &bottom_right_position) noexcept
+        : bottom_right_position{bottom_right_position} {}
+        constexpr TransformBottomRight(const TransformBottomRight &other) noexcept = default;
+        constexpr TransformBottomRight &operator=(const TransformBottomRight &other) noexcept = default;
+};
+
+struct TransformRectangleArea {
+        Lumen::UI::Component::TransformTopLeft top_left_position;
+        Lumen::UI::Component::TransformBottomRight bottom_right_position;
+
+        constexpr TransformRectangleArea(void) noexcept {}
+        constexpr TransformRectangleArea(const Lumen::UI::Component::TransformTopLeft &top_left_position,
+                                         const Lumen::UI::Component::TransformBottomRight &bottom_right_position) noexcept
+        : top_left_position{top_left_position}, bottom_right_position{bottom_right_position} {}
+
+        constexpr TransformRectangleArea(const Lumen::UI::Component::TransformTopLeft &top_left_position,
+                                         const Lumen::UI::Component::BoundingBox &bounding_box) noexcept
+        : top_left_position{top_left_position},
+          bottom_right_position{top_left_position.top_left_position + bounding_box.size} {}
+
+
+        constexpr TransformRectangleArea(const TransformRectangleArea &other) noexcept = default;
+        constexpr TransformRectangleArea &operator=(const TransformRectangleArea &other) noexcept = default;
+
+        constexpr void Move(const Lumen::Core::Math::Vec2i &offset) noexcept
+        {
+                this->top_left_position.top_left_position += offset;
+                this->bottom_right_position.bottom_right_position += offset;
+        }
+};
+
+struct TransformSelectedPosition {
+        Lumen::Core::Math::Vec2i selected_position;
+
+        constexpr TransformSelectedPosition(void) noexcept {}
+        constexpr TransformSelectedPosition(const Lumen::Core::Math::Vec2i &selected_position) noexcept
+        : selected_position{selected_position} {}
+
+};
+
+constexpr bool IsIncluded(const Lumen::UI::Component::TransformSelectedPosition &selected_position,
+                          const Lumen::UI::Component::TransformRectangleArea &rectangle_area) noexcept
 {
-        Lumen::Core::Math::Vec2i distance = transform_center.center_position - selection_position.center_position;
-
-        distance.x = Lumen::Core::Math::Abs(distance.x);
-        distance.y = Lumen::Core::Math::Abs(distance.y);
-
-        return (distance.x < bounding_box.half_size.x) &&
-               (distance.y < bounding_box.half_size.y);
-
+        return (selected_position.selected_position.x >= rectangle_area.top_left_position.top_left_position.x) &&
+               (selected_position.selected_position.x <= rectangle_area.bottom_right_position.bottom_right_position.x) &&
+               (selected_position.selected_position.y >= rectangle_area.top_left_position.top_left_position.y) &&
+               (selected_position.selected_position.y <= rectangle_area.bottom_right_position.bottom_right_position.y);
 }
+
+// constexpr bool IsSelected(const Lumen::UI::Component::TransformCenter &selection_position,
+//                           const Lumen::UI::Component::BoundingBox &bounding_box,
+//                           const Lumen::UI::Component::TransformCenter &transform_center) noexcept
+// {
+//         Lumen::Core::Math::Vec2i distance = transform_center.center_position - selection_position.center_position;
+
+//         distance.x = Lumen::Core::Math::Abs(distance.x);
+//         distance.y = Lumen::Core::Math::Abs(distance.y);
+
+//         return (distance.x < bounding_box.half_size.x) &&
+//                (distance.y < bounding_box.half_size.y);
+
+// }
 
 } // namespace Component
 } // namespace UI

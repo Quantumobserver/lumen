@@ -24,7 +24,7 @@ void TestMenuCase1(void) noexcept
                 sf::RenderWindow &window;
         } do_button_action_data{i, window};
 
-        auto menu_button_1 = Lumen::UI::Component::Detail::MenuButton{
+        auto menu_button_1 = Lumen::UI::Component::MenuButton{
                 "test", sf::Sprite{},
                 &do_button_action_data,
                 [](void *data, const Lumen::UI::Component::RelativeSelectionAction &relative_selection_action) noexcept
@@ -58,7 +58,7 @@ void TestMenuCase1(void) noexcept
                 }
         };
 
-        auto menu_button_2 = Lumen::UI::Component::Detail::MenuButton{
+        auto menu_button_2 = Lumen::UI::Component::MenuButton{
                 "test", sf::Sprite{},
                 &do_button_action_data,
                 [](void *data, const Lumen::UI::Component::RelativeSelectionAction &relative_selection_action) noexcept
@@ -95,13 +95,13 @@ void TestMenuCase1(void) noexcept
         constexpr const int scale = 2;
 
         auto sub_menu_ptr = std::make_unique<Lumen::UI::Component::Menu>(
-                Lumen::UI::Component::TransformCenter{{400, 300}},
+                Lumen::UI::Component::TransformTopLeft{{400, 300}},
                 Lumen::UI::Component::BoundingBox{{50 * scale, 70 * scale}},
                 Lumen::UI::Component::BoundingBox{{50 * scale, 10 * scale}},
                 &window
         );
 
-        auto menu_button_3 = Lumen::UI::Component::Detail::MenuButton{
+        auto menu_button_3 = Lumen::UI::Component::MenuButton{
                 "test", sf::Sprite{},
                 sub_menu_ptr.get(),
                 [](void *data, const Lumen::UI::Component::RelativeSelectionAction &relative_selection_action) noexcept
@@ -146,7 +146,7 @@ void TestMenuCase1(void) noexcept
 
         };
 
-        auto buttons = std::vector<Lumen::UI::Component::Detail::MenuButton>{
+        auto buttons = std::vector<Lumen::UI::Component::MenuButton>{
                 //std::move(button_1),
                 //std::move(button_2),
         };
@@ -165,7 +165,7 @@ void TestMenuCase1(void) noexcept
                 std::move(buttons),
         };*/
         Lumen::UI::Component::Menu menu{
-                Lumen::UI::Component::TransformCenter{{400, 300}},
+                Lumen::UI::Component::TransformTopLeft{{400, 300}},
                 Lumen::UI::Component::BoundingBox{{50 * scale, 10 * scale}},
                 &window,
                 std::move(buttons),

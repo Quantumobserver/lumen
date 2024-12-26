@@ -28,7 +28,7 @@ void TestButtonCase1(void) noexcept
 
         Lumen::UI::Component::Button button{
                 "test", sf::Sprite{}, Lumen::UI::Component::BoundingBox{{50, 70}},
-                Lumen::UI::Component::TransformCenter{{100, 200}}, &window,
+                Lumen::UI::Component::TransformTopLeft{{100, 200}}, &window,
                 &do_button_action_data, [](void *data) {
                         assert(nullptr != data);
                         DoButtonActionData &do_button_action_data = *static_cast<DoButtonActionData *>(data);
