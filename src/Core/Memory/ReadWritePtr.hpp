@@ -66,7 +66,39 @@ public:
         {
                 return m_pointer;
         }
+
+        constexpr bool operator==(const ReadWritePtr &other) const noexcept
+        {
+                return this->m_pointer == other.m_pointer;
+        }
+
+        constexpr bool operator!=(const ReadWritePtr &other) const noexcept
+        {
+                return this->m_pointer != other.m_pointer;
+        }
+
+        constexpr bool operator==(std::nullptr_t) const noexcept
+        {
+                return nullptr == this->m_pointer;
+        }
+
+        constexpr bool operator!=(std::nullptr_t) const noexcept
+        {
+                return nullptr != this->m_pointer;
+        }
 };
+
+template<typename T>
+constexpr bool operator==(std::nullptr_t, const Lumen::Core::Memory::ReadWritePtr<T> &pointer) noexcept
+{
+        return nullptr == pointer.Get();
+}
+
+template<typename T>
+constexpr bool operator!=(std::nullptr_t, const Lumen::Core::Memory::ReadWritePtr<T> &pointer) noexcept
+{
+        return nullptr != pointer.Get();
+}
 
 } // namespace Memory
 } // namespace Core
