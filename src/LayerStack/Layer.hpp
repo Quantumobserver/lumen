@@ -77,10 +77,10 @@ public:
         }
 
         template<typename T>
-        friend LayerPtr MakeLayer(void) noexcept;
+        friend CONSTEXPR_IF_CXX_23 LayerPtr MakeLayer(void) noexcept;
 
         template<typename T, typename ...Args>
-        friend LayerPtr MakeLayer(Args &&...args) noexcept;
+        friend CONSTEXPR_IF_CXX_23 LayerPtr MakeLayer(Args &&...args) noexcept;
 };
 
 template<typename T>
