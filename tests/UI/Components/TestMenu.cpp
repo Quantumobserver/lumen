@@ -26,7 +26,9 @@ void TestMenuCase1(void) noexcept
 
         auto menu_button_1 = Lumen::UI::Component::Detail::MenuButton{
                 "test", sf::Sprite{},
-                &do_button_action_data, [](void *data, const Lumen::UI::Component::RelativeSelectionAction &relative_selection_action) {
+                &do_button_action_data,
+                [](void *data, const Lumen::UI::Component::RelativeSelectionAction &relative_selection_action) noexcept
+                -> std::optional<Lumen::UI::Component::Menu::SelectedSubMenuItem> {
                         assert(nullptr != data);
 
                         DoButtonActionData &do_button_action_data = *static_cast<DoButtonActionData *>(data);
@@ -51,12 +53,16 @@ void TestMenuCase1(void) noexcept
                                 std::cout << "Button Wheel Scroll\n";
                                 break;
                         }
+
+                        return std::nullopt;
                 }
         };
 
         auto menu_button_2 = Lumen::UI::Component::Detail::MenuButton{
                 "test", sf::Sprite{},
-                &do_button_action_data, [](void *data, const Lumen::UI::Component::RelativeSelectionAction &relative_selection_action) {
+                &do_button_action_data,
+                [](void *data, const Lumen::UI::Component::RelativeSelectionAction &relative_selection_action) noexcept
+                -> std::optional<Lumen::UI::Component::Menu::SelectedSubMenuItem> {
                         assert(nullptr != data);
 
                         DoButtonActionData &do_button_action_data = *static_cast<DoButtonActionData *>(data);
@@ -81,11 +87,64 @@ void TestMenuCase1(void) noexcept
                                 std::cout << "Button Wheel Scroll\n";
                                 break;
                         }
+                        return std::nullopt;
                 }
 
         };
 
-        //auto button_3 = std::move(button_1);
+        constexpr const int scale = 2;
+
+        auto sub_menu_ptr = std::make_unique<Lumen::UI::Component::Menu>(
+                Lumen::UI::Component::TransformCenter{{400, 300}},
+                Lumen::UI::Component::BoundingBox{{50 * scale, 70 * scale}},
+                Lumen::UI::Component::BoundingBox{{50 * scale, 10 * scale}},
+                &window
+        );
+
+        auto menu_button_3 = Lumen::UI::Component::Detail::MenuButton{
+                "test", sf::Sprite{},
+                sub_menu_ptr.get(),
+                [](void *data, const Lumen::UI::Component::RelativeSelectionAction &relative_selection_action) noexcept
+                -> std::optional<Lumen::UI::Component::Menu::SelectedSubMenuItem> {
+                        assert(nullptr != data);
+
+                        Lumen::UI::Component::Menu &sub_menu = *static_cast<Lumen::UI::Component::Menu *>(data);
+
+                        switch (relative_selection_action.selection_action.selection_action_type) {
+                        case Lumen::Action::SelectionAction::SelectionActionTypeTag::NONE:
+                                //std::cout << "Button None\n";
+                                break;
+                        case Lumen::Action::SelectionAction::SelectionActionTypeTag::PRESS:
+                                std::cout << "[MenuButton_3]: Button Pressed\n";
+                                return std::optional<Lumen::UI::Component::Menu::SelectedSubMenuItem>{{
+                                        Lumen::UI::Component::SelectedSubMenuItem::SelectionTypeTag::PRESS,
+                                        Lumen::UI::Component::SelectedSubMenuItem::SpawnSide::RIGHT_SIDE,
+                                        Lumen::UI::Component::SelectedSubMenuItem::SpawnAlignment::TOP,
+                                        Lumen::Core::Memory::ReadWritePtr<Lumen::UI::Component::Menu>{&sub_menu}
+                                }};
+                        case Lumen::Action::SelectionAction::SelectionActionTypeTag::RELEASE:
+                                std::cout << "[MenuButton_3]:Button Released\n";
+                                return std::optional<Lumen::UI::Component::Menu::SelectedSubMenuItem>{};
+                        case Lumen::Action::SelectionAction::SelectionActionTypeTag::CURSOR_MOVEMENT:
+                                return std::optional<Lumen::UI::Component::Menu::SelectedSubMenuItem>{{
+                                        Lumen::UI::Component::SelectedSubMenuItem::SelectionTypeTag::HOVER,
+                                        Lumen::UI::Component::SelectedSubMenuItem::SpawnSide::LEFT_SIDE,
+                                        Lumen::UI::Component::SelectedSubMenuItem::SpawnAlignment::BOTTOM,
+                                        Lumen::Core::Memory::ReadWritePtr<Lumen::UI::Component::Menu>{&sub_menu}
+
+                                }};
+                                /*return std::optional<Lumen::UI::Component::Menu::SelectedSubMenuItem>{
+                                        Lumen::UI::Component::SelectedSubMenuItem::SelectionTypeTag::HOVER,
+                                        Lumen::Core::Memory::ReadWritePtr<Lumen::UI::Component::Menu>{&sub_menu}
+                                };*/
+                        case Lumen::Action::SelectionAction::SelectionActionTypeTag::WHEEL_SCROLL:
+                                std::cout << "Button Wheel Scroll\n";
+                                break;
+                        }
+                        return std::nullopt;
+                }
+
+        };
 
         auto buttons = std::vector<Lumen::UI::Component::Detail::MenuButton>{
                 //std::move(button_1),
@@ -93,16 +152,19 @@ void TestMenuCase1(void) noexcept
         };
         buttons.push_back(std::move(menu_button_1));
         buttons.push_back(std::move(menu_button_2));
+        buttons.push_back(std::move(menu_button_3));
 
-        constexpr const int scale = 2;
-        Lumen::UI::Component::Menu menu{
+        std::vector<std::unique_ptr<Lumen::UI::Component::Menu>> sub_menus{};
+        sub_menus.push_back(std::move(sub_menu_ptr));
+
+        /*Lumen::UI::Component::Menu menu{
                 Lumen::UI::Component::TransformCenter{{400, 300}},
                 Lumen::UI::Component::BoundingBox{{50 * scale, 70 * scale}},
                 Lumen::UI::Component::BoundingBox{{50 * scale, 10 * scale}},
                 &window,
                 std::move(buttons),
-        };
-        /*Lumen::UI::Component::Menu menu{
+        };*/
+        Lumen::UI::Component::Menu menu{
                 Lumen::UI::Component::TransformCenter{{400, 300}},
                 Lumen::UI::Component::BoundingBox{{50 * scale, 10 * scale}},
                 &window,
@@ -112,7 +174,8 @@ void TestMenuCase1(void) noexcept
                         .fixed_spacing_y = 50,
                         .fixed_spacing_footer_y = 100
                 },
-        };*/
+                std::move(sub_menus)
+        };
 
         while (window.isOpen()) {
                 for (std::optional<sf::Event> optional_event = window.pollEvent(); optional_event.has_value(); optional_event = window.pollEvent()) {

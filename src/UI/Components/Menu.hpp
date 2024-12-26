@@ -1,5 +1,6 @@
 #pragma once
 
+#include <Core/Memory/ReadWritePtr.hpp>
 #include "BasicUIComponent.hpp"
 
 #include <cassert>
@@ -14,11 +15,59 @@ namespace Lumen {
 namespace UI {
 namespace Component {
 
+class Menu;
+
+struct SelectedSubMenuItem {
+        enum class SelectionTypeTag {
+                NONE,
+                HOVER,
+                PRESS,
+        };
+        enum class SpawnSide {
+                LEFT_SIDE,
+                RIGHT_SIDE,
+        };
+        enum class SpawnAlignment {
+                TOP,
+                BOTTOM,
+        };
+        SelectionTypeTag selection_type;
+        SpawnSide spawn_side;
+        SpawnAlignment spawn_alignment;
+        Lumen::Core::Memory::ReadWritePtr<Lumen::UI::Component::Menu> sub_menu_ptr;
+
+        // Menu class will set this value
+        Lumen::UI::Component::TransformCenter transform_center_relative_to_menu_top_left;
+
+        constexpr SelectedSubMenuItem(void) noexcept
+        : selection_type{SelectionTypeTag::NONE}, spawn_side{SpawnSide::LEFT_SIDE}, spawn_alignment{SpawnAlignment::TOP} {}
+
+        constexpr SelectedSubMenuItem(SelectionTypeTag selection_type, SpawnSide spawn_side,
+                                      SpawnAlignment spawn_alignment,
+                                      Lumen::Core::Memory::ReadWritePtr<Lumen::UI::Component::Menu> sub_menu_ptr) noexcept
+        : selection_type{selection_type}, spawn_side{spawn_side}, spawn_alignment{spawn_alignment},
+          sub_menu_ptr{sub_menu_ptr} {}
+
+        constexpr bool HasSelectedSubMenu(void) const noexcept
+        {
+                return SelectionTypeTag::NONE != this->selection_type;
+        }
+
+
+        constexpr void Clear(void) noexcept
+        {
+                this->selection_type = SelectionTypeTag::NONE;
+                this->sub_menu_ptr = nullptr;
+        }
+};
+
 namespace Detail {
 
 class MenuButton {
 public:
-        using MenuButtonActionHandler = std::function<void(void *, const Lumen::UI::Component::RelativeSelectionAction &)>;
+        using MenuButtonActionHandler =
+                std::function<
+                        std::optional<Lumen::UI::Component::SelectedSubMenuItem>(void *, const Lumen::UI::Component::RelativeSelectionAction &)>;
 private:
         Lumen::UI::Component::TransformCenter m_transform_center_relative_to_menu_top_left;
         Lumen::UI::Component::TransformTopLeft m_transform_top_left_relative_to_menu_top_left;
@@ -63,11 +112,14 @@ public:
                 return *this;
         }
 
-        constexpr void DoSelectionAction(const Lumen::UI::Component::RelativeSelectionAction &relative_selection_action) noexcept
+        [[nodiscard]] constexpr std::optional<SelectedSubMenuItem>
+        DoSelectionAction(const Lumen::UI::Component::RelativeSelectionAction &relative_selection_action) noexcept
         {
                 if (this->fn_do_menu_button_action) {
-                        this->fn_do_menu_button_action(this->m_do_menu_button_action_data_ptr, relative_selection_action);
+                        return this->fn_do_menu_button_action(this->m_do_menu_button_action_data_ptr,
+                                                              relative_selection_action);
                 }
+                return std::nullopt;
         }
 
         constexpr void SetPosition(const Lumen::UI::Component::TransformCenter &center_position_relative_to_menu_top_left,
@@ -116,6 +168,7 @@ public:
         };
 
         using MenuButtonActionHandler = typename Lumen::UI::Component::Detail::MenuButton::MenuButtonActionHandler;
+        using SelectedSubMenuItem = Lumen::UI::Component::SelectedSubMenuItem;
 
         struct MenuLayout {
                 MenuLayoutTypeTag menu_layout_type;
@@ -150,6 +203,8 @@ private:
         Lumen::UI::Component::BoundingBox m_bounding_box_menu;
         Lumen::UI::Component::BoundingBox m_bounding_box_menu_button;
         std::vector<Lumen::UI::Component::Detail::MenuButton> m_buttons;
+        std::vector<std::unique_ptr<Lumen::UI::Component::Menu> > m_sub_menus;
+        SelectedSubMenuItem m_selected_sub_menu;
 
         MenuLayout m_menu_layout;
         //std::vector<std::unique_ptr<Lumen::UI::Component::Label> > m_lebels;
@@ -166,6 +221,8 @@ public:
              sf::RenderWindow *window_ptr,
              std::vector<Lumen::UI::Component::Detail::MenuButton> &&buttons =
                 std::vector<Lumen::UI::Component::Detail::MenuButton>{},
+             std::vector<std::unique_ptr<Lumen::UI::Component::Menu> > &&sub_menus =
+                std::vector<std::unique_ptr<Lumen::UI::Component::Menu> >{},
              MenuLayoutTypeTag menu_layout_type = MenuLayoutTypeTag::VERTICAL_UNIFORM_DISTRIBUTION
                 ) noexcept
         : Lumen::UI::Component::BasicUIComponent{Lumen::UI::Component::UIComponentTypeTag::MENU, window_ptr},
@@ -173,6 +230,7 @@ public:
           m_transform_top_left{transform_center.center_position - bounding_box_menu.half_size},
           m_bounding_box_menu{bounding_box_menu},
           m_bounding_box_menu_button{bounding_box_menu_button}, m_buttons{std::move(buttons)},
+          m_sub_menus{std::move(sub_menus)},
           m_menu_layout{menu_layout_type}
         {
                 std::cout << "))))))))))))))))))))))))))))\n";
@@ -185,6 +243,8 @@ public:
              sf::RenderWindow *window_ptr,
              std::vector<Lumen::UI::Component::Detail::MenuButton> &&buttons =
                 std::vector<Lumen::UI::Component::Detail::MenuButton>{},
+             std::vector<std::unique_ptr<Lumen::UI::Component::Menu> > &&sub_menus =
+                std::vector<std::unique_ptr<Lumen::UI::Component::Menu> >{},
              MenuLayoutTypeTag menu_layout_type = MenuLayoutTypeTag::VERTICAL_UNIFORM_DISTRIBUTION
                 ) noexcept
         : Lumen::UI::Component::BasicUIComponent{Lumen::UI::Component::UIComponentTypeTag::MENU, window_ptr},
@@ -192,6 +252,7 @@ public:
           m_transform_top_left{transform_top_left},
           m_bounding_box_menu{bounding_box_menu},
           m_bounding_box_menu_button{bounding_box_menu_button}, m_buttons{std::move(buttons)},
+          m_sub_menus{std::move(sub_menus)},
           m_menu_layout{menu_layout_type}
         {
                 std::cout << "_____________________\n";
@@ -203,13 +264,16 @@ public:
              sf::RenderWindow *window_ptr,
              std::vector<Lumen::UI::Component::Detail::MenuButton> &&buttons =
                 std::vector<Lumen::UI::Component::Detail::MenuButton>{},
-             const MenuLayout::VerticalFixedSpacingAutoData &vertical_fixed_spacing_auto_data = {0, 0, 0}
+             const MenuLayout::VerticalFixedSpacingAutoData &vertical_fixed_spacing_auto_data = {0, 0, 0},
+             std::vector<std::unique_ptr<Lumen::UI::Component::Menu> > &&sub_menus =
+                std::vector<std::unique_ptr<Lumen::UI::Component::Menu> >{}
                 ) noexcept
         : Lumen::UI::Component::BasicUIComponent{Lumen::UI::Component::UIComponentTypeTag::MENU, window_ptr},
           m_transform_center{transform_center},
           //m_transform_top_left{transform_center.center_position - bounding_box_menu.half_size},
           //m_bounding_box_menu{bounding_box_menu},
           m_bounding_box_menu_button{bounding_box_menu_button}, m_buttons{std::move(buttons)},
+          m_sub_menus{std::move(sub_menus)},
           m_menu_layout{vertical_fixed_spacing_auto_data}
         {
                 assert(MenuLayoutTypeTag::VERTICAL_FIXED_SPACING_AUTO == this->m_menu_layout.menu_layout_type);
@@ -275,6 +339,29 @@ public:
         {
                 this->DrawMenuBoundingBox();
                 this->DrawMenuButtonBoundingBoxForEach();
+                this->DrawSelectedSubMenu();
+        }
+
+        constexpr sf::Color GetColorWhenNotSelected(void) const noexcept
+        {
+                return sf::Color::Green;
+        }
+
+        constexpr void SetColor(const sf::Color &color) noexcept
+        {
+                this->m_outline_color_menu = color;
+        }
+
+        constexpr void UnSelectSubMenu(void) noexcept
+        {
+                //assert(nullptr != this->m_selected_sub_menu.sub_menu_ptr);
+                if (!this->m_selected_sub_menu.HasSelectedSubMenu()) {
+                        return;
+                }
+                std::cout << "UnSelectSubMenu: " << __LINE__ << "\n";
+                const auto sub_menu_color_unselected = this->m_selected_sub_menu.sub_menu_ptr->GetColorWhenNotSelected();
+                this->m_selected_sub_menu.sub_menu_ptr->SetColor(sub_menu_color_unselected);
+                this->m_selected_sub_menu.Clear();
         }
 
         constexpr void DrawMenuBoundingBox(void) noexcept 
@@ -332,6 +419,12 @@ public:
                 this->m_window_ptr->draw(m_rectangle_shape);
         }
 
+        constexpr void DrawSelectedSubMenu(void) noexcept
+        {
+                if (Lumen::UI::Component::SelectedSubMenuItem::SelectionTypeTag::NONE != this->m_selected_sub_menu.selection_type) {
+                        this->m_selected_sub_menu.sub_menu_ptr->Render();
+                }
+        }
 
         constexpr void DoWindowResizeAction(const Lumen::Core::Math::Vec2i &window_new_size) noexcept override
         {
@@ -424,10 +517,21 @@ public:
         constexpr void DoSelectionAction(
                 const Lumen::UI::Component::RelativeSelectionAction &relative_selection_action_to_parent) noexcept override
         {
+                if (this->m_selected_sub_menu.HasSelectedSubMenu() &&
+                    this->m_selected_sub_menu.sub_menu_ptr->IsMenuSelected(relative_selection_action_to_parent)) {
+                        this->m_selected_sub_menu.sub_menu_ptr->DoSelectionAction(relative_selection_action_to_parent);
+                        return;
+                }
+
                 if (!this->IsMenuSelected(relative_selection_action_to_parent)) {
                         this->m_outline_color_menu = sf::Color::Green;
                         for (auto iterator = this->m_buttons.begin(); iterator != this->m_buttons.end(); ++iterator) {
                                 iterator->SetColor(sf::Color::Blue);
+                        }
+                        if (Lumen::UI::Component::SelectedSubMenuItem::SelectionTypeTag::HOVER == this->m_selected_sub_menu.selection_type) {
+                                //this->m_selected_sub_menu.Clear();
+                                std::cout << "UnSelectSubMenu: " << __LINE__ << "\n";
+                                this->UnSelectSubMenu();
                         }
                         return;
                 }
@@ -439,17 +543,119 @@ public:
                         this->m_transform_top_left.top_left_position),
                 };
 
+                bool is_selection_handled{false};
                 for (auto &menu_button : this->m_buttons) {
         
-                        if (!this->IsMenuButtonSelected(relative_selection_to_menu, menu_button)) {
+                        if (is_selection_handled || (!this->IsMenuButtonSelected(relative_selection_to_menu, menu_button))) {
                                 menu_button.SetColor(sf::Color::Blue);
                                 continue;
                         }
+
                         menu_button.SetColor(sf::Color::Yellow);
-                        menu_button.DoSelectionAction(relative_selection_to_menu);
+                        auto selected_sub_menu = menu_button.DoSelectionAction(relative_selection_to_menu);
+                        if (selected_sub_menu.has_value()) {
+                                this->m_selected_sub_menu = selected_sub_menu.value();
+                                this->SetSelectedSubMenuPosition(menu_button);
+                        } else {
+                                //this->m_selected_sub_menu.Clear();
+                                std::cout << "UnSelectSubMenu: " << __LINE__ << "\n";
+                                this->UnSelectSubMenu();
+                        }
+                        is_selection_handled = true;
+
+                }
+
+                if (is_selection_handled) {
+                        return;
+                }
+                //this->m_selected_sub_menu.Clear();
+                std::cout << "UnSelectSubMenu: " << __LINE__ << "\n";
+                this->UnSelectSubMenu();
+        }
+
+private:
+        static constexpr int ComputeSubMenuCenterPositionXValue(
+                const Lumen::UI::Component::Menu::SelectedSubMenuItem::SpawnSide spawn_side,
+                const Lumen::UI::Component::TransformTopLeft &selected_menu_botton_top_left_transform,
+                const Lumen::UI::Component::BoundingBox &selected_menu_button_bounding_box,
+                const Lumen::UI::Component::BoundingBox &sub_menu_bounding_box
+        ) noexcept 
+        {
+                constexpr const int SUB_MENU_OFFSET_X = 3;
+                switch (spawn_side) {
+                case Lumen::UI::Component::SelectedSubMenuItem::SpawnSide::RIGHT_SIDE:
+                        return selected_menu_botton_top_left_transform.top_left_position.x +
+                               selected_menu_button_bounding_box.size.x +
+                               sub_menu_bounding_box.half_size.x -
+                               SUB_MENU_OFFSET_X ;
+                case Lumen::UI::Component::SelectedSubMenuItem::SpawnSide::LEFT_SIDE:
+                        return selected_menu_botton_top_left_transform.top_left_position.x -
+                               sub_menu_bounding_box.half_size.x +
+                               SUB_MENU_OFFSET_X ;
+                }
+
+                std::abort();
+        }
+
+        constexpr int ComputeSelectedSubMenuCenterYPosition(
+                const Lumen::UI::Component::SelectedSubMenuItem::SpawnAlignment spawn_alignment,
+                const Lumen::UI::Component::TransformTopLeft &selected_menu_botton_top_left_transform,
+                const Lumen::UI::Component::BoundingBox &selected_menu_button_bounding_box,
+                const Lumen::UI::Component::BoundingBox &sub_menu_bounding_box
+        ) noexcept
+        {
+                switch (spawn_alignment) {
+                case Lumen::UI::Component::SelectedSubMenuItem::SpawnAlignment::TOP:
+                        return selected_menu_botton_top_left_transform.top_left_position.y +
+                               sub_menu_bounding_box.half_size.y;
+                case Lumen::UI::Component::SelectedSubMenuItem::SpawnAlignment::BOTTOM:
+                        return selected_menu_botton_top_left_transform.top_left_position.y +
+                               selected_menu_button_bounding_box.size.y -
+                               sub_menu_bounding_box.half_size.y;
                 }
         }
 
+
+        constexpr void SetSelectedSubMenuPosition(const Lumen::UI::Component::Detail::MenuButton &menu_button) noexcept
+        {
+                const auto &menu_button_top_left_transform = menu_button.GetTopLeftTransformRelativeToMenuTopLeft();
+                //const auto &menu_button_top_left_position = menu_button_top_left_transform.top_left_position;
+
+                const auto &sub_menu_bounding_box = this->m_selected_sub_menu.sub_menu_ptr->GetMenuBoundingBox();
+
+                const Lumen::UI::Component::TransformCenter sub_menu_center_position_relative = {{
+                        this->ComputeSubMenuCenterPositionXValue(
+                                this->m_selected_sub_menu.spawn_side,
+                                menu_button_top_left_transform,
+                                this->m_bounding_box_menu_button,
+                                sub_menu_bounding_box
+                        ),
+                        this->ComputeSelectedSubMenuCenterYPosition(
+                                this->m_selected_sub_menu.spawn_alignment,
+                                menu_button_top_left_transform,
+                                this->m_bounding_box_menu_button,
+                                sub_menu_bounding_box
+                        ),
+                }};
+
+                const auto sub_menu_center_position = 
+                        this->m_transform_top_left.top_left_position + sub_menu_center_position_relative.center_position;
+
+                this->m_selected_sub_menu.transform_center_relative_to_menu_top_left = sub_menu_center_position;
+
+                this->m_selected_sub_menu.sub_menu_ptr->SetPosition(
+                        this->m_selected_sub_menu.transform_center_relative_to_menu_top_left.center_position
+                );
+
+        }
+
+
+        constexpr const Lumen::UI::Component::BoundingBox &GetMenuBoundingBox(void) const noexcept
+        {
+                return this->m_bounding_box_menu;
+        }
+
+public:
         constexpr void AddMenuButton(Lumen::UI::Component::Detail::MenuButton &&menu_button) noexcept
         {
                 this->m_buttons.push_back(std::move(menu_button));
@@ -473,6 +679,7 @@ public:
                 this->m_bounding_box_menu.size = size;
                 this->m_bounding_box_menu.half_size = size / 2;
         }
+
         //constexpr virtual void SetText([[maybe_unused]]std::string &&text) noexcept {}
         //constexpr virtual void SetIcon([[maybe_unused]]const sf::Sprite &sprite) noexcept {}
 
