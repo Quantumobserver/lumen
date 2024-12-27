@@ -108,8 +108,8 @@ private:
         {
                 assert(!this->m_is_initialized);
                 // TODO: LoadInitConfig from json file
-                this->m_config.window.video_mode.width = 800;
-                this->m_config.window.video_mode.height = 500;
+                this->m_config.window.video_mode.width = 1200;
+                this->m_config.window.video_mode.height = 800;
                 this->m_config.window.title = "Lumen";
         }
 

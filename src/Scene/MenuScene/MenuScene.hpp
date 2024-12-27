@@ -54,6 +54,9 @@ public:
                 if (Lumen::Scene::BaseScene::m_inter_scene_communication_data->change_scene) {
                         //std::cout << "[MenuScene] Render change_scene: true\n";
                 }
+                for (auto &layer : this->m_layer_stack) {
+                        layer->Render();
+                }
         }
 
         constexpr void ChangeToThisScene(Lumen::Scene::ChangeSceneArgs &change_scene_args) noexcept override
