@@ -205,34 +205,33 @@ constexpr std::size_t CountAliveNeighbors(
 
         std::size_t count{0};
 
-        count += cellular_automata_data.At(((y - 1) % height) * width + ((x - 1) % width)) ? 1 : 0;
-        count += cellular_automata_data.At(((y - 1) % height) * width + ((x) % width)) ? 1 : 0;
-        count += cellular_automata_data.At(((y - 1) % height) * width + ((x + 1) % width)) ? 1 : 0;
+        // count += cellular_automata_data.At(((y - 1) % height) * width + ((x - 1) % width)) ? 1 : 0;
+        // count += cellular_automata_data.At(((y - 1) % height) * width + x) ? 1 : 0;
+        // count += cellular_automata_data.At(((y - 1) % height) * width + ((x + 1) % width)) ? 1 : 0;
 
-        count += cellular_automata_data.At(((y) % height) * width + ((x - 1) % width)) ? 1 : 0;
-        count += cellular_automata_data.At(((y) % height) * width + ((x + 1) % width)) ? 1 : 0;
+        // count += cellular_automata_data.At(y * width + ((x - 1) % width)) ? 1 : 0;
+        // count += cellular_automata_data.At(y * width + ((x + 1) % width)) ? 1 : 0;
 
-        count += cellular_automata_data.At(((y + 1) % height) * width + ((x - 1) % width)) ? 1 : 0;
-        count += cellular_automata_data.At(((y + 1) % height) * width + ((x) % width)) ? 1 : 0;
-        count += cellular_automata_data.At(((y + 1) % height) * width + ((x + 1) % width)) ? 1 : 0;
-        // {
-        //         count += cellular_automata_data.At(top_row_index) ? 1 : 0;
-        //         count += cellular_automata_data.At(top_row_index + 1) ? 1 : 0;
-        //         count += cellular_automata_data.At(top_row_index + 2) ? 1 : 0;
-        // }
+        // count += cellular_automata_data.At(((y + 1) % height) * width + ((x - 1) % width)) ? 1 : 0;
+        // count += cellular_automata_data.At(((y + 1) % height) * width + x) ? 1 : 0;
+        // count += cellular_automata_data.At(((y + 1) % height) * width + ((x + 1) % width)) ? 1 : 0;
 
-        // {
-        //         std::size_t middle_row_index = ((y - 1) * width) + (x);
-        //         count += cellular_automata_data.At(middle_row_index) ? 1 : 0;
-        //         count += cellular_automata_data.At(middle_row_index + 2) ? 1 : 0;
-        // }
+        std::size_t y_minus_1 = (y - 1) % height;
+        std::size_t y_plus_1 = (y + 1) % height;
+        std::size_t x_minus_1 = (x - 1) % width;
+        std::size_t x_plus_1 = (x + 1) % width;
 
-        // {
-        //         std::size_t bottom_row_index = ((y + 1) * width) + (x - 1);
-        //         count += cellular_automata_data.At(bottom_row_index) ? 1 : 0;
-        //         count += cellular_automata_data.At(bottom_row_index + 1) ? 1 : 0;
-        //         count += cellular_automata_data.At(bottom_row_index + 2) ? 1 : 0;
-        // }
+        count += cellular_automata_data.At(y_minus_1 * width + x_minus_1);
+        count += cellular_automata_data.At(y_minus_1 * width + x);
+        count += cellular_automata_data.At(y_minus_1 * width + x_plus_1);
+
+        count += cellular_automata_data.At(y * width + x_minus_1);
+        count += cellular_automata_data.At(y * width + x_plus_1);
+
+        count += cellular_automata_data.At(y_plus_1 * width + x_minus_1);
+        count += cellular_automata_data.At(y_plus_1 * width + x);
+        count += cellular_automata_data.At(y_plus_1 * width + x_plus_1);
+
 
         return count;
 }
@@ -246,21 +245,21 @@ constexpr void UpdateASingleCellInCellularAutomata(
         std::size_t num_alive_neighbors = 
                 Lumen::Utility::ProceduralContentGeneration::CountAliveNeighbors(cellular_automata_data, x, y);
         
-        // if (num_alive_neighbors < death_limit) {
-        //         cellular_automata_data.At(x, y) = false;
-        // } else if (num_alive_neighbors > birth_limit) {
-        //         cellular_automata_data.At(x, y) = true;
-        // }
-
-        if (cellular_automata_data.At(x, y)) {
-                if (num_alive_neighbors < death_limit) {
-                        cellular_automata_data.At(x, y) = false;
-                }
-        } else {
-                if (num_alive_neighbors > birth_limit) {
-                        cellular_automata_data.At(x, y) = true;
-                }
+        if (num_alive_neighbors < death_limit) {
+                cellular_automata_data.At(x, y) = false;
+        } else if (num_alive_neighbors > birth_limit) {
+                cellular_automata_data.At(x, y) = true;
         }
+
+        // if (cellular_automata_data.At(x, y)) {
+        //         if (num_alive_neighbors < death_limit) {
+        //                 cellular_automata_data.At(x, y) = false;
+        //         }
+        // } else {
+        //         if (num_alive_neighbors > birth_limit) {
+        //                 cellular_automata_data.At(x, y) = true;
+        //         }
+        // }
         
 }
 
