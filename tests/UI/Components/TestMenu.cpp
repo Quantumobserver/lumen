@@ -6,6 +6,7 @@
 #include <SFML/Graphics/RenderWindow.hpp>
 
 #include <iostream>
+#include <chrono>
 
 #include <SFML/Window/Window.hpp>
 #include <SFML/Window/Keyboard.hpp>
@@ -177,6 +178,7 @@ void TestMenuCase1(void) noexcept
                 std::move(sub_menus)
         };
 
+        auto last_update_time_point = std::chrono::high_resolution_clock::now();
         while (window.isOpen()) {
                 for (std::optional<sf::Event> optional_event = window.pollEvent(); optional_event.has_value(); optional_event = window.pollEvent()) {
                         sf::Event &event = optional_event.value();
@@ -238,12 +240,18 @@ void TestMenuCase1(void) noexcept
                 menu.Render();
                 window.display();
 
+                const auto current_time_point = std::chrono::high_resolution_clock::now();
+                //const std::chrono::duration<float> fp_ms
+                const auto delta_time = std::chrono::duration<float>{current_time_point - last_update_time_point}.count();
+                last_update_time_point = current_time_point;
+                menu.Update(delta_time);
+                
                 if (!action_manager.IsSelectionActionHappened()) {
                         continue;
                 }
                 const auto &selection_action = action_manager.GetSelectionAction();
                 menu.DoSelectionAction({selection_action, selection_action.position});
-                menu.Update({0, 0});
+
 
                 if (2 == i) {
                         menu.SetPosition({std::abs(i) * 100, std::abs(i) * 100});

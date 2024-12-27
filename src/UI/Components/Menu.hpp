@@ -39,6 +39,8 @@ struct SelectedSubMenuItem {
         Lumen::Core::Memory::ReadWritePtr<Lumen::UI::Component::Menu> sub_menu_ptr;
 
         // Menu class will set this value
+        bool is_selected_in_last_update{true};
+        float remain_time_in_second{0.0f};
         Lumen::UI::Component::TransformRectangleArea transform_rectangle_area;
 
         constexpr SelectedSubMenuItem(void) noexcept
@@ -48,7 +50,7 @@ struct SelectedSubMenuItem {
                                       SpawnAlignment spawn_alignment,
                                       Lumen::Core::Memory::ReadWritePtr<Lumen::UI::Component::Menu> sub_menu_ptr) noexcept
         : selection_type{selection_type}, spawn_side{spawn_side}, spawn_alignment{spawn_alignment},
-          sub_menu_ptr{sub_menu_ptr} {}
+          sub_menu_ptr{sub_menu_ptr}, remain_time_in_second{GetRemainDurationInSecond()} {}
 
         constexpr bool HasSelectedSubMenu(void) const noexcept
         {
@@ -60,6 +62,11 @@ struct SelectedSubMenuItem {
         {
                 this->selection_type = SelectionTypeTag::NONE;
                 this->sub_menu_ptr = nullptr;
+        }
+
+        static constexpr float GetRemainDurationInSecond(void) noexcept
+        {
+                return 0.25f;
         }
 };
 
@@ -294,9 +301,20 @@ public:
                 this->InitMenuButtonPosition();
         }
 
-        constexpr void Update(const Lumen::Core::Math::Vec2i &position_move_offset) noexcept override
+        constexpr void Update(float delta_time) noexcept override
         {
-                this->Move(position_move_offset);
+                if (!this->m_selected_sub_menu.HasSelectedSubMenu() || 
+                    this->m_selected_sub_menu.is_selected_in_last_update) {
+                        return;
+                }
+
+std::cout << "Update: " << __LINE__ << ": delta_time=" << delta_time
+          << ", this->m_selected_sub_menu.remain_time_in_second="
+          << this->m_selected_sub_menu.remain_time_in_second << "\n";
+                this->m_selected_sub_menu.remain_time_in_second -= delta_time;
+                if (this->m_selected_sub_menu.remain_time_in_second <= 0.0f) {
+                        this->UnSelectSubMenu();
+                }
         }
 
         constexpr void Render(void) noexcept override
@@ -322,7 +340,7 @@ public:
                 if (!this->m_selected_sub_menu.HasSelectedSubMenu()) {
                         return;
                 }
-                std::cout << "UnSelectSubMenu: " << __LINE__ << "\n";
+                //std::cout << "UnSelectSubMenu: " << __LINE__ << "\n";
                 const auto sub_menu_color_unselected = this->m_selected_sub_menu.sub_menu_ptr->GetColorWhenNotSelected();
                 this->m_selected_sub_menu.sub_menu_ptr->SetColor(sub_menu_color_unselected);
                 this->m_selected_sub_menu.Clear();
@@ -471,12 +489,19 @@ private:
                 );
         }
 
+        constexpr void SubMenuIsNotSelectedCurrently(void) noexcept
+        {
+                this->m_selected_sub_menu.is_selected_in_last_update = false;
+                this->m_selected_sub_menu.remain_time_in_second = SelectedSubMenuItem::GetRemainDurationInSecond();
+        }
+
 public:
         constexpr void DoSelectionAction(
                 const Lumen::UI::Component::RelativeSelectionAction &relative_selection_action_to_parent) noexcept override
         {
                 if (this->m_selected_sub_menu.HasSelectedSubMenu() &&
                     this->m_selected_sub_menu.sub_menu_ptr->IsMenuSelected(relative_selection_action_to_parent)) {
+                        this->m_selected_sub_menu.is_selected_in_last_update = true;
                         this->m_selected_sub_menu.sub_menu_ptr->DoSelectionAction(relative_selection_action_to_parent);
                         return;
                 }
@@ -489,7 +514,7 @@ public:
                         if (Lumen::UI::Component::SelectedSubMenuItem::SelectionTypeTag::HOVER == this->m_selected_sub_menu.selection_type) {
                                 //this->m_selected_sub_menu.Clear();
                                 std::cout << "UnSelectSubMenu: " << __LINE__ << "\n";
-                                this->UnSelectSubMenu();
+                                this->SubMenuIsNotSelectedCurrently();
                         }
                         return;
                 }
@@ -517,7 +542,7 @@ public:
                         } else {
                                 //this->m_selected_sub_menu.Clear();
                                 std::cout << "UnSelectSubMenu: " << __LINE__ << "\n";
-                                this->UnSelectSubMenu();
+                                this->SubMenuIsNotSelectedCurrently();
                         }
                         is_selection_handled = true;
 
@@ -527,8 +552,8 @@ public:
                         return;
                 }
                 //this->m_selected_sub_menu.Clear();
-                std::cout << "UnSelectSubMenu: " << __LINE__ << "\n";
-                this->UnSelectSubMenu();
+                //std::cout << "UnSelectSubMenu: " << __LINE__ << "\n";
+                this->SubMenuIsNotSelectedCurrently();
         }
 
 private:

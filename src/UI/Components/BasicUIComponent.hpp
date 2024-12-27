@@ -63,7 +63,7 @@ public:
         constexpr virtual ~BasicUIComponent(void) noexcept {}
 
         constexpr virtual void Init(void) noexcept = 0;
-        constexpr virtual void Update(const Lumen::Core::Math::Vec2i &offset) noexcept = 0;
+        constexpr virtual void Update(float delta_time) noexcept = 0;
         constexpr virtual void Render(void) noexcept = 0;
         constexpr virtual void DoWindowResizeAction(const Lumen::Core::Math::Vec2i &window_new_size) noexcept = 0;
         constexpr virtual void DoSelectionAction(const Lumen::UI::Component::RelativeSelectionAction &selection_action) noexcept = 0;
