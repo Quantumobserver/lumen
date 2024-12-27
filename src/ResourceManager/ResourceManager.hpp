@@ -5,6 +5,7 @@
 #include <SFML/Graphics/Texture.hpp>
 #include <SFML/Graphics/Sprite.hpp>
 #include <SFML/Graphics/Rect.hpp>
+#include <SFML/Graphics/Font.hpp>
 #include "ResourceDef.hpp"
 
 #include <cassert>
@@ -19,13 +20,12 @@ class ResourceManager {
 private:
         bool m_is_initialized{false};
         std::vector<sf::Texture> m_textures;
-        //std::vector<sf::Font> m_fonts;
+        std::vector<sf::Font> m_fonts;
         std::vector<sf::Sprite> m_sprites;
 public:
         CONSTEXPR_IF_CXX_20 ResourceManager(void) noexcept = default;
         constexpr ResourceManager(const ResourceManager &) noexcept = delete;
-        CONSTEXPR_IF_CXX_20 ResourceManager(ResourceManager &&other) noexcept
-         : m_textures{std::move(other.m_textures)} {}
+        CONSTEXPR_IF_CXX_20 ResourceManager(ResourceManager &&other) noexcept = default;
 
         constexpr void Init(void) noexcept
         {
@@ -33,6 +33,7 @@ public:
                         return;
                 }
                 this->m_textures.resize(static_cast<std::size_t>(Lumen::ResourceManager::TextureID::NUMBER_OF_TEXTURES));
+                this->m_fonts.resize(static_cast<std::size_t>(Lumen::ResourceManager::FontID::NUMBER_OF_FONT));
                 this->m_sprites.resize(static_cast<std::size_t>(Lumen::ResourceManager::SpriteID::NUMBER_OF_SPRITES));
                 this->m_is_initialized = true;
         }
@@ -96,6 +97,37 @@ public:
                 assert(this->m_is_initialized);
                 return this->m_sprites[static_cast<std::size_t>(sprite_id)];
         }
+
+        CONSTEXPR_IF_CXX_20
+        void LoadFontFromFile(const std::string &file_name, Lumen::ResourceManager::FontID font_id)
+        {
+                sf::Font font;
+                bool is_succeed = font.openFromFile(file_name);
+                assert(is_succeed);
+                this->AddFont(std::move(font), font_id);
+        }
+
+        CONSTEXPR_IF_CXX_20
+        void AddFont(sf::Font &&font, Lumen::ResourceManager::FontID font_id) noexcept
+        {
+                assert(this->m_is_initialized);
+                this->m_fonts[static_cast<std::size_t>(font_id)] = std::move(font);
+        }
+
+        CONSTEXPR_IF_CXX_20
+        const sf::Font &GetFont(const Lumen::ResourceManager::FontID font_id) const noexcept
+        {
+                assert(this->m_is_initialized);
+                return this->m_fonts[static_cast<std::size_t>(font_id)];
+        }
+
+        CONSTEXPR_IF_CXX_20
+        sf::Font &GetFont(const Lumen::ResourceManager::FontID font_id) noexcept
+        {
+                assert(this->m_is_initialized);
+                return this->m_fonts[static_cast<std::size_t>(font_id)];
+        }
+
 
         // ~ResourceManager();
 };

@@ -37,9 +37,12 @@ set(DEPENDENCIES_DIR ${CMAKE_CURRENT_SOURCE_DIR}/Dependencies)
 
 set(LUMEN_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src)
 
+add_subdirectory(src)
+
+# Copy assets to build directory
+file(COPY ${CMAKE_SOURCE_DIR}/Assets DESTINATION ${CMAKE_BINARY_DIR}/src)
+
 if (LUMEN_BUILD_TESTS)
         include(CTest)
         add_subdirectory(tests)
 endif ()
-
-add_subdirectory(src)

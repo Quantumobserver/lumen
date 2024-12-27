@@ -20,6 +20,7 @@ private:
         using this_t = SceneManager;
 
         sf::RenderWindow *m_window_ptr;
+        Lumen::ResourceManager::ResourceManager *m_resource_manager_ptr;
         Lumen::ECS::Entity::EntityManager *m_entity_manager_ptr;
 
         Lumen::Scene::InterSceneCommunicationData m_inter_scene_communication_data;
@@ -48,12 +49,14 @@ private:
                 switch (scene_id) {
                 case Lumen::Scene::SceneID::MENU: {
                         return std::make_unique<Lumen::Scene::MenuScene>(this->m_window_ptr,
+                                                                         this->m_resource_manager_ptr,
                                                                          this->m_entity_manager_ptr,
                                                                          &this->m_inter_scene_communication_data);
                 }
                 
                 case Lumen::Scene::SceneID::GAME_PLAY:
                         return std::make_unique<Lumen::Scene::GamePlayScene>(this->m_window_ptr,
+                                                                             this->m_resource_manager_ptr, 
                                                                              this->m_entity_manager_ptr,
                                                                              &this->m_inter_scene_communication_data);
 

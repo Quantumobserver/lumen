@@ -17,10 +17,12 @@ private:
         bool m_is_initialized{false};
 public:
         MenuScene(sf::RenderWindow *window_ptr,
+                  Lumen::ResourceManager::ResourceManager *resource_manager,
                   Lumen::ECS::Entity::EntityManager *entity_manager_ptr,
                   Lumen::Scene::InterSceneCommunicationData *inter_scene_communication_data) noexcept
          : Lumen::Scene::BaseScene{Lumen::Scene::SceneID::MENU,
                                    window_ptr,
+                                   resource_manager,
                                    entity_manager_ptr,
                                    inter_scene_communication_data},
            m_is_initialized{false} {}
