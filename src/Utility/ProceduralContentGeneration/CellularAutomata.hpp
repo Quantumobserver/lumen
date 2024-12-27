@@ -4,8 +4,9 @@
 #include <Core/Memory/ReadWritePtr.hpp>
 #include <Utility/Random/Lehmer.hpp>
 
+#include "Grid.hpp"
+
 #include <cstddef>
-#include <utility>
 
 #include <iostream>
 
@@ -13,169 +14,10 @@ namespace Lumen {
 namespace Utility {
 namespace ProceduralContentGeneration {
 
-template<typename T>
-class CellularAutomataData {
-private:
-
-        class CellularAutomataDataIterator {
-        private:
-                Lumen::Core::Memory::ReadWritePtr<T> m_data_ptr;
-        public:
-                constexpr CellularAutomataDataIterator(Lumen::Core::Memory::ReadWritePtr<T> data_ptr) noexcept
-                : m_data_ptr{std::move(data_ptr)} {}
-
-                constexpr CellularAutomataDataIterator(const CellularAutomataDataIterator &) noexcept = default;
-                constexpr CellularAutomataDataIterator(CellularAutomataDataIterator &&) noexcept = default;
-
-                constexpr CellularAutomataDataIterator &operator=(const CellularAutomataDataIterator &) noexcept = default;
-                constexpr CellularAutomataDataIterator &operator=(CellularAutomataDataIterator &&) noexcept = default;
-
-                constexpr T &operator*(void) noexcept
-                {
-                        return *this->m_data_ptr.Get();
-                }
-
-                constexpr const T &operator*(void) const noexcept
-                {
-                        return *this->m_data_ptr.Get();
-                }
-
-                constexpr T *operator->(void) noexcept
-                {
-                        return this->m_data_ptr.Get();
-                }
-
-                constexpr const T *operator->(void) const noexcept
-                {
-                        return this->m_data_ptr.Get();
-                }
-
-                constexpr CellularAutomataDataIterator &operator++(void) noexcept
-                {
-                        this->m_data_ptr = this->m_data_ptr.Get() + 1;
-                        return *this;
-                }
-
-                friend constexpr bool operator==(const CellularAutomataDataIterator &lhs,
-                                                 const CellularAutomataDataIterator &rhs) noexcept
-                {
-                        return lhs.m_data_ptr == rhs.m_data_ptr;
-                }
-
-                friend constexpr bool operator!=(const CellularAutomataDataIterator &lhs,
-                                                 const CellularAutomataDataIterator &rhs) noexcept
-                {
-                        return lhs.m_data_ptr != rhs.m_data_ptr;
-                }
-        };
-
-        Lumen::Core::Memory::ReadWritePtr<T> m_data_ptr;
-        std::size_t m_width;
-        std::size_t m_height;
-
-public:
-        constexpr CellularAutomataData(Lumen::Core::Memory::ReadWritePtr<T> data_ptr,
-                                       std::size_t width, std::size_t height) noexcept
-        : m_data_ptr{std::move(data_ptr)}, m_width{width}, m_height{height} {}
-
-        template<std::size_t WIDTH, std::size_t HEIGHT>
-        constexpr CellularAutomataData(T (&array_2d)[WIDTH][HEIGHT]) noexcept
-        : m_data_ptr{&(array_2d[0][0])}, m_width{WIDTH}, m_height{HEIGHT} {}
-
-        constexpr CellularAutomataData(const CellularAutomataData &) noexcept = default;
-        constexpr CellularAutomataData(CellularAutomataData &&) noexcept = default;
-
-        constexpr CellularAutomataData &operator=(const CellularAutomataData &) noexcept = default;
-        constexpr CellularAutomataData &operator=(CellularAutomataData &&) noexcept = default;
-
-        constexpr T &At(std::size_t x, std::size_t y) noexcept
-        {
-                assert(x < this->m_width && y < this->m_height);
-                return this->m_data_ptr.Get()[y * this->m_width + x];
-        }
-
-        constexpr const T &At(std::size_t x, std::size_t y) const noexcept
-        {
-                assert(x < this->m_width && y < this->m_height);
-                return this->m_data_ptr.Get()[y * this->m_width + x];
-        }
-
-        constexpr T &At(std::size_t index) noexcept
-        {
-                assert(index < this->m_width * this->m_height);
-                return this->m_data_ptr.Get()[index];
-        }
-
-        constexpr const T &At(std::size_t index) const noexcept
-        {
-                assert(index < this->m_width * this->m_height);
-                return this->m_data_ptr.Get()[index];
-        }
-
-        constexpr std::size_t GetWidth(void) const noexcept
-        {
-                return this->m_width;
-        }
-
-        constexpr std::size_t GetHeight(void) const noexcept
-        {
-                return this->m_height;
-        }
-
-        constexpr std::size_t GetSize(void) const noexcept
-        {
-                return this->m_width * this->m_height;
-        }
-
-        constexpr T *GetData(void) noexcept
-        {
-                return this->m_data_ptr.Get();
-        }
-
-        constexpr const T *GetData(void) const noexcept
-        {
-                return this->m_data_ptr.Get();
-        }
-
-        constexpr void SetData(T *data_ptr, std::size_t width, std::size_t height) noexcept
-        {
-                this->m_data_ptr = data_ptr;
-                this->m_width = width;
-                this->m_height = height;
-        }
-
-        constexpr void SetData(Lumen::Core::Memory::ReadWritePtr<T> data_ptr,
-                               std::size_t width, std::size_t height) noexcept
-        {
-                this->m_data_ptr = data_ptr;
-                this->m_width = width;
-                this->m_height = height;
-        }
-
-        constexpr CellularAutomataDataIterator begin(void) noexcept
-        {
-                return CellularAutomataDataIterator{this->m_data_ptr};
-        }
-
-        constexpr CellularAutomataDataIterator end(void) noexcept
-        {
-                return CellularAutomataDataIterator{this->m_data_ptr.Get() + this->m_width * this->m_height};
-        }
-
-        constexpr const CellularAutomataDataIterator begin(void) const noexcept
-        {
-                return CellularAutomataDataIterator{this->m_data_ptr};
-        }
-
-        constexpr const CellularAutomataDataIterator end(void) const noexcept
-        {
-                return CellularAutomataDataIterator{this->m_data_ptr.Get() + this->m_width * this->m_height};
-        }
-};
 
 template<typename T>
 constexpr void InitCellularAutomata(
-        Lumen::Utility::ProceduralContentGeneration::CellularAutomataData<T> &cellular_automata_data,
+        Lumen::Utility::ProceduralContentGeneration::Grid<T> &cellular_automata_data,
         const std::uint32_t random_seed, const std::uint32_t alive_if_under_or_equal_to) noexcept
 {
         //std::size_t i{0};
@@ -195,7 +37,7 @@ constexpr void InitCellularAutomata(
 
 template<typename T>
 constexpr std::size_t CountAliveNeighbors(
-        const Lumen::Utility::ProceduralContentGeneration::CellularAutomataData<T> &cellular_automata_data,
+        const Lumen::Utility::ProceduralContentGeneration::Grid<T> &cellular_automata_data,
         std::size_t x, std::size_t y) noexcept
 {
         assert(x < cellular_automata_data.GetWidth());
@@ -238,7 +80,7 @@ constexpr std::size_t CountAliveNeighbors(
 
 template<typename T>
 constexpr void UpdateASingleCellInCellularAutomata(
-        Lumen::Utility::ProceduralContentGeneration::CellularAutomataData<T> &cellular_automata_data,
+        Lumen::Utility::ProceduralContentGeneration::Grid<T> &cellular_automata_data,
         std::size_t x, std::size_t y,
         const std::size_t death_limit, const std::size_t birth_limit) noexcept
 {
@@ -265,7 +107,7 @@ constexpr void UpdateASingleCellInCellularAutomata(
 
 template<typename T>
 constexpr void UpdateCellularAutomata(
-        Lumen::Utility::ProceduralContentGeneration::CellularAutomataData<T> &cellular_automata_data,
+        Lumen::Utility::ProceduralContentGeneration::Grid<T> &cellular_automata_data,
         const std::size_t death_limit, const std::size_t birth_limit) noexcept
 {
 //std::cout << __LINE__ << "\n";
