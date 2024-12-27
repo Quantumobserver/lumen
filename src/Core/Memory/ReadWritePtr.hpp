@@ -2,6 +2,8 @@
 #pragma once
 
 #include <cassert>
+#include <cstddef>
+#include <type_traits>
 
 namespace Lumen {
 namespace Core {
