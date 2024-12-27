@@ -35,6 +35,8 @@ constexpr void InitCellularAutomata(
         }
 }
 
+namespace Detail {
+
 template<typename T>
 constexpr std::size_t CountAliveNeighbors(
         const Lumen::Utility::ProceduralContentGeneration::Grid<T> &cellular_automata_data,
@@ -85,7 +87,7 @@ constexpr void UpdateASingleCellInCellularAutomata(
         const std::size_t death_limit, const std::size_t birth_limit) noexcept
 {
         std::size_t num_alive_neighbors = 
-                Lumen::Utility::ProceduralContentGeneration::CountAliveNeighbors(cellular_automata_data, x, y);
+                Lumen::Utility::ProceduralContentGeneration::Detail::CountAliveNeighbors(cellular_automata_data, x, y);
         
         if (num_alive_neighbors < death_limit) {
                 cellular_automata_data.At(x, y) = false;
@@ -105,6 +107,8 @@ constexpr void UpdateASingleCellInCellularAutomata(
         
 }
 
+} // namespace Detail
+
 template<typename T>
 constexpr void UpdateCellularAutomata(
         Lumen::Utility::ProceduralContentGeneration::Grid<T> &cellular_automata_data,
@@ -117,7 +121,7 @@ constexpr void UpdateCellularAutomata(
         for (std::size_t y{0}; y < height; ++y) {
                 for (std::size_t x{0}; x < width; ++x) {
 //std::cout << __LINE__ << "\n";
-                        Lumen::Utility::ProceduralContentGeneration::UpdateASingleCellInCellularAutomata(
+                        Lumen::Utility::ProceduralContentGeneration::Detail::UpdateASingleCellInCellularAutomata(
                                 cellular_automata_data, x, y, death_limit, birth_limit);
                 }
         }
