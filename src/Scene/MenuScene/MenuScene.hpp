@@ -17,15 +17,18 @@ private:
         bool m_is_initialized{false};
 public:
         MenuScene(sf::RenderWindow *window_ptr,
-                  Lumen::ResourceManager::ResourceManager *resource_manager,
+                  Lumen::ResourceManager::ResourceManager *resource_manager_ptr,
                   Lumen::ECS::Entity::EntityManager *entity_manager_ptr,
                   Lumen::Scene::InterSceneCommunicationData *inter_scene_communication_data) noexcept
          : Lumen::Scene::BaseScene{Lumen::Scene::SceneID::MENU,
                                    window_ptr,
-                                   resource_manager,
+                                   resource_manager_ptr,
                                    entity_manager_ptr,
                                    inter_scene_communication_data},
-           m_is_initialized{false} {}
+           m_is_initialized{false}
+        { 
+                std::cout << "[MenuScene] Constructor: RM addr: " << resource_manager_ptr << "\n";
+        }
 
         constexpr void Init(void) noexcept override
         {
@@ -37,6 +40,20 @@ public:
                 this->InitLayerStack();
 
                 this->m_is_initialized = true;
+
+                //sf::Font font;
+                // if (!font.openFromFile("../src/Assets/Fonts/DroidSansFallback.ttf")) {
+                //         std::cerr << "Failed to load font\n";
+                //         return;
+                // }
+// std::cout << __FILE__ " :" << __LINE__ << "\n";
+//                 font = Lumen::Scene::BaseScene::m_resource_manager_ptr ->GetFont(Lumen::ResourceManager::FontID::DROID_FONT);
+// std::cout << __FILE__ " :" << __LINE__ << "\n";
+//                 sf::Text text{font, __FILE__ ": Hello, World!"};
+//                 this->m_window_ptr->draw(text);
+//                 this->m_window_ptr->display();
+//                 std::string i;
+//                 std::cin >> i;
         }
 
 
@@ -48,6 +65,10 @@ public:
                 this->CreateActions();
                 
                 this->DoActions();
+                for (auto &layer : this->m_layer_stack) {
+                        layer->Update();
+                }
+
         }
 
         constexpr void Render(void) noexcept override
@@ -65,6 +86,8 @@ public:
         {
                 assert(this->m_is_initialized);
                 (void)change_scene_args;
+                std::cout << "--------------------------------\n";
+                Lumen::Scene::BaseScene::m_window_ptr->setView(Lumen::Scene::BaseScene::m_window_ptr->getDefaultView());
         }
 
 private:
@@ -126,6 +149,9 @@ private:
                 this->DoBasicAction();
                 this->DoWindowResizeAction();
                 this->DoWindowCloseAction();
+                this->DoSelectionAction();
+
+                Lumen::Scene::BaseScene::m_action_manager.ResetActionBuffer();
         }
 
         constexpr void DoBasicAction(void) noexcept
@@ -170,6 +196,25 @@ private:
                         Lumen::Scene::BaseScene::m_inter_scene_communication_data->running = false;
                         Lumen::Scene::BaseScene::m_action_manager.ResetActionBuffer();
                         //std::cout << "[MenuScene] IsWindowCloseActionHappened\n";
+                }
+        }
+
+        constexpr void DoSelectionAction(void) noexcept
+        {
+                //std::cout << "[MenuScene] DoSelectionAction\n";
+        
+                auto selection_action = Lumen::Scene::BaseScene::m_action_manager.GetSelectionAction();
+                if (!selection_action.HasSelectionAction()) {
+                        return;
+                }
+                for (auto layer_stack_it = Lumen::Scene::BaseScene::m_layer_stack.rbegin();
+                     layer_stack_it != Lumen::Scene::BaseScene::m_layer_stack.rend();
+                        ++layer_stack_it) {
+                        Lumen::LayerStack::LayerPtr &layer_ptr = (*layer_stack_it);
+                        if (Lumen::LayerStack::BaseLayer::DoActionResult::HandledOrBlocked == 
+                            layer_ptr->DoSelectionAction(selection_action)) {
+                                break;
+                        }
                 }
         }
 

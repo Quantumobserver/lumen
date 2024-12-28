@@ -69,9 +69,11 @@ private:
 
 public:
         constexpr SceneManager(void) noexcept
-        : m_window_ptr{nullptr}, m_entity_manager_ptr{nullptr}, m_current_scene_ptr{nullptr} {}
+        : m_window_ptr{nullptr}, m_resource_manager_ptr{nullptr},
+          m_entity_manager_ptr{nullptr}, m_current_scene_ptr{nullptr} {}
 
-        constexpr void Init(sf::RenderWindow *window_ptr,
+        constexpr void Init(sf::RenderWindow *window_ptr,       
+                            Lumen::ResourceManager::ResourceManager *resource_manager_ptr,
                             Lumen::ECS::Entity::EntityManager *entity_manager_ptr) noexcept
         {
                 assert(nullptr != window_ptr);
@@ -79,6 +81,7 @@ public:
 
                 this->m_window_ptr = window_ptr;
                 this->m_entity_manager_ptr = entity_manager_ptr;
+                this->m_resource_manager_ptr = resource_manager_ptr;
 
                 this->m_inter_scene_communication_data.running = true;
                 this->m_inter_scene_communication_data.change_scene = false;
@@ -151,10 +154,12 @@ private:
         {
                 assert(this->m_is_initialized);
                 assert(this->m_inter_scene_communication_data.change_scene);
-
+std::cout << "[SceneManager] Change scene to: \n";
                 this->m_current_scene_ptr = this->GetScene(this->m_inter_scene_communication_data.change_scene_args.change_to_this_scene);
+                
+std::cout << "[SceneManager] Change scene " << __LINE__ << "\n";
                 this->m_current_scene_ptr->ChangeToThisScene(this->m_inter_scene_communication_data.change_scene_args);
-
+std::cout << "[SceneManager] Change scene " << __LINE__ << "\n";
                 this->m_inter_scene_communication_data.change_scene = false;
         }
 };

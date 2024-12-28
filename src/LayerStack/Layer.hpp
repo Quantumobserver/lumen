@@ -42,6 +42,12 @@ public:
         }
 
         [[nodiscard]] CONSTEXPR_IF_CXX_20
+        virtual DoActionResult DoSelectionAction([[maybe_unused]] Lumen::Action::SelectionAction selection_action) noexcept
+        {
+                return DoActionResult::NotHandedOrNotBlocked;
+        }
+        
+        [[nodiscard]] CONSTEXPR_IF_CXX_20
         virtual DoActionResult DoMovementAction([[maybe_unused]] Lumen::Action::MovementAction movement_action) noexcept
         {
                 return DoActionResult::NotHandedOrNotBlocked;

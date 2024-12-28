@@ -100,7 +100,7 @@ protected:
         Lumen::Action::ActionManager m_action_manager;
         Lumen::LayerStack::LayerStack m_layer_stack;
         sf::RenderWindow *m_window_ptr;
-        Lumen::ResourceManager::ResourceManager *m_resource_manager;
+        Lumen::ResourceManager::ResourceManager *m_resource_manager_ptr;
         Lumen::ECS::Entity::EntityManager *m_entity_manager_ptr;
         Lumen::Scene::InterSceneCommunicationData *m_inter_scene_communication_data;
 
@@ -111,11 +111,11 @@ protected:
 public:
         constexpr BaseScene(Lumen::Scene::SceneID scene_id,
                             sf::RenderWindow *window_ptr,
-                            Lumen::ResourceManager::ResourceManager *resource_manager,
+                            Lumen::ResourceManager::ResourceManager *resource_manager_ptr,
                             Lumen::ECS::Entity::EntityManager *entity_manager_ptr,
                             Lumen::Scene::InterSceneCommunicationData *inter_scene_communication_data) noexcept
         : m_scene_id{scene_id}, m_current_frame{0}, m_window_ptr{window_ptr},
-          m_resource_manager{resource_manager}, m_entity_manager_ptr{entity_manager_ptr},
+          m_resource_manager_ptr{resource_manager_ptr}, m_entity_manager_ptr{entity_manager_ptr},
           m_inter_scene_communication_data{inter_scene_communication_data},
           m_view_changed{true}, m_is_paused{false}, m_has_ended{false} {}
 

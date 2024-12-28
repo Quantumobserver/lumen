@@ -218,6 +218,11 @@ struct SelectionAction {
                 this->selection_action_type = SelectionActionTypeTag::NONE;
                 this->no_data = Void{};
         }
+
+        constexpr bool HasSelectionAction(void) const noexcept
+        {
+                return SelectionActionTypeTag::NONE != this->selection_action_type;
+        }
 };
 
 #ifdef LUMEN_DEBUG_ACTION_FORMAT_ENABLED

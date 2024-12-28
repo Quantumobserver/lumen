@@ -4,6 +4,8 @@
 #include "BasicUIComponent.hpp"
 
 #include <SFML/Graphics/RectangleShape.hpp>
+// #include <SFML/Graphics/Font.hpp>
+#include <SFML/Graphics/Text.hpp>
 
 #include <cassert>
 #include <cstddef>
@@ -72,32 +74,45 @@ struct SelectedSubMenuItem {
 
 class MenuButton {
 public:
+        enum class MenuButtonLabelLayout {
+                CENTER,
+                LEFT,
+                RIGHT,
+                TOP,
+                BOTTOM,
+        };
+
         using MenuButtonActionHandler =
                 std::function<
                         std::optional<Lumen::UI::Component::SelectedSubMenuItem>(void *, const Lumen::UI::Component::RelativeSelectionAction &)>;
 private:
         Lumen::UI::Component::TransformRectangleArea m_transform_rectangle_area;
-        std::string m_text;
+        //std::string m_text;
+        sf::Text m_text_label;
         sf::Sprite m_icon;
         void *m_do_menu_button_action_data_ptr{nullptr};
         MenuButtonActionHandler fn_do_menu_button_action;
+        MenuButtonLabelLayout m_menu_button_label_layout;
 
-        sf::Color m_outline_color_menu_button{sf::Color::Yellow};
+        sf::Color m_outline_color_menu_button{sf::Color::Cyan};
 
 public:
-        constexpr MenuButton(std::string &&text, const sf::Sprite &icon,
+        constexpr MenuButton(sf::Text &&text, const sf::Sprite &icon,
                              void *do_menu_button_action_data_ptr = nullptr,
-                             MenuButtonActionHandler &&do_menu_button_action = nullptr) noexcept
-        : m_text{std::move(text)}, m_icon{icon},
+                             MenuButtonActionHandler &&do_menu_button_action = nullptr,
+                             MenuButtonLabelLayout menue_button_layout = MenuButtonLabelLayout::CENTER) noexcept
+        : m_text_label{std::move(text)}, m_icon{icon},
           m_do_menu_button_action_data_ptr{do_menu_button_action_data_ptr},
-          fn_do_menu_button_action{std::move(do_menu_button_action)} {}
+          fn_do_menu_button_action{std::move(do_menu_button_action)},
+          m_menu_button_label_layout{menue_button_layout} {}
 
         constexpr MenuButton(const MenuButton &) noexcept = delete;
         constexpr MenuButton(MenuButton &&other) noexcept
         : m_transform_rectangle_area{std::move(other.m_transform_rectangle_area)},
-          m_text{std::move(other.m_text)}, m_icon{std::move(other.m_icon)},
+          m_text_label{std::move(other.m_text_label)}, m_icon{std::move(other.m_icon)},
           m_do_menu_button_action_data_ptr{other.m_do_menu_button_action_data_ptr},
-          fn_do_menu_button_action{std::move(other.fn_do_menu_button_action)}
+          fn_do_menu_button_action{std::move(other.fn_do_menu_button_action)},
+          m_menu_button_label_layout{std::move(other.m_menu_button_label_layout)}
         {
                 other.m_do_menu_button_action_data_ptr = nullptr;
         }
@@ -109,10 +124,11 @@ public:
                         return *this;
                 }
 
-                this->m_text = std::move(other.m_text);
+                this->m_text_label = std::move(other.m_text_label);
                 this->m_icon = std::move(other.m_icon);
                 this->m_do_menu_button_action_data_ptr = other.m_do_menu_button_action_data_ptr;
                 this->fn_do_menu_button_action = std::move(other.fn_do_menu_button_action);
+                this->m_menu_button_label_layout = std::move(other.m_menu_button_label_layout);
                 other.m_do_menu_button_action_data_ptr = nullptr;
                 return *this;
         }
@@ -132,10 +148,22 @@ public:
                 this->m_transform_rectangle_area = rectangle_area;
         }
 
+        constexpr void SetButtonLabelPosition(const Lumen::UI::Component::TransformRectangleArea &rectangle_area) noexcept
+        {
+                this->m_text_label.setPosition({static_cast<float>(rectangle_area.top_left_position.top_left_position.x),
+                                                static_cast<float>(rectangle_area.top_left_position.top_left_position.y)});
+        }
+
         constexpr void SetPosition(const Lumen::UI::Component::TransformTopLeft &transform_top_left,
                                    const Lumen::UI::Component::BoundingBox &bounding_box) noexcept
         {
                 this->m_transform_rectangle_area = {transform_top_left, bounding_box};
+        }
+
+        constexpr void SetButtonLabelPosition(const Lumen::UI::Component::TransformTopLeft &transform_top_left) noexcept
+        {
+                this->m_text_label.setPosition({static_cast<float>(transform_top_left.top_left_position.x),
+                                                static_cast<float>(transform_top_left.top_left_position.y)});
         }
 
         constexpr void Move(const Lumen::Core::Math::Vec2i &offset) noexcept
@@ -158,6 +186,27 @@ public:
                 return this->m_outline_color_menu_button;
         }
 
+        constexpr void SetText(const sf::Text &text) noexcept
+        {
+                this->m_text_label = text;
+        }
+
+        constexpr const sf::Text &GetText(void) const noexcept
+        {
+                //std::cout << "MenuButton::SetText() called\n";
+                //std::cout << "Text: " << this->m_text_label.getString().toAnsiString() << "\n";
+                return this->m_text_label;
+        }
+
+        constexpr MenuButtonLabelLayout GetMenuButtonLabelLayout(void) const noexcept
+        {
+                return this->m_menu_button_label_layout;
+        }
+
+        constexpr void SetMenuButtonLabelLayout(MenuButtonLabelLayout menu_button_label_layout) noexcept
+        {
+                this->m_menu_button_label_layout = menu_button_label_layout;
+        }
 };
 
 class Menu : public Lumen::UI::Component::BasicUIComponent {
@@ -185,9 +234,11 @@ public:
                         VerticalFixedSpacingAutoData vertical_fixed_spacing_auto_data;
                 };
 
-                constexpr MenuLayout(void) noexcept : menu_layout_type{MenuLayoutTypeTag::VERTICAL_UNIFORM_DISTRIBUTION}, no_data{} {}
+                constexpr MenuLayout(void) noexcept : menu_layout_type{
+                        MenuLayoutTypeTag::VERTICAL_UNIFORM_DISTRIBUTION}, no_data{} {}
 
-                constexpr MenuLayout(MenuLayoutTypeTag menu_layout_type) noexcept : menu_layout_type{menu_layout_type}, no_data{}
+                constexpr MenuLayout(MenuLayoutTypeTag menu_layout_type) noexcept 
+                : menu_layout_type{menu_layout_type}, no_data{}
                 {
                         assert(MenuLayoutTypeTag::VERTICAL_UNIFORM_DISTRIBUTION == this->menu_layout_type);
                 }
@@ -234,6 +285,20 @@ public:
         {
                 //std::cout << "))))))))))))))))))))))))))))\n";
                 this->Init();
+
+                // std::cout << __FILE__ " :" << __LINE__ << "\n";
+                // const sf::Text &text = this->m_buttons[0].GetText();
+                // const sf::Font &font = this->m_buttons[0].GetText().getFont();
+                //const sf::Text &text_o = this->m_buttons[0].GetText();
+//std::cout << __FILE__ " :" << __LINE__ << "\n";
+               // const sf::Font &font = text_o.getFont();
+//std::cout << __FILE__ " :" << __LINE__ << ", text addr: " << &text << ", font addr: " << &font << "\n";
+                // sf::Text text{font, "Hello, World!"};
+                // this->m_window_ptr->draw(text);
+                // this->m_window_ptr->draw(this->m_buttons[0].GetText());
+                // this->m_window_ptr->display();
+                // std::string i;
+                // std::cin >> i;
         }
         
         Menu(const Lumen::UI::Component::TransformTopLeft &transform_top_left,
@@ -292,6 +357,13 @@ public:
                         //           << menu_button_center_position_relative_to_menu_top_left.y << " }\n";
 
                         iterator->SetPosition(menu_button_top_left_position, this->m_bounding_box_menu_button);
+                        // iterator->SetButtonLabelPosition({
+                        //         menu_button_top_left_position.top_left_position +
+                        //         this->m_transform_rectangle_area.top_left_position.top_left_position
+                        // });
+                        this->UpdateMenuButtonTextLabelPosition(*iterator, menu_button_top_left_position.top_left_position + 
+                                                                this->m_transform_rectangle_area.top_left_position.top_left_position );
+
                 }
         }
 
@@ -322,6 +394,7 @@ std::cout << "Update: " << __LINE__ << ": delta_time=" << delta_time
                 this->DrawMenuBoundingBox();
                 this->DrawMenuButtonBoundingBoxForEach();
                 this->DrawSelectedSubMenu();
+                this->DrawMenuButton();
         }
 
         constexpr sf::Color GetColorWhenNotSelected(void) const noexcept
@@ -374,6 +447,29 @@ std::cout << "Update: " << __LINE__ << ": delta_time=" << delta_time
                         //this->DrawMenuButtonBoundingBox(index, *iterator);
                         this->DrawMenuButtonBoundingBox(menu_button);
                 }
+        }
+
+        constexpr void DrawMenuButton(void) const noexcept
+        {
+                //std::cout << "size: " << this->m_buttons.size() << "\n";
+                for (const auto &menu_button : this->m_buttons) {
+                        //std::cout << "DrawMenuButton: " << __LINE__ << "\n";
+                        this->DrawMenuButtonTextLabel(menu_button);
+                }
+        }
+
+        constexpr void DrawMenuButtonTextLabel(const MenuButton &menu_button) const noexcept
+        {
+        //         std::cout << "DrawMenuButtonTextLabel: " << __LINE__ << "\n";
+        //         std::cout << "DrawMenuButtonTextLabel Text: " << menu_button.GetText().getString().toAnsiString() << "\n";
+        // std::cout << "win_ptr:" << this->m_window_ptr << "\n";
+        //         const sf::Text &text{menu_button.GetText()};
+        // std::cout << "DrawMenuButtonTextLabel: " << __LINE__ << "\n";
+        //         const sf::Drawable &drawable{dynamic_cast<const sf::Drawable &>(text)};
+        // std::cout << "DrawMenuButtonTextLabel: " << __LINE__ << "\n";
+        //         this->m_window_ptr->draw(drawable);
+        //std::cout << "DrawMenuButtonTextLabel: " << __LINE__ << "\n";
+                this->m_window_ptr->draw(menu_button.GetText());
         }
 
         constexpr void DrawMenuButtonBoundingBox(
@@ -495,6 +591,46 @@ private:
                 this->m_selected_sub_menu.remain_time_in_second = SelectedSubMenuItem::GetRemainDurationInSecond();
         }
 
+        void UpdateMenuButtonTextLabelPosition(MenuButton &button, Lumen::Core::Math::Vec2i button_position) {
+                Lumen::Core::Math::Vec2i text_bounds = {static_cast<int>(button.GetText().getLocalBounds().size.x),
+                                                        static_cast<int>(button.GetText().getLocalBounds().size.y)};
+                Lumen::Core::Math::Vec2i button_size = this->m_bounding_box_menu_button.size;
+                Lumen::Core::Math::Vec2i position;
+
+                switch (button.GetMenuButtonLabelLayout()) {
+                case MenuButton::MenuButtonLabelLayout::CENTER:
+                        std::cout << "Center\n";
+                        position = button_position + (button_size - text_bounds) / 2 - 
+                                   Lumen::Core::Math::Vec2i{static_cast<int>(button.GetText().getLocalBounds().position.x),
+                                   static_cast<int>(button.GetText().getLocalBounds().position.y)};
+                        break;
+                case MenuButton::MenuButtonLabelLayout::LEFT:
+                        std::cout << "Left\n";
+                        position.x = button_position.x - static_cast<int>(button.GetText().getLocalBounds().position.x);
+                        position.y = button_position.y + (button_size.y - text_bounds.y) / 2 -
+                                     static_cast<int>(button.GetText().getLocalBounds().position.y);
+                        break;
+                case MenuButton::MenuButtonLabelLayout::RIGHT:
+                        position.x = button_position.x + button_size.x - text_bounds.x -
+                                     static_cast<int>(button.GetText().getLocalBounds().position.x);
+                        position.y = button_position.y + (button_size.y - text_bounds.y) / 2 -
+                                     static_cast<int>(button.GetText().getLocalBounds().position.y);
+                        break;
+                case MenuButton::MenuButtonLabelLayout::TOP:
+                        position.x = button_position.x + (button_size.x - text_bounds.x) / 2 -
+                                     static_cast<int>(button.GetText().getLocalBounds().position.x);
+                        position.y = button_position.y - static_cast<int>(button.GetText().getLocalBounds().position.y);
+                        break;
+                case MenuButton::MenuButtonLabelLayout::BOTTOM:
+                        position.x = button_position.x + (button_size.x - text_bounds.x) / 2 -
+                                     static_cast<int>(button.GetText().getLocalBounds().position.x);
+                        position.y = button_position.y + button_size.y - text_bounds.y -
+                                     static_cast<int>(button.GetText().getLocalBounds().position.y);
+                        break;
+                }
+                button.SetButtonLabelPosition(position);
+        }
+
 public:
         constexpr void DoSelectionAction(
                 const Lumen::UI::Component::RelativeSelectionAction &relative_selection_action_to_parent) noexcept override
@@ -511,9 +647,10 @@ public:
                         for (auto iterator = this->m_buttons.begin(); iterator != this->m_buttons.end(); ++iterator) {
                                 iterator->SetColor(sf::Color::Blue);
                         }
-                        if (Lumen::UI::Component::SelectedSubMenuItem::SelectionTypeTag::HOVER == this->m_selected_sub_menu.selection_type) {
+                        if (Lumen::UI::Component::SelectedSubMenuItem::SelectionTypeTag::HOVER == 
+                            this->m_selected_sub_menu.selection_type) {
                                 //this->m_selected_sub_menu.Clear();
-                                std::cout << "UnSelectSubMenu: " << __LINE__ << "\n";
+                                //std::cout << "UnSelectSubMenu: " << __LINE__ << "\n";
                                 this->SubMenuIsNotSelectedCurrently();
                         }
                         return;
@@ -541,7 +678,7 @@ public:
                                 this->SetSelectedSubMenuPosition(menu_button);
                         } else {
                                 //this->m_selected_sub_menu.Clear();
-                                std::cout << "UnSelectSubMenu: " << __LINE__ << "\n";
+                                //std::cout << "UnSelectSubMenu: " << __LINE__ << "\n";
                                 this->SubMenuIsNotSelectedCurrently();
                         }
                         is_selection_handled = true;

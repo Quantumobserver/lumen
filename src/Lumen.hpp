@@ -54,7 +54,7 @@ private:
 
         Lumen::Scene::SceneManager m_scene_manager;
         Lumen::ECS::Entity::EntityManager m_entity_manager;
-        Lumen::ResourceManager::ResourceManager m_resource_manager;
+        Lumen::ResourceManager::ResourceManager m_resource_manager_ptr;
 
         Lumen::Timer m_timer;
 
@@ -70,8 +70,8 @@ public:
 
                 this->LoadInitConfig();
                 this->CreateWindow();
-                this->InitSceneManager();
                 this->InitResourceManager();
+                this->InitSceneManager();
                 this->m_timer.Init();
                 this->m_is_initialized = true;
         }
@@ -122,20 +122,21 @@ private:
                                 {this->m_config.window.video_mode.width,
                                  this->m_config.window.video_mode.height}},
                                  this->m_config.window.title);
+                this->m_window.setFramerateLimit(120);
         }
 
         constexpr void InitSceneManager(void) noexcept
         {
                 LUMEN_VISUAL_PROFILE_FUNCTION();
                 assert(!this->m_is_initialized);
-                this->m_scene_manager.Init(&this->m_window, &this->m_entity_manager);
+                this->m_scene_manager.Init(&this->m_window, &this->m_resource_manager_ptr, &this->m_entity_manager);
         }
 
         constexpr void InitResourceManager(void) noexcept
         {
                 LUMEN_VISUAL_PROFILE_FUNCTION();
                 assert(!this->m_is_initialized);
-                this->m_resource_manager.Init();
+                this->m_resource_manager_ptr.Init();
 
                 this->LoadInitFonts();
         }
@@ -143,7 +144,7 @@ private:
         constexpr void LoadInitFonts(void) noexcept
         {
                 assert(!this->m_is_initialized);
-                this->m_resource_manager.LoadFontFromFile("./Assets/Fonts/DroidSansFallback.ttf", Lumen::ResourceManager::FontID::DROID_FONT);
+                this->m_resource_manager_ptr.LoadFontFromFile("./Assets/Fonts/DroidSansFallback.ttf", Lumen::ResourceManager::FontID::DROID_FONT);
         }
 
         constexpr bool IsRunning(void) const noexcept
