@@ -4,6 +4,8 @@
 #include <UI/Components/Menu.hpp>
 
 #include <SFML/Graphics/RenderWindow.hpp>
+#include <SFML/Graphics/Font.hpp>
+#include <SFML/Graphics/Text.hpp>
 
 #include <iostream>
 #include <chrono>
@@ -25,8 +27,15 @@ void TestMenuCase1(void) noexcept
                 sf::RenderWindow &window;
         } do_button_action_data{i, window};
 
+        sf::Font font;
+        if (font.openFromFile("../../../src/Assets/Fonts/DroidSansFallback.ttf")) {
+                std::cout << "Font loaded\n";
+                return;
+        }
+        sf::Text text{font, "Start GameHello, World你好，世界!啊啊啊啊啊啊啊啊啊啊"};
+
         auto menu_button_1 = Lumen::UI::Component::MenuButton{
-                "test", sf::Sprite{},
+                sf::Text{text}, sf::Sprite{},
                 &do_button_action_data,
                 [](void *data, const Lumen::UI::Component::RelativeSelectionAction &relative_selection_action) noexcept
                 -> std::optional<Lumen::UI::Component::Menu::SelectedSubMenuItem> {
@@ -60,7 +69,7 @@ void TestMenuCase1(void) noexcept
         };
 
         auto menu_button_2 = Lumen::UI::Component::MenuButton{
-                "test", sf::Sprite{},
+                sf::Text{text}, sf::Sprite{},
                 &do_button_action_data,
                 [](void *data, const Lumen::UI::Component::RelativeSelectionAction &relative_selection_action) noexcept
                 -> std::optional<Lumen::UI::Component::Menu::SelectedSubMenuItem> {
@@ -103,7 +112,7 @@ void TestMenuCase1(void) noexcept
         );
 
         auto menu_button_3 = Lumen::UI::Component::MenuButton{
-                "test", sf::Sprite{},
+                sf::Text{text}, sf::Sprite{},
                 sub_menu_ptr.get(),
                 [](void *data, const Lumen::UI::Component::RelativeSelectionAction &relative_selection_action) noexcept
                 -> std::optional<Lumen::UI::Component::Menu::SelectedSubMenuItem> {
