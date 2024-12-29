@@ -591,7 +591,7 @@ private:
                 this->m_selected_sub_menu.remain_time_in_second = SelectedSubMenuItem::GetRemainDurationInSecond();
         }
 
-        void UpdateMenuButtonTextLabelPosition(MenuButton &button, Lumen::Core::Math::Vec2i button_position) {
+        constexpr void UpdateMenuButtonTextLabelPosition(MenuButton &button, Lumen::Core::Math::Vec2i button_position) noexcept {
                 Lumen::Core::Math::Vec2i text_bounds = {static_cast<int>(button.GetText().getLocalBounds().size.x),
                                                         static_cast<int>(button.GetText().getLocalBounds().size.y)};
                 Lumen::Core::Math::Vec2i button_size = this->m_bounding_box_menu_button.size;
