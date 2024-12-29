@@ -68,6 +68,8 @@ private:
         std::size_t m_height;
 
 public:
+        constexpr Grid(void) noexcept = default;
+
         constexpr Grid(Lumen::Core::Memory::ReadWritePtr<T> data_ptr,
                                        std::size_t width, std::size_t height) noexcept
         : m_data_ptr{std::move(data_ptr)}, m_width{width}, m_height{height} {}
