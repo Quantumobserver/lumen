@@ -19,11 +19,14 @@ constexpr void GenerateWhiteNoise(Lumen::Utility::ProceduralContentGeneration::G
                                   std::uint32_t white_noise_seed) noexcept
 {
         std::uint32_t random_number = white_noise_seed;
+
+        std::size_t index{0};
         for (std::size_t j = 0; j < grid.GetHeight(); ++j) {
                 for (std::size_t i = 0; i < grid.GetWidth(); ++i) {
                         random_number = Lumen::Utility::Random::LehmerRandomNumberGenerator2D(
                                 random_number ^ static_cast<std::uint32_t>(i), static_cast<std::uint32_t>(j));
-                        grid.At(i, j) = static_cast<float>(random_number) / static_cast<float>(UINT32_MAX);
+                        grid.At(index) = static_cast<float>(random_number) / static_cast<float>(UINT32_MAX);
+                        ++index;
                 }
         }
 }
@@ -162,6 +165,11 @@ public:
         {
                 return this->perlin_noise.GetHeight();
         }
+
+        constexpr std::size_t GetSize(void) const noexcept
+        {
+                return this->perlin_noise.GetSize();
+        }
 };
 
 namespace Detail {
@@ -202,11 +210,11 @@ struct PerlinNoiseTotalAmplitude {
 
                 const auto &smooth_noise = perlin_noise_data.GetSmoothNoise(
                         perlin_noise_data.GetOctaveCount() - 1 - octave_reverse_index);
-                
-                for (std::size_t j = 0; j < perlin_noise_data.GetHeight(); ++j) {
-                        for (std::size_t i = 0; i < perlin_noise_data.GetWidth(); ++i) {
-                                perlin_noise_data.GetPerlinNoise().At(i, j) += smooth_noise.At(i, j) * amplitude;
-                        }
+
+                const std::size_t size = perlin_noise_data.GetSize();
+
+                for (std::size_t i = 0; i < size; ++i) {
+                        perlin_noise_data.GetPerlinNoise().At(i) += smooth_noise.At(i) * amplitude;
                 }
         }
 
@@ -216,10 +224,10 @@ struct PerlinNoiseTotalAmplitude {
 constexpr void NormalizePerlinNoise(PerlinNoiseData &perlin_noise_data,
                                     const PerlinNoiseTotalAmplitude &total_amplitude) noexcept
 {
-        for (std::size_t j = 0; j < perlin_noise_data.GetHeight(); ++j) {
-                for (std::size_t i = 0; i < perlin_noise_data.GetWidth(); ++i) {
-                        perlin_noise_data.GetPerlinNoise().At(i, j) /= total_amplitude.total_amplitude;
-                }
+        auto &perlin_noise = perlin_noise_data.GetPerlinNoise();
+
+        for (auto &cell : perlin_noise) {
+                cell /= total_amplitude.total_amplitude;
         }
 }
 

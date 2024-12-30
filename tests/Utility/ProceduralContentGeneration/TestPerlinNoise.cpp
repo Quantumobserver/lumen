@@ -165,6 +165,22 @@ constexpr void GenerateWhiteNoise_New_3(Lumen::Utility::ProceduralContentGenerat
         }
 }
 
+constexpr void GenerateWhiteNoise_New_4(Lumen::Utility::ProceduralContentGeneration::Grid<float> &grid, 
+                                  std::uint32_t random_seed) noexcept
+{
+        std::uint32_t random_number = random_seed;
+
+        std::size_t index = 0;
+        for (std::size_t i = 0; i < grid.GetWidth(); ++i) {
+                for (std::size_t j = 0; j < grid.GetHeight(); ++j) {
+                        random_number = Lumen::Utility::Random::LehmerRandomNumberGenerator2D(
+                                random_number ^ static_cast<std::uint32_t>(i), static_cast<std::uint32_t>(j));
+                        grid.At(index) = static_cast<float>(random_number) / static_cast<float>(UINT32_MAX);
+                        ++index;
+                }
+        }
+}
+
 constexpr void GenerateSmoothNoise_Old(Lumen::Utility::ProceduralContentGeneration::Grid<float> &smooth_noise_octave,
                                    const Lumen::Utility::ProceduralContentGeneration::Grid<float> &base_noise,
                                    std::size_t octave) noexcept
@@ -301,6 +317,34 @@ struct PerlinNoiseTotalAmplitude {
         return {total_amplitude};
 }
 
+[[nodiscard]] constexpr PerlinNoiseTotalAmplitude BlendSmoothNoiseOctaveTogether_New_2(
+        Lumen::Utility::ProceduralContentGeneration::PerlinNoiseData &perlin_noise_data) noexcept
+{
+        float persistance = 0.5f;
+
+        float amplitude = 1.0f;
+        float total_amplitude = 0.0f;
+
+        for (std::size_t octave_reverse_index = 0; octave_reverse_index < perlin_noise_data.GetOctaveCount();
+             ++octave_reverse_index) {
+
+                amplitude *= persistance;
+
+                total_amplitude += amplitude;
+
+                const auto &smooth_noise = perlin_noise_data.GetSmoothNoise(
+                        perlin_noise_data.GetOctaveCount() - 1 - octave_reverse_index);
+                
+                const std::size_t size = perlin_noise_data.GetSize();
+
+                for (std::size_t i = 0; i < size; ++i) {
+                        perlin_noise_data.GetPerlinNoise().At(i) += smooth_noise.At(i) * amplitude;
+                }
+        }
+
+        return {total_amplitude};
+}
+
 constexpr void NormalizePerlinNoise_Old(
         Lumen::Utility::ProceduralContentGeneration::PerlinNoiseData &perlin_noise_data,
         const Lumen::Utility::ProceduralContentGeneration::Detail::PerlinNoiseTotalAmplitude &total_amplitude) noexcept
@@ -329,9 +373,9 @@ void TestPalinNoiseCase1(void)
         {
                 Lumen::Utility::ProceduralContentGeneration::Grid<float> base_noise{float_array[0]};
 
-                const auto start_old = std::chrono::high_resolution_clock::now();
-                GenerateWhiteNoise_Old(base_noise, 23646);
-                const auto end_old = std::chrono::high_resolution_clock::now();
+                // const auto start_old = std::chrono::high_resolution_clock::now();
+                // GenerateWhiteNoise_Old(base_noise, 23646);
+                // const auto end_old = std::chrono::high_resolution_clock::now();
 
                 const auto start_new = std::chrono::high_resolution_clock::now();
                 GenerateWhiteNoise_New(base_noise, 23646);
@@ -341,14 +385,19 @@ void TestPalinNoiseCase1(void)
                 GenerateWhiteNoise_New_2(base_noise, 23646);
                 const auto end_new_2 = std::chrono::high_resolution_clock::now();
 
-                const auto start_new_3 = std::chrono::high_resolution_clock::now();
-                GenerateWhiteNoise_New_3(base_noise, 23646);
-                const auto end_new_3 = std::chrono::high_resolution_clock::now();
+                // const auto start_new_3 = std::chrono::high_resolution_clock::now();
+                // GenerateWhiteNoise_New_3(base_noise, 23646);
+                // const auto end_new_3 = std::chrono::high_resolution_clock::now();
 
-                std::cout << "Old: " << std::chrono::duration<double>(end_old - start_old).count() << "\n";
+                const auto start_new_4 = std::chrono::high_resolution_clock::now();
+                GenerateWhiteNoise_New_4(base_noise, 23646);
+                const auto end_new_4 = std::chrono::high_resolution_clock::now();
+
+                //std::cout << "Old: " << std::chrono::duration<double>(end_old - start_old).count() << "\n";
                 std::cout << "New: " << std::chrono::duration<double>(end_new - start_new).count() << "\n";
                 std::cout << "New_2: " << std::chrono::duration<double>(end_new_2 - start_new_2).count() << "\n";
-                std::cout << "New_3: " << std::chrono::duration<double>(end_new_3 - start_new_3).count() << "\n";
+                //std::cout << "New_3: " << std::chrono::duration<double>(end_new_3 - start_new_3).count() << "\n";
+                std::cout << "New_4: " << std::chrono::duration<double>(end_new_4 - start_new_4).count() << "\n";
         }
 #endif
 
@@ -412,15 +461,20 @@ void TestPalinNoiseCase1(void)
                 Lumen::Utility::ProceduralContentGeneration::Detail::GenerateSmoothNoiseOctave(perlin_noise_data);
                 const auto gen_smooth_noise_end = std::chrono::high_resolution_clock::now();
 
-                const auto start_old = std::chrono::high_resolution_clock::now();
-                const auto amp_old = BlendSmoothNoiseOctaveTogether_Old(perlin_noise_data);
-                (void)amp_old;
-                const auto end_old = std::chrono::high_resolution_clock::now();
+                // const auto start_old = std::chrono::high_resolution_clock::now();
+                // const auto amp_old = BlendSmoothNoiseOctaveTogether_Old(perlin_noise_data);
+                // (void)amp_old;
+                // const auto end_old = std::chrono::high_resolution_clock::now();
 
                 const auto start_new = std::chrono::high_resolution_clock::now();
                 const auto amp_new = BlendSmoothNoiseOctaveTogether_New(perlin_noise_data);
                 (void)amp_new;
                 const auto end_new = std::chrono::high_resolution_clock::now();
+
+                const auto start_new_2 = std::chrono::high_resolution_clock::now();
+                const auto amp_new_2 = BlendSmoothNoiseOctaveTogether_New_2(perlin_noise_data);
+                (void)amp_new_2;
+                const auto end_new_2 = std::chrono::high_resolution_clock::now();
 
                 const auto blend_smooth_noise_start = std::chrono::high_resolution_clock::now();
                 const auto amp = Lumen::Utility::ProceduralContentGeneration::Detail::BlendSmoothNoiseOctaveTogether(perlin_noise_data);
@@ -431,8 +485,9 @@ void TestPalinNoiseCase1(void)
 
                 std::cout << "GenSmoothNoise: " << std::chrono::duration<double>(gen_smooth_noise_end - gen_smooth_noise_start).count() << "\n";
 
-                std::cout << "Old: " << std::chrono::duration<double>(end_old - start_old).count() << "\n";
+                //std::cout << "Old: " << std::chrono::duration<double>(end_old - start_old).count() << "\n";
                 std::cout << "New: " << std::chrono::duration<double>(end_new - start_new).count() << "\n";
+                std::cout << "New_2: " << std::chrono::duration<double>(end_new_2 - start_new_2).count() << "\n";
 
                 std::cout << "BlendSmoothNoise: " << std::chrono::duration<double>(blend_smooth_noise_end - blend_smooth_noise_start).count() << "\n";
 
@@ -526,7 +581,7 @@ void TestPalinNoiseCase1(void)
 //std::cout << "PerlinNoiseData: " << __LINE__ << "\n";
         sf::VertexArray vertices{};
 
-        float cell_size = 1.0f;
+        float cell_size = 5.0f;
 //std::cout << "PerlinNoiseData: " << __LINE__ << "\n";
         //SetVertexArrayPerlinNoise(vertices, base_noise, cell_size);
         SetVertexArrayPerlinNoise(vertices, perlin_noise_data.GetPerlinNoise(), cell_size);
