@@ -139,12 +139,28 @@ private:
                 this->m_resource_manager_ptr.Init();
 
                 this->LoadInitFonts();
+                this->LoadInitTextures();
+                this->InitSprite();
         }
 
         constexpr void LoadInitFonts(void) noexcept
         {
                 assert(!this->m_is_initialized);
                 this->m_resource_manager_ptr.LoadFontFromFile("./Assets/Fonts/DroidSansFallback.ttf", Lumen::ResourceManager::FontID::DROID_FONT);
+        }
+
+        constexpr void LoadInitTextures(void) noexcept
+        {
+                assert(!this->m_is_initialized);
+                this->m_resource_manager_ptr.LoadTextureFromFile("./Assets/Images/TestUITexture.jpeg", Lumen::ResourceManager::TextureID::UI_TEXTURE);
+        }
+
+        constexpr void InitSprite(void) noexcept
+        {
+                assert(!this->m_is_initialized);
+                sf::Sprite menu_button_sprite{this->m_resource_manager_ptr.GetTexture(Lumen::ResourceManager::TextureID::UI_TEXTURE)};
+                menu_button_sprite.setTextureRect(sf::IntRect({240, 214}, {370, 200}));
+                this->m_resource_manager_ptr.AddSprite(std::move(menu_button_sprite), Lumen::ResourceManager::SpriteID::MENU_BUTTON_SPRITE);
         }
 
         constexpr bool IsRunning(void) const noexcept

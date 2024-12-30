@@ -161,7 +161,7 @@ struct TransformRectangleArea {
         constexpr TransformRectangleArea(const TransformRectangleArea &other) noexcept = default;
         constexpr TransformRectangleArea &operator=(const TransformRectangleArea &other) noexcept = default;
 
-        constexpr void Move(const Lumen::Core::Math::Vec2i &offset) noexcept
+        constexpr void MovePosition(const Lumen::Core::Math::Vec2i &offset) noexcept
         {
                 this->top_left_position.top_left_position += offset;
                 this->bottom_right_position.bottom_right_position += offset;

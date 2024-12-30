@@ -102,6 +102,12 @@ public:
                 };
                 main_menu_start_game_button.SetMenuButtonLabelLayout(
                         Lumen::UI::Component::MenuButton::MenuButtonLabelLayout::CENTER);
+                
+                // Get button background sprite
+                sf::Sprite start_game_menu_button_sprite{resource_manager.GetSprite(Lumen::ResourceManager::SpriteID::MENU_BUTTON_SPRITE)};
+
+                // Set button background
+                main_menu_start_game_button.SetMenuButtonBackground(start_game_menu_button_sprite);
 
                 // Add buttons to the vector
                 buttons.push_back(std::move(main_menu_start_game_button));
