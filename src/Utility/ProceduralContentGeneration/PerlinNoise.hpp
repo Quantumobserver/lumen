@@ -18,13 +18,40 @@ namespace ProceduralContentGeneration {
 constexpr void GenerateWhiteNoise(Lumen::Utility::ProceduralContentGeneration::Grid<float> &grid, 
                                   std::uint32_t random_seed) noexcept
 {
+        // std::uint32_t random_number = random_seed;
+        // for (auto &cell : grid) {
+
+        //         random_number = Lumen::Utility::Random::LehmerRandomNumberGenerator(random_number);
+        //         cell = static_cast<float>(random_number) / static_cast<float>(UINT32_MAX);
+
+        //         //++i;
+        // }
+
+        // std::uint32_t random_number = random_seed;
+        // for (std::size_t i = 0; i < grid.GetHeight(); ++i) {
+        //         for (std::size_t j = 0; j < grid.GetWidth(); ++j) {
+        //                 random_number = Lumen::Utility::Random::LehmerRandomNumberGenerator3D(
+        //                         random_number, static_cast<std::uint32_t>(i), static_cast<std::uint32_t>(j));
+        //                 grid.At(j, i) = static_cast<float>(random_number) / static_cast<float>(UINT32_MAX);
+        //         }
+        // }
+
+        // std::uint32_t random_number = random_seed;
+        // for (std::size_t i = 0; i < grid.GetHeight(); ++i) {
+        //         for (std::size_t j = 0; j < grid.GetWidth(); ++j) {
+        //                 random_number = Lumen::Utility::Random::LehmerRandomNumberGenerator2D(
+        //                         random_number ^ static_cast<std::uint32_t>(i), random_number ^ static_cast<std::uint32_t>(j));
+        //                 grid.At(j, i) = static_cast<float>(random_number) / static_cast<float>(UINT32_MAX);
+        //         }
+        // }
+
         std::uint32_t random_number = random_seed;
-        for (auto &cell : grid) {
-
-                random_number = Lumen::Utility::Random::LehmerRandomNumberGenerator(random_number);
-                cell = static_cast<float>(random_number) / static_cast<float>(UINT32_MAX);
-
-                //++i;
+        for (std::size_t j = 0; j < grid.GetHeight(); ++j) {
+                for (std::size_t i = 0; i < grid.GetWidth(); ++i) {
+                        random_number = Lumen::Utility::Random::LehmerRandomNumberGenerator2D(
+                                random_number ^ static_cast<std::uint32_t>(i), static_cast<std::uint32_t>(j));
+                        grid.At(i, j) = static_cast<float>(random_number) / static_cast<float>(UINT32_MAX);
+                }
         }
 }
 
@@ -55,30 +82,28 @@ constexpr void GenerateSmoothNoise(Lumen::Utility::ProceduralContentGeneration::
         std::size_t sample_period = Lumen::Utility::ProceduralContentGeneration::Detail::PowerOfTwo(octave);
         float sample_frequency = 1.0f / static_cast<float>(sample_period);
  
-        //for (std::size_t i = 0; (i * sample_period) < base_noise.GetWidth(); ++i) {
-        for (std::size_t i = 0; i < base_noise.GetWidth(); ++i) {
-                //calculate the horizontal sampling indices
-                std::size_t sample_i0 = (i / sample_period) * sample_period;
-                std::size_t sample_i1 = (sample_i0 + sample_period) % base_noise.GetWidth(); //wrap around
-                float horizontal_blend = static_cast<float>(i - sample_i0) * sample_frequency;
-        
-                //for (std::size_t j = 0; (j * sample_period) < base_noise.GetHeight(); ++j) {
-                for (std::size_t j = 0; j < base_noise.GetHeight(); ++j) {
-                        //calculate the vertical sampling indices
-                        std::size_t sample_j0 = (j / sample_period) * sample_period;
-                        std::size_t sample_j1 = (sample_j0 + sample_period) % base_noise.GetHeight(); //wrap around
-                        float vertical_blend = static_cast<float>(j - sample_j0) * sample_frequency;
-                
+        for (std::size_t j = 0; j < base_noise.GetHeight(); ++j) {
+                //calculate the vertical sampling indices
+                std::size_t sample_j0 = (j / sample_period) * sample_period;
+                std::size_t sample_j1 = (sample_j0 + sample_period) % base_noise.GetHeight(); //wrap around
+                float vertical_blend = static_cast<float>(j - sample_j0) * sample_frequency;
+
+                for (std::size_t i = 0; i < base_noise.GetWidth(); ++i) {
+                        //calculate the horizontal sampling indices
+                        std::size_t sample_i0 = (i / sample_period) * sample_period;
+                        std::size_t sample_i1 = (sample_i0 + sample_period) % base_noise.GetWidth(); //wrap around
+                        float horizontal_blend = static_cast<float>(i - sample_i0) * sample_frequency;
+
                         //blend the top two corners
                         float top = Lumen::Utility::ProceduralContentGeneration::Detail::Interpolate(
                                 base_noise.At(sample_i0, sample_j0), 
                                 base_noise.At(sample_i1, sample_j0), horizontal_blend);
-                
+
                         //blend the bottom two corners
                         float bottom = Lumen::Utility::ProceduralContentGeneration::Detail::Interpolate(
                                 base_noise.At(sample_i0, sample_j1),
                                 base_noise.At(sample_i1, sample_j1), horizontal_blend);
-                
+
                         //final blend
                         smooth_noise_octave.At(i, j) = Lumen::Utility::ProceduralContentGeneration::Detail::Interpolate(
                                 top, bottom, vertical_blend);
@@ -177,10 +202,10 @@ constexpr void GenerateSmoothNoiseOctave(PerlinNoiseData &perlin_noise_data) noe
 
 constexpr void SetPerlinNoiseToAllZeros(PerlinNoiseData &perlin_noise_data) noexcept
 {
-        for (std::size_t i = 0; i < perlin_noise_data.GetWidth(); ++i) {
-                for (std::size_t j = 0; j < perlin_noise_data.GetHeight(); ++j) {
-                        perlin_noise_data.GetPerlinNoise().At(i, j) = 0.0f;
-                }
+        auto &perlin_noise = perlin_noise_data.GetPerlinNoise();
+
+        for (auto &cell : perlin_noise) {
+                cell = 0.0f;
         }
 }
 
@@ -194,24 +219,20 @@ struct PerlinNoiseTotalAmplitude {
 
         float amplitude = 1.0f;
         float total_amplitude = 0.0f;
-std::cout << "PerlinNoiseData: " << __LINE__ << "perlin_noise addr:" << perlin_noise_data.GetPerlinNoise().GetData() << "\n";
+
         for (std::size_t octave_reverse_index = 0; octave_reverse_index < perlin_noise_data.GetOctaveCount();
              ++octave_reverse_index) {
-std::cout << "PerlinNoiseData: " << __LINE__ << "octave_reverse_index:" << octave_reverse_index << "\n";
+
                 amplitude *= persistance;
-std::cout << "PerlinNoiseData: " << __LINE__ << "amplitude:" << amplitude << "\n";
+
                 total_amplitude += amplitude;
-assert(amplitude > 0.0f);
+
                 const auto &smooth_noise = perlin_noise_data.GetSmoothNoise(
                         perlin_noise_data.GetOctaveCount() - 1 - octave_reverse_index);
                 
-                for (std::size_t i = 0; i < perlin_noise_data.GetWidth(); ++i) {
-                        for (std::size_t j = 0; j < perlin_noise_data.GetHeight(); ++j) {
-
+                for (std::size_t j = 0; j < perlin_noise_data.GetHeight(); ++j) {
+                        for (std::size_t i = 0; i < perlin_noise_data.GetWidth(); ++i) {
                                 perlin_noise_data.GetPerlinNoise().At(i, j) += smooth_noise.At(i, j) * amplitude;
-//std::cout << "PerlinNoiseData: " << __LINE__ << ", [" << i << ", " << j <<"] " << smooth_noise.At(i, j) << "\n";
-//assert(smooth_noise.At(i, j) >= 0.01f);
-//assert(perlin_noise_data.GetPerlinNoise().At(i, j) >= 0.01f);
                         }
                 }
         }
@@ -222,8 +243,8 @@ assert(amplitude > 0.0f);
 constexpr void NormalizePerlinNoise(PerlinNoiseData &perlin_noise_data,
                                     const PerlinNoiseTotalAmplitude &total_amplitude) noexcept
 {
-        for (std::size_t i = 0; i < perlin_noise_data.GetWidth(); ++i) {
-                for (std::size_t j = 0; j < perlin_noise_data.GetHeight(); ++j) {
+        for (std::size_t j = 0; j < perlin_noise_data.GetHeight(); ++j) {
+                for (std::size_t i = 0; i < perlin_noise_data.GetWidth(); ++i) {
                         perlin_noise_data.GetPerlinNoise().At(i, j) /= total_amplitude.total_amplitude;
                 }
         }
@@ -236,13 +257,11 @@ constexpr void GeneratePerlinNoise(PerlinNoiseData &perlin_noise_data) noexcept
         Lumen::Utility::ProceduralContentGeneration::Detail::GenerateSmoothNoiseOctave(perlin_noise_data);
 
         Lumen::Utility::ProceduralContentGeneration::Detail::SetPerlinNoiseToAllZeros(perlin_noise_data);
-std::cout << "Generating perlin noise: " << __LINE__ << std::endl;
+
         const auto total_amplitude = Lumen::Utility::ProceduralContentGeneration::Detail::BlendSmoothNoiseOctaveTogether(
                                         perlin_noise_data);
-        (void) total_amplitude;
-/*std::cout << "Generating perlin noise: " << __LINE__ << std::endl;
+
         Lumen::Utility::ProceduralContentGeneration::Detail::NormalizePerlinNoise(perlin_noise_data, total_amplitude);
-std::cout << "Generating perlin noise: " << __LINE__ << std::endl;*/
 }
 
 } // namespace ProceduralContentGeneration
