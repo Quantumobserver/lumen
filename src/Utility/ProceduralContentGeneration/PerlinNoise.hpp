@@ -16,36 +16,9 @@ namespace Utility {
 namespace ProceduralContentGeneration {
 
 constexpr void GenerateWhiteNoise(Lumen::Utility::ProceduralContentGeneration::Grid<float> &grid, 
-                                  std::uint32_t random_seed) noexcept
+                                  std::uint32_t white_noise_seed) noexcept
 {
-        // std::uint32_t random_number = random_seed;
-        // for (auto &cell : grid) {
-
-        //         random_number = Lumen::Utility::Random::LehmerRandomNumberGenerator(random_number);
-        //         cell = static_cast<float>(random_number) / static_cast<float>(UINT32_MAX);
-
-        //         //++i;
-        // }
-
-        // std::uint32_t random_number = random_seed;
-        // for (std::size_t i = 0; i < grid.GetHeight(); ++i) {
-        //         for (std::size_t j = 0; j < grid.GetWidth(); ++j) {
-        //                 random_number = Lumen::Utility::Random::LehmerRandomNumberGenerator3D(
-        //                         random_number, static_cast<std::uint32_t>(i), static_cast<std::uint32_t>(j));
-        //                 grid.At(j, i) = static_cast<float>(random_number) / static_cast<float>(UINT32_MAX);
-        //         }
-        // }
-
-        // std::uint32_t random_number = random_seed;
-        // for (std::size_t i = 0; i < grid.GetHeight(); ++i) {
-        //         for (std::size_t j = 0; j < grid.GetWidth(); ++j) {
-        //                 random_number = Lumen::Utility::Random::LehmerRandomNumberGenerator2D(
-        //                         random_number ^ static_cast<std::uint32_t>(i), random_number ^ static_cast<std::uint32_t>(j));
-        //                 grid.At(j, i) = static_cast<float>(random_number) / static_cast<float>(UINT32_MAX);
-        //         }
-        // }
-
-        std::uint32_t random_number = random_seed;
+        std::uint32_t random_number = white_noise_seed;
         for (std::size_t j = 0; j < grid.GetHeight(); ++j) {
                 for (std::size_t i = 0; i < grid.GetWidth(); ++i) {
                         random_number = Lumen::Utility::Random::LehmerRandomNumberGenerator2D(
