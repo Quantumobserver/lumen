@@ -107,11 +107,92 @@ struct Lifespan {
 //#include <iostream>
 class Animation {
 private:
+        struct Sprite {
+                struct Void {};
+
+                bool has_valid_sprite;
+                union {
+                        Void no_data;
+                        sf::Sprite sprite;
+                };
+
+                CONSTEXPR_IF_SF_SPRITE_DEFAULT_CONSTRUCTOR Sprite(void) noexcept
+                : has_valid_sprite{false}, no_data{} {}
+
+                CONSTEXPR_IF_SF_SPRITE_SET_TEXTURE Sprite(const sf::Sprite &sprite) noexcept
+                :  has_valid_sprite{true}, sprite{sprite} {}
+
+                constexpr ~Sprite(void) noexcept
+                {
+                        if (this->has_valid_sprite) {
+                                this->sprite.~Sprite();
+                        }
+                }
+
+                constexpr Sprite &operator=(const Sprite &other) noexcept
+                {
+                        if (this->has_valid_sprite) {
+                                this->sprite.~Sprite();
+                        }
+                        if (other.has_valid_sprite) {
+                                this->sprite = other.sprite;
+                        }
+                        this->has_valid_sprite = other.has_valid_sprite;
+                        return *this;
+                }
+
+                constexpr void SetOrigin(Lumen::Core::Math::Vec2f32 origin) noexcept
+                {
+                        assert(this->has_valid_sprite);
+                        this->sprite.setOrigin({origin.x, origin.y});
+                }
+
+
+                constexpr void SetScale(Lumen::Core::Math::Vec2f32 factors) noexcept
+                {
+                        assert(this->has_valid_sprite);
+                        this->sprite.setScale({factors.x, factors.y});
+                }
+
+                constexpr void SetPosition(Lumen::Core::Math::Vec2f32 position) noexcept
+                {
+                        assert(this->has_valid_sprite);
+                        this->sprite.setPosition({position.x, position.y});
+                }
+
+                constexpr void SetTextureRect(const sf::IntRect &rectangle) noexcept
+                {
+                        assert(this->has_valid_sprite);
+                        this->sprite.setTextureRect(rectangle);
+                }
+
+                [[nodiscard]] constexpr const sf::Texture &GetTexture(void) const noexcept
+                {
+                        assert(this->has_valid_sprite);
+                        return this->sprite.getTexture();
+                }
+
+                [[nodiscard]] constexpr Lumen::Core::Math::Vec2f32 GetScale(void) const noexcept
+                {
+                        assert(this->has_valid_sprite);
+                        const auto scale = this->sprite.getScale();
+                        return {scale.x, scale.y};
+                }
+
+                [[nodiscard]] constexpr Lumen::Core::Math::Vec2f32 GetPosition(void) const noexcept
+                {
+                        assert(this->has_valid_sprite);
+                        const auto position = this->sprite.getPosition();
+                        return {position.x, position.y};
+                }
+
+        };
+
         std::size_t m_number_of_frames_this_animation_has;
         float m_the_time_of_this_entity_has_lived_in_game;
         float m_frame_duration;
         Lumen::Core::Math::Vec2f32 m_size;
-        sf::Sprite m_sprite;
+        Sprite m_sprite;
         bool m_is_non_repeating_animation;
 
 public:
@@ -131,13 +212,13 @@ public:
           m_is_non_repeating_animation{is_non_repeating_animation}
         {
                 assert(this->m_frame_duration > 0.0f);
-                const sf::Texture &texture = this->m_sprite.getTexture();
+                const sf::Texture &texture = this->m_sprite.GetTexture();
                 const auto texture_size = texture.getSize();
                 const float animation_size_x = static_cast<float>(texture_size.x / this->m_number_of_frames_this_animation_has);
                 const float scale_factor_x = this->m_size.x / animation_size_x;
                 const float scale_factor_y = this->m_size.y / static_cast<float>(texture_size.y);
-                this->m_sprite.setScale({scale_factor_x, scale_factor_y});
-                this->m_sprite.setOrigin({animation_size_x / 2.0f, static_cast<float>(texture_size.y) / 2.0f});
+                this->m_sprite.SetScale({scale_factor_x, scale_factor_y});
+                this->m_sprite.SetOrigin({animation_size_x / 2.0f, static_cast<float>(texture_size.y) / 2.0f});
         }
 
         constexpr void ChangeAnimation(const Animation &animation) noexcept
@@ -178,29 +259,29 @@ public:
         {
                 this->m_the_time_of_this_entity_has_lived_in_game += delta_time;
                 const std::size_t animation_frame = this->GetAnimationFrame();
-                const sf::Texture &texture = this->m_sprite.getTexture();
+                const sf::Texture &texture = this->m_sprite.GetTexture();
                 const sf::Vector2u &texture_size = texture.getSize();
                 const auto fram_size_x = texture_size.x / this->m_number_of_frames_this_animation_has;
                 sf::IntRect rectangle_to_draw{
                         { static_cast<int>(animation_frame * fram_size_x), 0, },
                         { static_cast<int>(fram_size_x), static_cast<int>(texture_size.y), },
                 };
-                m_sprite.setTextureRect(rectangle_to_draw);
+                m_sprite.SetTextureRect(rectangle_to_draw);
         }
 
         CONSTEXPR_IF_SF_SPRITE_SET_TEXTURE void SetPosition(float x, float y) noexcept
         {
-                this->m_sprite.setPosition({x, y});
+                this->m_sprite.SetPosition({x, y});
         }
 
         CONSTEXPR_IF_SF_SPRITE_SET_POSITION void SetPosition(const Lumen::Core::Math::Vec2f32 &position) noexcept
         {
-                this->m_sprite.setPosition({position.x, position.y});
+                this->m_sprite.SetPosition(position);
         }
 
         CONSTEXPR_IF_SF_SPRITE_SET_SCALE void SetScale(const Lumen::Core::Math::Vec2f32 &factor) noexcept
         {
-                this->m_sprite.setScale({factor.x, factor.y});
+                this->m_sprite.SetScale(factor);
         }
 
         CONSTEXPR_IF_SF_SPRITE_SET_SCALE void ClearSprite(void) noexcept
@@ -208,13 +289,12 @@ public:
                 //auto color = this->m_sprite.getColor();
                 //color.a = 0;
                 //this->m_sprite.setColor(color);
-                this->m_sprite.setScale({0.0f, 0.0f});
+                this->m_sprite.SetScale({0.0f, 0.0f});
         }
 
         CONSTEXPR_IF_SF_SPRITE_GET_SCALE Lumen::Core::Math::Vec2f32 GetScale(void) const noexcept
         {
-                const auto scale_factor = this->m_sprite.getScale();
-                return {scale_factor.x, scale_factor.y};
+                return this->m_sprite.GetScale();
         }
 
         constexpr void SetSprite(const sf::Sprite &sprite) noexcept
@@ -229,7 +309,8 @@ public:
 
         constexpr const sf::Sprite &GetSprite(void) const noexcept
         {
-                return this->m_sprite;
+                assert(this->m_sprite.has_valid_sprite);
+                return this->m_sprite.sprite;
         }
 
         constexpr const Lumen::Core::Math::Vec2f32 &GetSize(void) const noexcept
