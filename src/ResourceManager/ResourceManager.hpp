@@ -12,6 +12,7 @@
 #include <vector>
 #include <utility>
 #include <string>
+#include <optional>
 
 namespace Lumen {
 namespace ResourceManager {
@@ -21,7 +22,7 @@ private:
         bool m_is_initialized{false};
         std::vector<sf::Texture> m_textures;
         std::vector<sf::Font> m_fonts;
-        std::vector<sf::Sprite> m_sprites;
+        std::vector<std::optional<sf::Sprite> > m_sprites;
 public:
         CONSTEXPR_IF_CXX_20 ResourceManager(void) noexcept = default;
         constexpr ResourceManager(const ResourceManager &) noexcept = delete;
@@ -88,14 +89,16 @@ public:
         const sf::Sprite &GetSprite(const Lumen::ResourceManager::SpriteID sprite_id) const noexcept
         {
                 assert(this->m_is_initialized);
-                return this->m_sprites[static_cast<std::size_t>(sprite_id)];
+                assert(this->m_sprites[static_cast<std::size_t>(sprite_id)].has_value());
+                return this->m_sprites[static_cast<std::size_t>(sprite_id)].value();
         }
 
         CONSTEXPR_IF_CXX_20
         sf::Sprite &GetSprite(const Lumen::ResourceManager::SpriteID sprite_id) noexcept
         {
                 assert(this->m_is_initialized);
-                return this->m_sprites[static_cast<std::size_t>(sprite_id)];
+                assert(this->m_sprites[static_cast<std::size_t>(sprite_id)].has_value());
+                return this->m_sprites[static_cast<std::size_t>(sprite_id)].value();
         }
 
         CONSTEXPR_IF_CXX_20

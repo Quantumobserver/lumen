@@ -108,81 +108,73 @@ struct Lifespan {
 class Animation {
 private:
         struct Sprite {
-                struct Void {};
+                std::optional<sf::Sprite> sprite;
 
-                bool has_valid_sprite;
-                union {
-                        Void no_data;
-                        sf::Sprite sprite;
-                };
+                constexpr Sprite(void) noexcept : sprite{std::nullopt} {}
 
-                CONSTEXPR_IF_SF_SPRITE_DEFAULT_CONSTRUCTOR Sprite(void) noexcept
-                : has_valid_sprite{false}, no_data{} {}
+                constexpr Sprite(const sf::Sprite &sprite) noexcept : sprite{sprite} {}
 
-                CONSTEXPR_IF_SF_SPRITE_SET_TEXTURE Sprite(const sf::Sprite &sprite) noexcept
-                :  has_valid_sprite{true}, sprite{sprite} {}
+                constexpr Sprite &operator=(const Sprite &other) noexcept = default;
 
-                constexpr ~Sprite(void) noexcept
+                [[nodiscard]] constexpr bool HasValidSprite(void) const noexcept
                 {
-                        if (this->has_valid_sprite) {
-                                this->sprite.~Sprite();
-                        }
+                        return this->sprite.has_value();
                 }
 
-                constexpr Sprite &operator=(const Sprite &other) noexcept
+                constexpr sf::Sprite &GetSprite(void) noexcept
                 {
-                        if (this->has_valid_sprite) {
-                                this->sprite.~Sprite();
-                        }
-                        if (other.has_valid_sprite) {
-                                this->sprite = other.sprite;
-                        }
-                        this->has_valid_sprite = other.has_valid_sprite;
-                        return *this;
+                        assert(this->sprite.has_value());
+                        return this->sprite.value();
+                }
+
+                constexpr const sf::Sprite &GetSprite(void) const noexcept
+                {
+                        assert(this->sprite.has_value());
+                        return this->sprite.value();
                 }
 
                 constexpr void SetOrigin(Lumen::Core::Math::Vec2f32 origin) noexcept
                 {
-                        assert(this->has_valid_sprite);
-                        this->sprite.setOrigin({origin.x, origin.y});
+                        assert(this->sprite.has_value());
+                        this->sprite.value().setOrigin({origin.x, origin.y});
                 }
 
 
                 constexpr void SetScale(Lumen::Core::Math::Vec2f32 factors) noexcept
                 {
-                        assert(this->has_valid_sprite);
-                        this->sprite.setScale({factors.x, factors.y});
+                        assert(this->sprite.has_value());
+                        this->sprite.value().setScale({factors.x, factors.y});
                 }
 
                 constexpr void SetPosition(Lumen::Core::Math::Vec2f32 position) noexcept
                 {
-                        assert(this->has_valid_sprite);
-                        this->sprite.setPosition({position.x, position.y});
+                        assert(this->sprite.has_value());
+                        this->sprite.value().setPosition({position.x, position.y});
                 }
 
                 constexpr void SetTextureRect(const sf::IntRect &rectangle) noexcept
                 {
-                        assert(this->has_valid_sprite);
-                        this->sprite.setTextureRect(rectangle);
+                        assert(this->sprite.has_value());
+                        this->sprite.value().setTextureRect(rectangle);
                 }
 
                 [[nodiscard]] constexpr const sf::Texture &GetTexture(void) const noexcept
                 {
-                        assert(this->has_valid_sprite);
-                        return this->sprite.getTexture();
+                        assert(this->sprite.has_value());
+                        return this->sprite.value().getTexture();
                 }
 
                 [[nodiscard]] constexpr Lumen::Core::Math::Vec2f32 GetScale(void) const noexcept
                 {
-                        assert(this->has_valid_sprite);
-                        const auto scale = this->sprite.getScale();
+                        assert(this->sprite.has_value());
+                        const auto scale = this->sprite.value().getScale();
                         return {scale.x, scale.y};
                 }
 
                 [[nodiscard]] constexpr Lumen::Core::Math::Vec2f32 GetPosition(void) const noexcept
                 {
-                        assert(this->has_valid_sprite);
-                        const auto position = this->sprite.getPosition();
+                        assert(this->sprite.has_value());
+                        const auto position = this->sprite.value().getPosition();
                         return {position.x, position.y};
                 }
 
@@ -309,8 +301,8 @@ public:
 
         constexpr const sf::Sprite &GetSprite(void) const noexcept
         {
-                assert(this->m_sprite.has_valid_sprite);
-                return this->m_sprite.sprite;
+                assert(this->m_sprite.HasValidSprite());
+                return this->m_sprite.GetSprite();
         }
 
         constexpr const Lumen::Core::Math::Vec2f32 &GetSize(void) const noexcept
