@@ -15,7 +15,7 @@ target_link_libraries(TestButton PRIVATE
 add_test(NAME TestButton COMMAND TestButton)
 
 
-add_executable(TestMenu TestMenu.cpp)
+add_executable(TestMenu TestMenu.cpp ${LUMEN_SRC_DIR}/Log/DebugSignal.cpp)
 target_include_directories(TestMenu PRIVATE
                            ${DEPENDENCIES_DIR}/SFML/include/
                            ${DEPENDENCIES_DIR}/glm/

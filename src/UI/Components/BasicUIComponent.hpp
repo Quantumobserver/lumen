@@ -2,6 +2,7 @@
 
 #include <Core/Math/Vector.hpp>
 #include <Action/Action.hpp>
+#include <LayerStack/Layer.hpp>
 
 #include <SFML/Graphics/Sprite.hpp>
 #include <SFML/Graphics/RenderWindow.hpp>
@@ -23,6 +24,7 @@ enum class UIComponentTypeTag {
         TEXT_AREA,
         CHECKBOX,
         MENU,
+        NUMBER_OF_BASIC_UI_COMPONENTS,
 };
 
 struct RelativeSelectionAction {
@@ -33,66 +35,54 @@ struct RelativeSelectionAction {
 class BasicUIComponent {
 protected:
         UIComponentTypeTag m_ui_component_type;
-        sf::RenderWindow *m_window_ptr;
+        bool m_is_visible;
+        mutable bool m_is_selected;
+
 public:
-        constexpr BasicUIComponent(void) noexcept : m_ui_component_type{UIComponentTypeTag::NULL_COMPONENT}, m_window_ptr{nullptr} {}
-        constexpr BasicUIComponent(UIComponentTypeTag ui_component_type, sf::RenderWindow *window_ptr) noexcept
-        : m_ui_component_type{ui_component_type}, m_window_ptr{window_ptr} {}
+        using DoActionResult = Lumen::LayerStack::BaseLayer::DoActionResult;
+
+        constexpr BasicUIComponent(void) noexcept
+        : m_ui_component_type{UIComponentTypeTag::NULL_COMPONENT}, m_is_visible{true}, m_is_selected{false} {}
+        constexpr BasicUIComponent(UIComponentTypeTag ui_component_type, bool is_visable = true) noexcept
+        : m_ui_component_type{ui_component_type}, m_is_visible{is_visable}, m_is_selected{false} {}
 
         constexpr BasicUIComponent(const BasicUIComponent &) noexcept = delete;
-        constexpr BasicUIComponent(BasicUIComponent &&other) noexcept
-        : m_ui_component_type{other.m_ui_component_type}, m_window_ptr{other.m_window_ptr}
-        {
-                other.m_ui_component_type = UIComponentTypeTag::NULL_COMPONENT;
-                other.m_window_ptr = nullptr;
-        }
+        constexpr BasicUIComponent(BasicUIComponent &&other) noexcept = default;
 
         constexpr BasicUIComponent &operator=(const BasicUIComponent &) noexcept = delete;
-        constexpr BasicUIComponent &operator=(BasicUIComponent &&other) noexcept
-        {
-                if (this == &other) {
-                        return *this;
-                }
-                this->m_ui_component_type = other.m_ui_component_type;
-                this->m_window_ptr = other.m_window_ptr;
-                other.m_ui_component_type = UIComponentTypeTag::NULL_COMPONENT;
-                other.m_window_ptr = nullptr;
-                return *this;
-        }
+        constexpr BasicUIComponent &operator=(BasicUIComponent &&other) noexcept = default;
 
         constexpr virtual ~BasicUIComponent(void) noexcept {}
 
-        constexpr virtual void Init(void) noexcept = 0;
-        constexpr virtual void Update(float delta_time) noexcept = 0;
-        constexpr virtual void Render(void) noexcept = 0;
-        constexpr virtual void DoWindowResizeAction(const Lumen::Core::Math::Vec2i &window_new_size) noexcept = 0;
-        constexpr virtual void DoSelectionAction(const Lumen::UI::Component::RelativeSelectionAction &selection_action) noexcept = 0;
+        constexpr virtual void Init(void) noexcept {} // = 0;
+        constexpr virtual void Update(float delta_time) noexcept {(void)delta_time;} // = 0;
+        constexpr virtual void Render(void) noexcept {} // = 0;
+        constexpr virtual DoActionResult DoWindowResizeAction(
+                const Lumen::Core::Math::Vec2i &window_new_size) noexcept {
+                        (void)window_new_size;
+                        return DoActionResult::NotHandledOrNotBlocked;} // = 0;
+        constexpr virtual DoActionResult DoSelectionAction(
+                const Lumen::UI::Component::RelativeSelectionAction &selection_action) noexcept
+        {(void)selection_action;return DoActionResult::NotHandledOrNotBlocked;} // = 0;
 
-        constexpr virtual void AddComponent([[maybe_unused]] Lumen::UI::Component::BasicUIComponent &&basic_ui_component) noexcept {}
-
-        constexpr virtual void SetPosition([[maybe_unused]] const Lumen::Core::Math::Vec2i &position) noexcept {}
-        constexpr virtual void SetSize([[maybe_unused]] const Lumen::Core::Math::Vec2i &size) noexcept {}
-        constexpr virtual void SetText([[maybe_unused]] std::string &&text) noexcept {}
-        constexpr virtual void SetIcon([[maybe_unused]] const sf::Sprite &sprite) noexcept {}
-
-        constexpr virtual std::optional<Lumen::Core::Math::Vec2i> GetPosition(void) const noexcept
+        constexpr bool IsSelected(void) const noexcept
         {
-                return std::nullopt;
+                return this->m_is_selected;
         }
 
-        constexpr virtual std::optional<Lumen::Core::Math::Vec2i> GetSize(void) const noexcept
+        constexpr void SetSelected(bool is_selected) const noexcept
         {
-                return std::nullopt;
+                this->m_is_selected = is_selected;
         }
 
-        constexpr virtual std::optional<std::string_view> GetText(void) const noexcept
+        constexpr void SetVisible(bool is_visible) noexcept
         {
-                return std::nullopt;
+                this->m_is_visible = is_visible;
         }
 
-        constexpr virtual std::optional<sf::Sprite> GetIcon(void) const noexcept
+        constexpr bool IsVisible(void) const noexcept
         {
-                return std::nullopt;
+                return this->m_is_visible;
         }
 
         constexpr Lumen::UI::Component::UIComponentTypeTag GetUIType(void) const noexcept
@@ -102,103 +92,144 @@ public:
 };
 
 struct BoundingBox {
-        Lumen::Core::Math::Vec2i size;
-        //Lumen::Core::Math::Vec2i half_size;
-
-        constexpr BoundingBox(void) noexcept = default;
-        constexpr BoundingBox(const Lumen::Core::Math::Vec2i &size) noexcept
-        : size{size}//, half_size{size / 2}
-          {}
-        constexpr BoundingBox(const BoundingBox &other) noexcept = default;
-        constexpr BoundingBox &operator=(const BoundingBox &other) noexcept = default;
+        Lumen::Core::Math::Vec2f32 size;
 };
 
-// struct TransformCenter {
-//         Lumen::Core::Math::Vec2i center_position;
-
-//         constexpr TransformCenter(void) noexcept {}
-//         constexpr TransformCenter(const Lumen::Core::Math::Vec2i &center_position) noexcept
-//         : center_position{center_position} {}
-//         constexpr TransformCenter(const TransformCenter &other) noexcept = default;
-//         constexpr TransformCenter &operator=(const TransformCenter &other) noexcept = default;
-// };
-
-struct TransformTopLeft {
-        Lumen::Core::Math::Vec2i top_left_position;
-
-        constexpr TransformTopLeft(void) noexcept {}
-        constexpr TransformTopLeft(const Lumen::Core::Math::Vec2i &top_left_position) noexcept
-        : top_left_position{top_left_position} {}
-        constexpr TransformTopLeft(const TransformTopLeft &other) noexcept = default;
-        constexpr TransformTopLeft &operator=(const TransformTopLeft &other) noexcept = default;
+struct RelativeTransformTopLeft {
+        Lumen::Core::Math::Vec2f32 position;
 };
 
-struct TransformBottomRight {
-        Lumen::Core::Math::Vec2i bottom_right_position;
-
-        constexpr TransformBottomRight(void) noexcept {}
-        constexpr TransformBottomRight(const Lumen::Core::Math::Vec2i &bottom_right_position) noexcept
-        : bottom_right_position{bottom_right_position} {}
-        constexpr TransformBottomRight(const TransformBottomRight &other) noexcept = default;
-        constexpr TransformBottomRight &operator=(const TransformBottomRight &other) noexcept = default;
+struct RelativeTransformBottomRight {
+        Lumen::Core::Math::Vec2f32 position;
 };
 
-struct TransformRectangleArea {
-        Lumen::UI::Component::TransformTopLeft top_left_position;
-        Lumen::UI::Component::TransformBottomRight bottom_right_position;
+struct AbsoluteTransformTopLeft {
+        Lumen::Core::Math::Vec2f32 position;
+};
 
-        constexpr TransformRectangleArea(void) noexcept {}
-        constexpr TransformRectangleArea(const Lumen::UI::Component::TransformTopLeft &top_left_position,
-                                         const Lumen::UI::Component::TransformBottomRight &bottom_right_position) noexcept
-        : top_left_position{top_left_position}, bottom_right_position{bottom_right_position} {}
+struct AbsoluteTransformBottomRight {
+        Lumen::Core::Math::Vec2f32 position;
+};
 
-        constexpr TransformRectangleArea(const Lumen::UI::Component::TransformTopLeft &top_left_position,
-                                         const Lumen::UI::Component::BoundingBox &bounding_box) noexcept
-        : top_left_position{top_left_position},
-          bottom_right_position{top_left_position.top_left_position + bounding_box.size} {}
+struct RelativeTransformRectangleArea {
+        Lumen::Core::Math::Vec2f32 top_left_position;
+        Lumen::Core::Math::Vec2f32 bottom_right_position;
 
+        constexpr RelativeTransformRectangleArea(void) noexcept {}
 
-        constexpr TransformRectangleArea(const TransformRectangleArea &other) noexcept = default;
-        constexpr TransformRectangleArea &operator=(const TransformRectangleArea &other) noexcept = default;
+        constexpr RelativeTransformRectangleArea(
+                const Lumen::UI::Component::RelativeTransformTopLeft &top_left_position,
+                const Lumen::UI::Component::RelativeTransformBottomRight &bottom_right_position) noexcept
+        : top_left_position{top_left_position.position}, bottom_right_position{bottom_right_position.position} {}
 
-        constexpr void MovePosition(const Lumen::Core::Math::Vec2i &offset) noexcept
+        constexpr RelativeTransformRectangleArea(
+                const Lumen::UI::Component::RelativeTransformTopLeft &top_left_position,
+                const Lumen::UI::Component::BoundingBox &bounding_box) noexcept
+        : top_left_position{top_left_position.position},
+          bottom_right_position{top_left_position.position + bounding_box.size} {}
+
+        constexpr void MovePosition(const Lumen::Core::Math::Vec2f32 &offset) noexcept
         {
-                this->top_left_position.top_left_position += offset;
-                this->bottom_right_position.bottom_right_position += offset;
+                this->top_left_position += offset;
+                this->bottom_right_position += offset;
+        }
+
+        constexpr void operator+=(const Lumen::Core::Math::Vec2f32 &offset) noexcept
+        {
+                this->MovePosition(offset);
         }
 };
 
-struct TransformSelectedPosition {
-        Lumen::Core::Math::Vec2i selected_position;
+struct AbsoluteTransformRectangleArea {
+        Lumen::Core::Math::Vec2f32 top_left_position;
+        Lumen::Core::Math::Vec2f32 bottom_right_position;
 
-        constexpr TransformSelectedPosition(void) noexcept {}
-        constexpr TransformSelectedPosition(const Lumen::Core::Math::Vec2i &selected_position) noexcept
-        : selected_position{selected_position} {}
+        constexpr AbsoluteTransformRectangleArea(void) noexcept {}
 
+        constexpr AbsoluteTransformRectangleArea(
+                const Lumen::UI::Component::AbsoluteTransformTopLeft &top_left_position,
+                const Lumen::UI::Component::AbsoluteTransformBottomRight &bottom_right_position) noexcept
+        : top_left_position{top_left_position.position}, bottom_right_position{bottom_right_position.position} {}
+
+        constexpr AbsoluteTransformRectangleArea(
+                const Lumen::UI::Component::AbsoluteTransformTopLeft &top_left_position,
+                const Lumen::UI::Component::BoundingBox &bounding_box) noexcept
+        : top_left_position{top_left_position.position},
+          bottom_right_position{top_left_position.position + bounding_box.size} {}
+        
+        constexpr AbsoluteTransformRectangleArea(
+                const Lumen::UI::Component::RelativeTransformRectangleArea &relative_rectangle_area,
+                const Lumen::Core::Math::Vec2f32 &offset) noexcept
+        : top_left_position{relative_rectangle_area.top_left_position + offset},
+          bottom_right_position{relative_rectangle_area.bottom_right_position + offset} {}
+
+        constexpr void MovePosition(const Lumen::Core::Math::Vec2f32 &offset) noexcept
+        {
+                this->top_left_position += offset;
+                this->bottom_right_position += offset;
+        }
+
+        constexpr void operator+=(const Lumen::Core::Math::Vec2f32 &offset) noexcept
+        {
+                this->MovePosition(offset);
+        }
 };
 
-constexpr bool IsIncluded(const Lumen::UI::Component::TransformSelectedPosition &selected_position,
-                          const Lumen::UI::Component::TransformRectangleArea &rectangle_area) noexcept
+struct TransformRectangleArea {
+        RelativeTransformRectangleArea relative_rectangle_area;
+        AbsoluteTransformRectangleArea absolute_rectangle_area;
+
+        constexpr TransformRectangleArea(void) noexcept {}
+
+        constexpr TransformRectangleArea(
+                const Lumen::UI::Component::RelativeTransformRectangleArea &relative_rectangle_area,
+                const Lumen::UI::Component::AbsoluteTransformRectangleArea &absolute_rectangle_area) noexcept
+        : relative_rectangle_area{relative_rectangle_area}, absolute_rectangle_area{absolute_rectangle_area} {}
+
+        constexpr TransformRectangleArea(
+                const Lumen::UI::Component::RelativeTransformRectangleArea &relative_rectangle_area,
+                const Lumen::Core::Math::Vec2f32 offset) noexcept
+        : relative_rectangle_area{relative_rectangle_area},
+          absolute_rectangle_area{
+                Lumen::UI::Component::AbsoluteTransformTopLeft{relative_rectangle_area.top_left_position + offset},
+                Lumen::UI::Component::AbsoluteTransformBottomRight{relative_rectangle_area.bottom_right_position + offset}} {}
+
+        constexpr void MovePosition(const Lumen::Core::Math::Vec2f32 &offset) noexcept
+        {
+                this->relative_rectangle_area += offset;
+                this->absolute_rectangle_area += offset;
+        }
+};
+
+struct RelativeSelectedPosition {
+        Lumen::Core::Math::Vec2f32 position;
+};
+
+struct  AbsoluteSelectedPosition {
+        Lumen::Core::Math::Vec2f32 position;
+};
+
+constexpr bool IsIncluded(const Lumen::UI::Component::RelativeSelectedPosition &relative_selected_position,
+                          const Lumen::UI::Component::RelativeTransformRectangleArea &relative_rectangle_area) noexcept
 {
-        return (selected_position.selected_position.x >= rectangle_area.top_left_position.top_left_position.x) &&
-               (selected_position.selected_position.x <= rectangle_area.bottom_right_position.bottom_right_position.x) &&
-               (selected_position.selected_position.y >= rectangle_area.top_left_position.top_left_position.y) &&
-               (selected_position.selected_position.y <= rectangle_area.bottom_right_position.bottom_right_position.y);
+        return (relative_selected_position.position.x >= relative_rectangle_area.top_left_position.x) &&
+               (relative_selected_position.position.x <= relative_rectangle_area.bottom_right_position.x) &&
+               (relative_selected_position.position.y >= relative_rectangle_area.top_left_position.y) &&
+               (relative_selected_position.position.y <= relative_rectangle_area.bottom_right_position.y);
 }
 
-// constexpr bool IsSelected(const Lumen::UI::Component::TransformCenter &selection_position,
-//                           const Lumen::UI::Component::BoundingBox &bounding_box,
-//                           const Lumen::UI::Component::TransformCenter &transform_center) noexcept
-// {
-//         Lumen::Core::Math::Vec2i distance = transform_center.center_position - selection_position.center_position;
+constexpr bool IsIncluded(const Lumen::UI::Component::AbsoluteSelectedPosition &absolute_selected_position,
+                          const Lumen::UI::Component::AbsoluteTransformRectangleArea &absolute_rectangle_area) noexcept
+{
+        return (absolute_selected_position.position.x >= absolute_rectangle_area.top_left_position.x) &&
+               (absolute_selected_position.position.x <= absolute_rectangle_area.bottom_right_position.x) &&
+               (absolute_selected_position.position.y >= absolute_rectangle_area.top_left_position.y) &&
+               (absolute_selected_position.position.y <= absolute_rectangle_area.bottom_right_position.y);
+}
 
-//         distance.x = Lumen::Core::Math::Abs(distance.x);
-//         distance.y = Lumen::Core::Math::Abs(distance.y);
-
-//         return (distance.x < bounding_box.half_size.x) &&
-//                (distance.y < bounding_box.half_size.y);
-
-// }
+struct Sprite {
+        Lumen::UI::Component::AbsoluteTransformRectangleArea texture_rectangle_area;
+};
 
 } // namespace Component
 } // namespace UI

@@ -4,11 +4,15 @@
 
 #include <SFML/Graphics/RenderWindow.hpp>
 
+#include <SFML/Graphics/Font.hpp>
+#include <SFML/Graphics/Text.hpp>
+
 #include <iostream>
 
 #include <SFML/Window/Window.hpp>
 #include <SFML/Window/Keyboard.hpp>
 
+#if 0
 void TestButtonCase1(void) noexcept 
 {
         //sf::RenderWindow window{sf::VideoMode{{1920, 1080}}, {"My window"}, sf::Style::Default, sf::State::Fullscreen,};
@@ -105,10 +109,48 @@ void TestButtonCase1(void) noexcept
                 window.display();
         }
 }
+#endif
+
+void TestFont(void) noexcept
+{
+        sf::Font font;
+        if (!font.openFromFile("test.ttf")) {
+                std::cerr << "Failed to load font\n";
+                return;
+        }
+
+        sf::Text text{font, "Hello, world!"};
+
+        sf::RenderWindow window{sf::VideoMode{{1920, 1080}}, {"My window"}};
+
+        while (window.isOpen()) {
+                for (std::optional<sf::Event> optional_event = window.pollEvent();
+                     optional_event.has_value();
+                     optional_event = window.pollEvent()) {
+                        sf::Event &event = optional_event.value();
+
+                        if (event.is<sf::Event::KeyPressed>()) {
+                                const sf::Event::KeyPressed &key_pressed_data = *event.getIf<sf::Event::KeyPressed>();
+
+                                if (sf::Keyboard::Key::Escape == key_pressed_data.code) {
+                                        window.close();
+                                }
+                        } else if (event.is<sf::Event::Closed>()) {
+                                window.close();
+                        }
+                }
+
+                window.clear();
+                window.draw(text);
+                window.display();
+        }
+
+}
 
 int main(void)
 {
         //TestActionManagerCase1();
-        TestButtonCase1();
+        //TestButtonCase1();
+        TestFont();
         std::cout << "Done\n";
 }

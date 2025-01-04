@@ -22,21 +22,23 @@ private:
         Lumen::Scene::BaseScene *m_menu_scene;
         std::vector<std::unique_ptr<Lumen::UI::Component::BasicUIComponent>> m_ui_components;
 
+#if 0
         // Button Actions
         struct DoButtonActionData {
                 int i;
                 Lumen::Scene::InterSceneCommunicationData &inter_scene_communication_data;
                 sf::RenderWindow &window;
-        } m_do_button_action_data;
+        } [[maybe_unused]] m_do_button_action_data;
+#endif
 
 public:
         constexpr TestUILayer(Lumen::Scene::BaseScene *menu_scene) noexcept
-        : m_menu_scene{menu_scene}, m_ui_components{},
-          m_do_button_action_data{0, *this->m_menu_scene->m_inter_scene_communication_data,
-                                  *this->m_menu_scene->m_window_ptr}
+        : m_menu_scene{menu_scene}, m_ui_components{}//,
+          //m_do_button_action_data{0, *this->m_menu_scene->m_inter_scene_communication_data,
+          //                        *this->m_menu_scene->m_window_ptr}
         {
                 assert(nullptr != this->m_menu_scene);
-
+#if 0
                 auto window_size = this->m_menu_scene->m_window_ptr->getSize();
                 // std::cout << "[MenuScene:TestUILayer]: Window position: ("
                 //           << window_size.x << ", " << window_size.y << ")\n";
@@ -127,6 +129,7 @@ public:
                 );
 
                 this->AddUIComponent(std::move(menu_ptr));
+#endif
         }
 
         constexpr void Update(void) noexcept override
@@ -194,7 +197,7 @@ public:
                 default:
                         break;
                 }
-                return Lumen::LayerStack::BaseLayer::DoActionResult::NotHandedOrNotBlocked;
+                return Lumen::LayerStack::BaseLayer::DoActionResult::NotHandledOrNotBlocked;
         }
 
         constexpr void AddUIComponent(std::unique_ptr<Lumen::UI::Component::BasicUIComponent> ui_component) noexcept
