@@ -31,26 +31,26 @@ public:
         CONSTEXPR_IF_CXX_20 virtual void Render(void) noexcept {}
 
         enum class DoActionResult {
-                NotHandedOrNotBlocked,
+                NotHandledOrNotBlocked,
                 HandledOrBlocked,
         };
         
         [[nodiscard]] CONSTEXPR_IF_CXX_20
         virtual DoActionResult DoAction([[maybe_unused]] Lumen::Action::Action action) noexcept
         {
-                return DoActionResult::NotHandedOrNotBlocked;
+                return DoActionResult::NotHandledOrNotBlocked;
         }
 
         [[nodiscard]] CONSTEXPR_IF_CXX_20
         virtual DoActionResult DoSelectionAction([[maybe_unused]] Lumen::Action::SelectionAction selection_action) noexcept
         {
-                return DoActionResult::NotHandedOrNotBlocked;
+                return DoActionResult::NotHandledOrNotBlocked;
         }
         
         [[nodiscard]] CONSTEXPR_IF_CXX_20
         virtual DoActionResult DoMovementAction([[maybe_unused]] Lumen::Action::MovementAction movement_action) noexcept
         {
-                return DoActionResult::NotHandedOrNotBlocked;
+                return DoActionResult::NotHandledOrNotBlocked;
         }
 };
 

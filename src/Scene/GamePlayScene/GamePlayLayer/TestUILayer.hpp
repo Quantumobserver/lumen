@@ -49,7 +49,7 @@ public:
                 default:
                         break;
                 }
-                return Lumen::LayerStack::BaseLayer::DoActionResult::NotHandedOrNotBlocked;
+                return Lumen::LayerStack::BaseLayer::DoActionResult::NotHandledOrNotBlocked;
         }
 };
 
