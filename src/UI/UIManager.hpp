@@ -7,6 +7,7 @@
 
 #include <SFML/Graphics/Font.hpp>
 #include <SFML/Graphics/Sprite.hpp>
+#include <SFML/Graphics/View.hpp>
 
 #include <array>
 #include <memory>
@@ -27,9 +28,11 @@ private:
         bool m_draw_bounding_box;
         const sf::Texture *m_ui_texture;
         const sf::Font *m_default_font;
-        //const sf::Sprite *m_default_sprite;
         Lumen::UI::Component::Sprite m_default_sprite;
 
+        sf::View m_view;
+        sf::Vector2u m_window_size;
+        Lumen::Core::Math::Vec2f32 m_view_window_size_ratio;
         sf::VertexArray m_vertex_array;
         sf::VertexArray m_vertex_array_bounding_box;
         std::vector<const sf::Text *> m_texts_needed_to_render;
@@ -54,7 +57,8 @@ public:
         constexpr UIManager &operator=(const UIManager &) noexcept = delete;
         constexpr UIManager &operator=(UIManager &&) noexcept = default;
 
-        constexpr void Init(const Lumen::ResourceManager::ResourceManager &resource_manager) noexcept
+        constexpr void Init(const Lumen::ResourceManager::ResourceManager &resource_manager,
+                            const sf::RenderWindow &window) noexcept
         {
                 if (this->m_initialized) {
                         return;
@@ -89,6 +93,13 @@ public:
                 this->m_ui_components.resize(
                         static_cast<std::size_t>(Lumen::UI::Component::UIComponentTypeTag::NUMBER_OF_BASIC_UI_COMPONENTS));
         
+                this->m_view = window.getDefaultView();
+                this->m_window_size = window.getSize();
+                this->m_view_window_size_ratio = {
+                        this->m_view.getSize().x / static_cast<float>(this->m_window_size.x),
+                        this->m_view.getSize().y / static_cast<float>(this->m_window_size.y),
+                };
+
                 this->m_vertex_array.setPrimitiveType(sf::PrimitiveType::Triangles);
                 this->m_vertex_array_bounding_box.setPrimitiveType(sf::PrimitiveType::Lines);
 
@@ -132,6 +143,9 @@ this->m_debug_render_target = &render_target;
                         }
                 }
 // std::cout << __FILE__ " :" << __LINE__ << "\n";
+                const auto render_target_view = render_target.getView();
+                render_target.setView(this->m_view);
+
                 render_target.draw(this->m_vertex_array, this->m_ui_texture);
                 for (const auto &text : this->m_texts_needed_to_render) {
 // std::cout << __FILE__ " :" << __LINE__ << "\n";
@@ -141,11 +155,21 @@ this->m_debug_render_target = &render_target;
 // std::cout << __FILE__ " :" << __LINE__ << "\n";
                         render_target.draw(this->m_vertex_array_bounding_box);
                 }
+                render_target.setView(render_target_view);
+
 // std::cout << __FILE__ " :" << __LINE__ << "\n";
         }
 
-        // void shutdown();
-        // bool isInitialized() const;
+        constexpr void WindowResize(const sf::RenderWindow &window) noexcept
+        {
+                this->m_window_size = window.getSize();
+                const auto &view_size = this->m_view.getSize();
+                this->m_view_window_size_ratio = {
+                        view_size.x / static_cast<float>(this->m_window_size.x),
+                        view_size.y / static_cast<float>(this->m_window_size.y),
+                };
+        }
+
 
 //         constexpr DoActionResult DoAction(
 //                 const Lumen::UI::Component::RelativeSelectionAction &relative_selection_action) noexcept
@@ -242,11 +266,24 @@ this->m_debug_render_target = &render_target;
 
         constexpr DoActionResult DoSelectionAction(const Lumen::UI::Component::RelativeSelectionAction &relative_selection_action) noexcept
         {
+                auto selection_action = relative_selection_action.selection_action;
+                const auto &selected_position = selection_action.position;
+
+                selection_action.position = {
+                        static_cast<int>(static_cast<float>(selected_position.x) * this->m_view_window_size_ratio.x),
+                        static_cast<int>(static_cast<float>(selected_position.y) * this->m_view_window_size_ratio.y),
+                };
+
+                const Lumen::UI::Component::RelativeSelectionAction resized_relative_selection_action{
+                        selection_action,
+                        {0, 0},
+                };
+
                 for (auto &ui_component : this->m_ui_components) {
                         for (auto &component : ui_component) {
 // std::cout << __FILE__ " :" << __LINE__ << "\n";
                                 if (DoActionResult::HandledOrBlocked ==
-                                    component->DoSelectionAction(relative_selection_action)) {
+                                    component->DoSelectionAction(resized_relative_selection_action)) {
 // std::cout << __FILE__ " :" << __LINE__ << "\n";
                                         component->SetSelected(true);
                                         return DoActionResult::HandledOrBlocked;
@@ -304,7 +341,7 @@ private:
                         return;
                 }
                 const auto &sub_menu = menu.GetSelectedSubMenu();
-std::cout << __FILE__ " :" << __LINE__ << "\n";
+// std::cout << __FILE__ " :" << __LINE__ << "\n";
                 this->RenderMenu(sub_menu);
         }
 
@@ -319,24 +356,10 @@ std::cout << __FILE__ " :" << __LINE__ << "\n";
                         }
 
                         if (menu_button.HasText()) {
-// std::cout << __FILE__ " :" << __LINE__ << "\n";
                                 this->m_texts_needed_to_render.push_back(&menu_button.GetText());
-// sf::RectangleShape rectangle_shape;
-// rectangle_shape.setPosition(menu_button.GetText().getGlobalBounds().position);
-// std::cout << __FILE__ " :" << __LINE__ << ": {"
-//           << menu_button.GetText().getGlobalBounds().position.x << ", "
-//           << menu_button.GetText().getGlobalBounds().position.y << " }\n";
-// rectangle_shape.setSize({
-//         menu_button.GetText().getLocalBounds().size.x * menu_button.GetText().getScale().x,
-//         menu_button.GetText().getLocalBounds().size.y * menu_button.GetText().getScale().y});
-// rectangle_shape.setOutlineColor(sf::Color::Red);
-// rectangle_shape.setOutlineThickness(1.0f);
-// rectangle_shape.setFillColor(sf::Color::Transparent);
-// this->m_debug_render_target->draw(rectangle_shape);
                         }
 
                         if (menu_button.HasBackground()) {
-                                //this->m_debug_render_target->draw(menu_button.GetBackground());
                                 this->RenderDrawSprite(
                                         menu_button.GetTransformRectangleArea().absolute_rectangle_area,
                                         menu_button.GetBackground());
@@ -360,12 +383,7 @@ std::cout << __FILE__ " :" << __LINE__ << "\n";
                 const sf::Color color = sf::Color::White) noexcept
         {
                 std::array<sf::Vertex, 8> bounding_box_vertices;
-// std::cout << __FILE__ " :" << __LINE__ << ": {"
-//           << rectangle_area.top_left_position.x << ", "
-//           << rectangle_area.top_left_position.y << " }\n";
-// std::cout << __FILE__ " :" << __LINE__ << ": {"
-//           << rectangle_area.bottom_right_position.x << ", "
-//           << rectangle_area.bottom_right_position.y << " }\n";
+
                 bounding_box_vertices[0].position = {rectangle_area.top_left_position.x, rectangle_area.top_left_position.y};
                 bounding_box_vertices[1].position = {rectangle_area.bottom_right_position.x, rectangle_area.top_left_position.y};
 

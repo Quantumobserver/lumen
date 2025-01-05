@@ -37,7 +37,7 @@ void TestMenuCase1(void) noexcept
 
         Lumen::UI::UIManager ui_manager{};
 //std::cout << __FILE__ " :" << __LINE__ << "\n";
-        ui_manager.Init(resource_manager);
+        ui_manager.Init(resource_manager, window);
 
 // sf::Text text{resource_manager.GetFont(Lumen::ResourceManager::FontID::DROID_FONT), "Hello, World!"};
 // //text.setPosition({0.0f, 0.0f});
@@ -182,7 +182,7 @@ void TestMenuCase1(void) noexcept
 
                 {
                         v_menu.CreateMenuButton();
-                        
+
                 }
 
                 v_menu.ComputeBoundingBoxAndTransform({{0.0f, 0.0f}});
@@ -223,6 +223,7 @@ void TestMenuCase1(void) noexcept
                                         window.setView(veiw);
                                 }
                         } else if (event.is<sf::Event::Resized>()) {
+                                ui_manager.WindowResize(window);
                                 // auto view = window.getView();
                                 // view.setSize({static_cast<float>(window.getSize().x), static_cast<float>(window.getSize().y)});
                                 // view.setCenter({static_cast<float>(window.getSize().x / 2),

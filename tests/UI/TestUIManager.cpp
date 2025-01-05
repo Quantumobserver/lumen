@@ -36,7 +36,7 @@ void TestUIManagerCase1(void) noexcept
 
         Lumen::UI::UIManager ui_manager{};
 
-        ui_manager.Init(resource_manager);
+        ui_manager.Init(resource_manager, window);
 
         // auto &menu = ui_manager.CreateMenu();
 
