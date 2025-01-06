@@ -113,7 +113,7 @@ private:
         LabelLayout m_label_layout;
 
 public:
-        constexpr MenuButton(void) noexcept = default;
+        MenuButton(void) noexcept = default;
 
         constexpr MenuButton(const MenuButton &) noexcept = delete;
         constexpr MenuButton(MenuButton &&other) noexcept
