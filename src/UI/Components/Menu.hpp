@@ -376,6 +376,7 @@ private:
         std::optional<Lumen::UI::Component::Sprite> m_background;
         std::vector<Lumen::UI::Component::MenuButton> m_buttons;
         std::vector<std::unique_ptr<Lumen::UI::Component::Menu> > m_sub_menus;
+        std::optional<const Lumen::UI::Component::MenuButton *> m_selected_button;
         std::optional<SelectedSubMenu> m_selected_sub_menu;
 
 public:
@@ -815,16 +816,23 @@ public:
                 }
 
                 if (!this->IsMenuSelected(relative_selection_action_to_parent)) {
+                        this->SetSelected(false);
+                        if (this->m_selected_button.has_value()) {
+                                this->m_selected_button.value()->SetSelected(false);
+                                this->m_selected_button = std::nullopt;
+                        }
                         return DoActionResult::NotHandledOrNotBlocked;
                 }
 
                 for (auto &menu_button : this->m_buttons) {
 
                         if (!this->IsMenuButtonSelected(relative_selection_action_to_parent, menu_button)) {
+                                menu_button.SetSelected(false);
                                 continue;
                         }
 
                         menu_button.SetSelected(true);
+                        this->m_selected_button = &menu_button;
 
                         auto action_result = menu_button.DoSelectionAction(relative_selection_action_to_parent);
                         if (!action_result.is_handled) {

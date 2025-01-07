@@ -71,24 +71,27 @@ public:
 
                 this->m_default_font = &resource_manager.GetFont(static_cast<Lumen::ResourceManager::FontID>(0));
 
-                {
-                        const auto default_sprite_id = static_cast<Lumen::ResourceManager::SpriteID>(0);
-                        const auto texture_rect = resource_manager.GetSprite(default_sprite_id).getTextureRect();
+                // {
+                //         const auto default_sprite_id = static_cast<Lumen::ResourceManager::SpriteID>(0);
+                //         std::cout << __FILE__ " :" << __LINE__ << "\n";
+                //         const auto texture_rect = resource_manager.GetSprite(default_sprite_id).getTextureRect();
+                //         std::cout << __FILE__ " :" << __LINE__ << "\n";
 
-                        this->m_default_sprite = Lumen::UI::Component::Sprite{
-                                Lumen::UI::Component::AbsoluteTransformRectangleArea{
-                                        Lumen::UI::Component::AbsoluteTransformTopLeft{{
-                                                static_cast<float>(texture_rect.position.x),
-                                                static_cast<float>(texture_rect.position.y)
-                                        }},
 
-                                        Lumen::UI::Component::BoundingBox{{
-                                                static_cast<float>(texture_rect.size.x),
-                                                static_cast<float>(texture_rect.size.y)
-                                        }}
-                                }
-                        };
-                }
+                //         this->m_default_sprite = Lumen::UI::Component::Sprite{
+                //                 Lumen::UI::Component::AbsoluteTransformRectangleArea{
+                //                         Lumen::UI::Component::AbsoluteTransformTopLeft{{
+                //                                 static_cast<float>(texture_rect.position.x),
+                //                                 static_cast<float>(texture_rect.position.y)
+                //                         }},
+
+                //                         Lumen::UI::Component::BoundingBox{{
+                //                                 static_cast<float>(texture_rect.size.x),
+                //                                 static_cast<float>(texture_rect.size.y)
+                //                         }}
+                //                 }
+                //         };
+                // }
 
                 this->m_ui_components.resize(
                         static_cast<std::size_t>(Lumen::UI::Component::UIComponentTypeTag::NUMBER_OF_BASIC_UI_COMPONENTS));
@@ -307,7 +310,7 @@ private:
                         break;
                 }
 // std::cout << __FILE__ " :" << __LINE__ << "\n";
-                ui_component.SetSelected(false);
+                // ui_component.SetSelected(false);
         }
 
 
@@ -365,7 +368,7 @@ private:
                                         menu_button.GetBackground());
                         }
 
-                        menu_button.SetSelected(false);
+                        // menu_button.SetSelected(false);
                 }
         }
 
