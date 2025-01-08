@@ -6,6 +6,7 @@
 #include <sstream>
 #include <utility>
 #include <string_view>
+#include <filesystem>
 
 namespace Lumen {
 namespace Utility {
@@ -760,7 +761,7 @@ private:
                                 return {
                                         std::make_unique<Lumen::Utility::Json::JsonValue>(
                                                 Lumen::Utility::Json::JsonFloatingPointNumber{
-                                                        sign * (number_integer_part + number_fractional_part)
+                                                        static_cast<float>(sign) * (static_cast<float>(number_integer_part) + number_fractional_part)
                                                 }
                                         ).release()
                                 };

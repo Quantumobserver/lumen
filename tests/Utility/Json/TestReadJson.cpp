@@ -7,7 +7,7 @@
 void TestReadJsonFile() noexcept
 {
 
-        Lumen::Utility::Json::JsonInFileStream json_istream{"./config.json"};
+        Lumen::Utility::Json::JsonInFileStream json_istream{"./test.json"};
 
         // auto json_value = json_stream.Get("tile_map");
         // auto json_string = Lumen::Utility::Json::JsonCast<Lumen::Utility::Json::JsonString>(json_value);
