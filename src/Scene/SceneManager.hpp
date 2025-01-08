@@ -127,14 +127,14 @@ public:
                 }
         }*/
 
-        constexpr void Update(void) noexcept
+        constexpr void Update(float delta_time) noexcept
         {
                 assert(this->m_is_initialized);
                 if (this->m_inter_scene_communication_data.change_scene) {//std::cout << "[SceneManager] change scene\n";
                         this->ChangeScene();
                 }
 
-                this->m_current_scene_ptr->Update();
+                this->m_current_scene_ptr->Update(delta_time);
         }
 
         CONSTEXPR_IF_SF_RENDER_WINDOW_DISPLAY void Render(void) noexcept

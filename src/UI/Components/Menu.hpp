@@ -254,6 +254,13 @@ public:
                 this->m_text_label_size_type = TextLabelSizeTypeTag::AUTO;
         }
 
+        void SetText(const sf::Font *font, const std::wstring &text_string, const sf::Color color = sf::Color::White) noexcept
+        {
+                this->m_text_label = sf::Text{*font, text_string};
+                this->m_text_label.value().setFillColor(color);
+                this->m_text_label_size_type = TextLabelSizeTypeTag::AUTO;
+        }
+
         constexpr TextLabelSizeTypeTag GetTextLabelSizeTypeTag(void) const noexcept
         {
                 return this->m_text_label_size_type;

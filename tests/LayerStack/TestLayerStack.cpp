@@ -13,8 +13,9 @@
 class ExampleLayer1 : public Lumen::LayerStack::BaseLayer {
 public:
 
-        constexpr void Update(void) noexcept override
+        constexpr void Update(float delta_time) noexcept override
         {
+                (void)delta_time;
                 //std::cout << "[ExampleLayer1]: Update\n";
         }
 
@@ -36,8 +37,9 @@ public:
 class ExampleLayer2 : public Lumen::LayerStack::BaseLayer {
 public:
 
-        constexpr void Update(void) noexcept override
+        constexpr void Update(float delta_time) noexcept override
         {
+                (void)delta_time;
                 //std::cout << "[ExampleLayer2]: Update\n";
         }
 
@@ -75,6 +77,8 @@ void TestLayerStackCase1(void) noexcept
         action_manager.RegisteAction(sf::Keyboard::Key::G, Lumen::Action::ActionName::TOGGLE_DRAWING_GRID);
         action_manager.SetActionKind(Lumen::Action::ActionName::TOGGLE_DRAWING_GRID, Lumen::Action::ActionKind::TRIGGER);
 
+        auto last_update_time_point = std::chrono::high_resolution_clock::now();
+
         while (window.isOpen()) {
                 for (std::optional<sf::Event> optional_event = window.pollEvent(); optional_event.has_value(); optional_event = window.pollEvent()) {
                         sf::Event &event = optional_event.value();
@@ -108,9 +112,12 @@ void TestLayerStackCase1(void) noexcept
 
                         std::cout << "\n";
                 }
+                auto current_time_point = std::chrono::high_resolution_clock::now();
+                auto delta_time = std::chrono::duration<float>{current_time_point - last_update_time_point}.count();
+                last_update_time_point = current_time_point;
 
                 for (auto &LayerPtr : layer_stack) {
-                        LayerPtr->Update();
+                        LayerPtr->Update(delta_time);
                 }
                 //std::cout << "\n";
         }

@@ -58,7 +58,7 @@ public:
 
 
         CONSTEXPR_IF_SF_RENDER_WINDOW_POLL_EVENT
-        void Update(void) noexcept override
+        void Update(float delta_time) noexcept override
         {
                 assert(this->m_is_initialized);
 
@@ -66,7 +66,7 @@ public:
                 
                 this->DoActions();
                 for (auto &layer : this->m_layer_stack) {
-                        layer->Update();
+                        layer->Update(delta_time);
                 }
 
         }
@@ -186,6 +186,15 @@ private:
                         //std::cout << "[GamePlayScene] HasWindowResizeAction\n";
                         this->SetView();
                         Lumen::Scene::BaseScene::m_action_manager.ResetWindowResizeAction();
+                }
+                for (auto layer_stack_it = Lumen::Scene::BaseScene::m_layer_stack.rbegin();
+                     layer_stack_it != Lumen::Scene::BaseScene::m_layer_stack.rend();
+                        ++layer_stack_it) {
+                        Lumen::LayerStack::LayerPtr &layer_ptr = (*layer_stack_it);
+                        if (Lumen::LayerStack::BaseLayer::DoActionResult::HandledOrBlocked == 
+                            layer_ptr->DoWindowResizeAction()) {
+                                break;
+                        }
                 }
         }
 

@@ -57,8 +57,9 @@ public:
                 assert(nullptr != game_play_scene);
         }
 
-        constexpr void Update(void) noexcept override
+        constexpr void Update(float delta_time) noexcept override
         {
+                (void)delta_time;
                 //std::cout << "[ExampleLayer2]: Update\n";
         }
 

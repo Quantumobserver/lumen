@@ -28,10 +28,11 @@ void TestMenuCase1(void) noexcept
         Lumen::ResourceManager::ResourceManager resource_manager{};
         resource_manager.Init();
         resource_manager.LoadFontFromFile("../../../src/Assets/Fonts/DroidSansFallback.ttf", Lumen::ResourceManager::FontID::DROID_FONT);
-        resource_manager.LoadTextureFromFile("../../../src/Assets/Images/TestUITexture.jpeg", Lumen::ResourceManager::TextureID::UI_TEXTURE);
+        resource_manager.LoadTextureFromFile("../../../src/Assets/Images/testButton.png", Lumen::ResourceManager::TextureID::UI_TEXTURE);
         {
                 sf::Texture &texture = resource_manager.GetTexture(Lumen::ResourceManager::TextureID::UI_TEXTURE);
-                sf::Sprite sprite{texture, sf::IntRect{{0, 0}, sf::Vector2i{texture.getSize()} / 2}};
+                sf::Sprite sprite{texture};
+                sprite.setTextureRect(sf::IntRect{{0, 17}, {64, 30}});
                 resource_manager.AddSprite(std::move(sprite), static_cast<Lumen::ResourceManager::SpriteID>(0));
         }
 

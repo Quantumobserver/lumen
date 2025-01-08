@@ -122,7 +122,7 @@ public:
         constexpr virtual ~BaseScene(void) noexcept {}
 
         constexpr virtual void Init(void) noexcept = 0;
-        constexpr virtual void Update(void) noexcept = 0;
+        constexpr virtual void Update(float delta_time) noexcept = 0;
         constexpr virtual void Render(void) noexcept = 0;
         constexpr virtual void ChangeToThisScene(Lumen::Scene::ChangeSceneArgs &change_scene_args) noexcept = 0;
 

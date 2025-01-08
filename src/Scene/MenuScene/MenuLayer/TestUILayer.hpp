@@ -6,6 +6,8 @@
 #include <UI/Components/Menu.hpp>
 #include <UI/Components/Button.hpp>
 #include <ResourceManager/ResourceManager.hpp>
+#include <UI/UIManager.hpp>
+#include <Utility/Unicode/UnicodeString.hpp>
 
 #include <SFML/Graphics/Text.hpp>
 
@@ -20,152 +22,114 @@ class TestUILayer : public Lumen::LayerStack::BaseLayer {
 private:
 
         Lumen::Scene::BaseScene *m_menu_scene;
-        std::vector<std::unique_ptr<Lumen::UI::Component::BasicUIComponent>> m_ui_components;
+        Lumen::UI::UIManager m_ui_manager{};
 
-#if 0
-        // Button Actions
         struct DoButtonActionData {
                 int i;
                 Lumen::Scene::InterSceneCommunicationData &inter_scene_communication_data;
                 sf::RenderWindow &window;
-        } [[maybe_unused]] m_do_button_action_data;
-#endif
+        } m_do_button_action_data;
 
 public:
         constexpr TestUILayer(Lumen::Scene::BaseScene *menu_scene) noexcept
-        : m_menu_scene{menu_scene}, m_ui_components{}//,
-          //m_do_button_action_data{0, *this->m_menu_scene->m_inter_scene_communication_data,
-          //                        *this->m_menu_scene->m_window_ptr}
+        : m_menu_scene{menu_scene},
+          m_do_button_action_data{0, *this->m_menu_scene->m_inter_scene_communication_data,
+                                 *this->m_menu_scene->m_window_ptr}
         {
                 assert(nullptr != this->m_menu_scene);
-#if 0
+
+                this->Init();
+
+                auto &resource_manager = *this->m_menu_scene->m_resource_manager_ptr;
+                const sf::Font &menu_font{resource_manager.GetFont(Lumen::ResourceManager::FontID::DROID_FONT)};
+
                 auto window_size = this->m_menu_scene->m_window_ptr->getSize();
                 // std::cout << "[MenuScene:TestUILayer]: Window position: ("
                 //           << window_size.x << ", " << window_size.y << ")\n";
-                Lumen::Core::Math::Vec2i window_center{static_cast<int>((window_size.x) / 2),
-                                                       static_cast<int>((window_size.y) / 2)};
+                Lumen::Core::Math::Vec2f32 window_center{static_cast<float>(window_size.x) / 2.0f, static_cast<float>(window_size.y) / 2.0f};
                 // std::cout << "[MenuScene:TestUILayer]: Window center: (" << window_center.x
                 //           << ", " << window_center.y << ")\n";
-
-                // Button Vector
-                std::vector<Lumen::UI::Component::MenuButton> buttons{};
-
-                // Initialize font
-                auto &resource_manager = *this->m_menu_scene->m_resource_manager_ptr;
-                const sf::Font &menu_font{resource_manager.GetFont(Lumen::ResourceManager::FontID::DROID_FONT)};
-// std::cout << __FILE__ " :" << __LINE__ << "\n";
-
-//                 sf::Text text{menu_font, __FILE__ ": Hello, World!"};
-//                 this->m_menu_scene->m_window_ptr->draw(text);
-//                 this->m_menu_scene->m_window_ptr->display();
-//                 std::string i;
-//                 std::cin >> i;
-
-                sf::Text menu_button_start_game_label{menu_font, L"开始游戏"};
-                menu_button_start_game_label.setFillColor(sf::Color::Black);
-                menu_button_start_game_label.setStyle(sf::Text::Bold);
-
-                // Create buttons
-                auto main_menu_start_game_button = Lumen::UI::Component::MenuButton{
-                        sf::Text{menu_button_start_game_label}, sf::Sprite{},
-                        &this->m_do_button_action_data,
-                        [](void *data, const Lumen::UI::Component::RelativeSelectionAction &relative_selection_action) noexcept
-                        -> std::optional<Lumen::UI::Component::Menu::SelectedSubMenuItem> {
-                                assert(nullptr != data);
-
-                                DoButtonActionData &do_button_action_data = *static_cast<DoButtonActionData *>(data);
-
-                                switch (relative_selection_action.selection_action.selection_action_type) {
-                                case Lumen::Action::SelectionAction::SelectionActionTypeTag::NONE:
-                                        std::cout << "Button None\n";
-                                        break;
-                                case Lumen::Action::SelectionAction::SelectionActionTypeTag::PRESS:
-                                        std::cout << "[MenuButton_1]: Button Pressed " << do_button_action_data.i << "\n";
-                                        ++do_button_action_data.i;
-                                        break;
-                                case Lumen::Action::SelectionAction::SelectionActionTypeTag::RELEASE:
-                                        std::cout << "[MenuButton_1]:Button Released\n";
-                                                do_button_action_data.inter_scene_communication_data.change_scene_args.SetChangeSceneArgs(
-                                                        Lumen::Scene::SceneID::MENU,
-                                                        Lumen::Scene::SceneID::GAME_PLAY,
-                                                        Lumen::Scene::ChangeSceneArgs::Args{}
-                                                );
-                                                do_button_action_data.inter_scene_communication_data.change_scene = true;
-                                        break;
-                                case Lumen::Action::SelectionAction::SelectionActionTypeTag::CURSOR_MOVEMENT:
-                                        break;
-                                case Lumen::Action::SelectionAction::SelectionActionTypeTag::WHEEL_SCROLL:
-                                        std::cout << "Button Wheel Scroll\n";
-                                        break;
-                                }
-
-                                return std::nullopt;
-                        }
-                };
-                main_menu_start_game_button.SetMenuButtonLabelLayout(
-                        Lumen::UI::Component::MenuButton::MenuButtonLabelLayout::CENTER);
                 
-                // Get button background sprite
+                constexpr const float scale = 5.f;
+                constexpr const Lumen::Core::Math::Vec2f32 main_menu_size = {50.0f * scale, 70.0f * scale};
+                constexpr const Lumen::Core::Math::Vec2f32 main_button_menu_size = {50.0f * scale, 10.0f * scale};
+                Lumen::Core::Math::Vec2f32 main_menu_position{window_center.x - (main_menu_size.x / 2.0f),
+                                                            window_center.y - (main_menu_size.y / 2.0f)};
+                
+                auto &main_menu = this->m_ui_manager.CreateMenu();
+                main_menu.SetMenuRelativeTopLeftPosition(main_menu_position);
+                main_menu.SetMenuBoundingBox({{main_menu_size}});
+                main_menu.SetMenuButtonBoundingBox({{main_button_menu_size}});
+                main_menu.SetVisible(true);
+
+                Lumen::UI::Component::Menu::Layout menu_layout;
+                menu_layout.direction_type_tag = Lumen::UI::Component::Menu::Layout::DirectionTypeTag::VERTICAL;
+                menu_layout.spacing_type_tag = Lumen::UI::Component::Menu::Layout::SpacingTypeTag::UNIFORM_DISTRIBUTION;
+                menu_layout.alignment_type_tag = Lumen::UI::Component::Menu::Layout::AlignmentTypeTag::TOP_LEFT;
+                main_menu.SetLayout(menu_layout);
+
+                auto &main_menu_game_start_button = main_menu.CreateMenuButton();
+                main_menu_game_start_button.SetText(&menu_font, LUMEN_UTILITY_UNICODE_STRING("开始游戏"), sf::Color::Black);
                 sf::Sprite start_game_menu_button_sprite{resource_manager.GetSprite(Lumen::ResourceManager::SpriteID::MENU_BUTTON_SPRITE)};
 
-                // Set button background
-                main_menu_start_game_button.SetMenuButtonBackground(start_game_menu_button_sprite);
+                auto main_menu_button_sprite_x = static_cast<float>(start_game_menu_button_sprite.getTextureRect().position.x);
+                auto main_menu_button_sprite_y = static_cast<float>(start_game_menu_button_sprite.getTextureRect().position.y);
+                auto main_menu_button_sprite_width = static_cast<float>(start_game_menu_button_sprite.getTextureRect().size.x);
+                auto main_menu_button_sprite_height = static_cast<float>(start_game_menu_button_sprite.getTextureRect().size.y);
+                Lumen::UI::Component::AbsoluteTransformRectangleArea texture_rectangle_area {};
+                texture_rectangle_area.top_left_position = {main_menu_button_sprite_x, main_menu_button_sprite_y};
+                texture_rectangle_area.bottom_right_position = {main_menu_button_sprite_width + main_menu_button_sprite_x,
+                                                              main_menu_button_sprite_height + main_menu_button_sprite_y};
+                main_menu_game_start_button.SetBackground({texture_rectangle_area});
 
-                // Add buttons to the vector
-                buttons.push_back(std::move(main_menu_start_game_button));
+                main_menu_game_start_button.SetVisible(true);
+                main_menu_game_start_button.SetActionHandler(
+                        [](void *data, const Lumen::UI::Component::RelativeSelectionAction &relative_selection_action) noexcept
+                        -> Lumen::UI::Component::MenuButton::ActionResult {
+                                (void)data;
+                                auto &do_button_action_data = *static_cast<DoButtonActionData *>(data);
+                                if (Lumen::Action::SelectionAction::SelectionActionTypeTag::RELEASE ==
+                                    relative_selection_action.selection_action.selection_action_type) {
+                                        std::cout << "Start Game\n";
+                                        do_button_action_data.inter_scene_communication_data.change_scene_args.SetChangeSceneArgs(
+                                                Lumen::Scene::SceneID::MENU,
+                                                Lumen::Scene::SceneID::GAME_PLAY,
+                                                Lumen::Scene::ChangeSceneArgs::Args{}
+                                        );
+                                        do_button_action_data.inter_scene_communication_data.change_scene = true;
+                                }
 
-                constexpr const int scale = 5;
-                constexpr const Lumen::Core::Math::Vec2i main_menu_size = {50 * scale, 70 * scale};
-                constexpr const Lumen::Core::Math::Vec2i main_button_menu_size = {50 * scale, 10 * scale};
-                Lumen::Core::Math::Vec2i main_menu_position{window_center.x - (main_menu_size.x / 2),
-                                                            window_center.y - (main_menu_size.y / 2)};
-                
-                auto menu_ptr = std::make_unique<Lumen::UI::Component::Menu>(
-                        Lumen::UI::Component::TransformTopLeft{main_menu_position},
-                        Lumen::UI::Component::BoundingBox{main_menu_size},
-                        Lumen::UI::Component::BoundingBox{main_button_menu_size},
-                        this->m_menu_scene->m_window_ptr,
-                        std::move(buttons)
-                );
+                                return Lumen::UI::Component::MenuButton::ActionResult{
+                                        true, true, std::nullopt,
+                                };
+                        }, &this->m_do_button_action_data);
 
-                this->AddUIComponent(std::move(menu_ptr));
-#endif
+                main_menu.ComputeBoundingBoxAndTransform({{0, 0}});
+
         }
 
-        constexpr void Update(void) noexcept override
+        constexpr void Init(void) noexcept
         {
-                // std::cout << "[ExampleLayer1]: Update\n";
-                for (auto &ui_component : this->m_ui_components) {
-                        ui_component->Update(0.25f);
-                }
+                this->m_ui_manager.Init(*this->m_menu_scene->m_resource_manager_ptr, *this->m_menu_scene->m_window_ptr);
+        }
+
+        constexpr void Update(float delta_time) noexcept override
+        {
+                this->m_ui_manager.Update(delta_time);
         }
 
         constexpr void Render(void) noexcept override
         {
-                //std::cout << "[ExampleLayer1]: Render\n";
-                for (auto &ui_component : this->m_ui_components) {
-                        ui_component->Render();
-                }
+                this->m_ui_manager.Render(*this->m_menu_scene->m_window_ptr);
         }
 
         virtual DoActionResult DoSelectionAction(Lumen::Action::SelectionAction selection_action) noexcept override
         {
-                // Lumen::UI::Component::Menu *menu_ptr = 
-                //         dynamic_cast<Lumen::UI::Component::Menu *>(
-                //                 this->m_ui_components.at(this->m_ui_components.size() - 1).get());
-
-                // std::cout << "[MenuUILayer1]: Added UI Component\n";
-                // menu_ptr->Render();
-                // this->m_menu_scene->m_window_ptr->display();
-                // std::string i;
-                // std::cin >> i;
-
-                //std::cout << "[MenuUILayer1]: DoSelectionAction\n";
-                Lumen::UI::Component::RelativeSelectionAction relative_selection_action{selection_action,selection_action.position};
-                for (auto &ui_component : this->m_ui_components) {
-                        //std::cout << "[MenuUILayer1_for]: DoSelectionAction\n";
-                        ui_component->DoSelectionAction(relative_selection_action);
-                }
+                Lumen::UI::Component::RelativeSelectionAction relative_selection_action{
+                        selection_action,
+                        selection_action.position,
+                };
+                this->m_ui_manager.DoSelectionAction(relative_selection_action);
                 return DoActionResult::HandledOrBlocked;
         }
 
@@ -200,19 +164,11 @@ public:
                 return Lumen::LayerStack::BaseLayer::DoActionResult::NotHandledOrNotBlocked;
         }
 
-        constexpr void AddUIComponent(std::unique_ptr<Lumen::UI::Component::BasicUIComponent> ui_component) noexcept
+        [[nodiscard]] constexpr Lumen::LayerStack::BaseLayer::DoActionResult DoWindowResizeAction(void) noexcept override
         {
-                this->m_ui_components.push_back(std::move(ui_component));
-
-                // Lumen::UI::Component::Menu *menu_ptr = 
-                //         dynamic_cast<Lumen::UI::Component::Menu *>(
-                //                 this->m_ui_components.at(this->m_ui_components.size() - 1).get());
-
-                // std::cout << "[MenuUILayer1]: Added UI Component\n";
-                // menu_ptr->Render();
-                // this->m_menu_scene->m_window_ptr->display();
-                // std::string i;
-                // std::cin >> i;
+                // std::cout << "[MenuScene:TestUILayer]: DoWindowResizeAction\n";
+                this->m_ui_manager.WindowResize(*this->m_menu_scene->m_window_ptr);
+                return Lumen::LayerStack::BaseLayer::DoActionResult::NotHandledOrNotBlocked;
         }
 };
 

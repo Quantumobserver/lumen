@@ -21,9 +21,10 @@ public:
                 assert(nullptr != this->m_game_play_scene);
         }
 
-        constexpr void Update(void) noexcept override
+        constexpr void Update(float delta_time) noexcept override
         {
-
+                (void)delta_time;
+                //std::cout << "[GameWorldLayer]: Update\n";
         }
 
         constexpr void Render(void) noexcept override

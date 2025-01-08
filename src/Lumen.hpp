@@ -80,8 +80,9 @@ public:
         {
                 LUMEN_VISUAL_PROFILE_FUNCTION();
                 assert(this->m_is_initialized);
-                this->m_scene_manager.SetDeltaTime(this->m_timer.GetElapsed());
-                this->m_scene_manager.Update();
+                const float delta_time = this->m_timer.GetElapsed();
+                this->m_scene_manager.SetDeltaTime(delta_time);
+                this->m_scene_manager.Update(delta_time);
                 //this->TestUpdate();
         }
 
@@ -152,14 +153,14 @@ private:
         constexpr void LoadInitTextures(void) noexcept
         {
                 assert(!this->m_is_initialized);
-                this->m_resource_manager_ptr.LoadTextureFromFile("./Assets/Images/TestUITexture.jpeg", Lumen::ResourceManager::TextureID::UI_TEXTURE);
+                this->m_resource_manager_ptr.LoadTextureFromFile("./Assets/Images/testButton.png", Lumen::ResourceManager::TextureID::UI_TEXTURE);
         }
 
         constexpr void InitSprite(void) noexcept
         {
                 assert(!this->m_is_initialized);
                 sf::Sprite menu_button_sprite{this->m_resource_manager_ptr.GetTexture(Lumen::ResourceManager::TextureID::UI_TEXTURE)};
-                menu_button_sprite.setTextureRect(sf::IntRect({240, 214}, {370, 200}));
+                menu_button_sprite.setTextureRect(sf::IntRect({0, 17}, {64, 30}));
                 this->m_resource_manager_ptr.AddSprite(std::move(menu_button_sprite), Lumen::ResourceManager::SpriteID::MENU_BUTTON_SPRITE);
         }
 

@@ -49,7 +49,7 @@ public:
                 this->m_is_initialized = true;
         }
 
-        constexpr void Update(void) noexcept override
+        constexpr void Update(float delta_time) noexcept override
         {
                 assert(this->m_is_initialized);
                 this->CreateActions();
@@ -57,6 +57,8 @@ public:
                 this->Collision();
                 this->Movement();
                 this->LifespanUpdate();
+                
+                (void)delta_time;
 
                 auto &entity_manager = *Lumen::Scene::BaseScene::m_entity_manager_ptr;
                 entity_manager.Update();

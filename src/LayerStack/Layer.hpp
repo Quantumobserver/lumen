@@ -27,7 +27,7 @@ public:
 
         CONSTEXPR_IF_CXX_20 virtual void Attach(void) noexcept {}
         CONSTEXPR_IF_CXX_20 virtual void Detach(void) noexcept {}
-        CONSTEXPR_IF_CXX_20 virtual void Update(void) noexcept {}
+        CONSTEXPR_IF_CXX_20 virtual void Update([[maybe_unused]] float delta_time) noexcept {}
         CONSTEXPR_IF_CXX_20 virtual void Render(void) noexcept {}
 
         enum class DoActionResult {
@@ -49,6 +49,12 @@ public:
         
         [[nodiscard]] CONSTEXPR_IF_CXX_20
         virtual DoActionResult DoMovementAction([[maybe_unused]] Lumen::Action::MovementAction movement_action) noexcept
+        {
+                return DoActionResult::NotHandledOrNotBlocked;
+        }
+        
+        [[nodiscard]] CONSTEXPR_IF_CXX_20
+        virtual DoActionResult DoWindowResizeAction(void) noexcept
         {
                 return DoActionResult::NotHandledOrNotBlocked;
         }
