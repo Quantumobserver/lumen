@@ -126,8 +126,8 @@ private:
         CONSTEXPR_IF_CXX_23 void InitLayerStack(void) noexcept
         {
                 assert(!this->m_is_initialized);
+                Lumen::Scene::BaseScene::m_layer_stack.PushBackLayer(Lumen::LayerStack::MakeLayer<MenuLayer::TestBackgroundLayer>(this));
                 Lumen::Scene::BaseScene::m_layer_stack.PushBackLayer(Lumen::LayerStack::MakeLayer<MenuLayer::TestUILayer>(this));
-                Lumen::Scene::BaseScene::m_layer_stack.PushBackLayer(Lumen::LayerStack::MakeLayer<MenuLayer::TestBackgroundLayer>());
         }
 
         CONSTEXPR_IF_SF_RENDER_WINDOW_POLL_EVENT

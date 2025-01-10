@@ -154,13 +154,16 @@ private:
         {
                 assert(!this->m_is_initialized);
                 this->m_resource_manager_ptr.LoadTextureFromFile("./Assets/Images/testButton.png", Lumen::ResourceManager::TextureID::UI_TEXTURE);
+                this->m_resource_manager_ptr.LoadTextureFromFile("./Assets/Images/TestBackground.png", Lumen::ResourceManager::TextureID::MENU_SENCE_BACKGROUND);
         }
 
         constexpr void InitSprite(void) noexcept
         {
                 assert(!this->m_is_initialized);
+                sf::Sprite menu_sence_background{this->m_resource_manager_ptr.GetTexture(Lumen::ResourceManager::TextureID::MENU_SENCE_BACKGROUND)};
                 sf::Sprite menu_button_sprite{this->m_resource_manager_ptr.GetTexture(Lumen::ResourceManager::TextureID::UI_TEXTURE)};
                 menu_button_sprite.setTextureRect(sf::IntRect({0, 17}, {64, 30}));
+                this->m_resource_manager_ptr.AddSprite(std::move(menu_sence_background), Lumen::ResourceManager::SpriteID::MENU_SCENCE_BACKGROUND_SPRITE);
                 this->m_resource_manager_ptr.AddSprite(std::move(menu_button_sprite), Lumen::ResourceManager::SpriteID::MENU_BUTTON_SPRITE);
         }
 

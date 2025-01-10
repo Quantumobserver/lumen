@@ -85,14 +85,16 @@ class TestBackgroundLayer;
 namespace MenuLayer {
 
 class TestUILayer;
+class TestBackgroundLayer;
 
 } // namespace MenuLayer
 
 class BaseScene {
         friend Lumen::Scene::GamePlayLayer::TestUILayer;
         friend Lumen::Scene::GamePlayLayer::GameWorldLayer;
-        friend Lumen::Scene::MenuLayer::TestUILayer;
         friend Lumen::Scene::GamePlayLayer::TestBackgroundLayer;
+        friend Lumen::Scene::MenuLayer::TestUILayer;
+        friend Lumen::Scene::MenuLayer::TestBackgroundLayer;
 protected:
         Lumen::Scene::SceneID m_scene_id;
 

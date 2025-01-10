@@ -150,13 +150,13 @@ public:
                 this->CreateAndInitMenuButtons(main_menu,
                                                start_game_menu_button_sprite,
                                                m_menu_font,
-                                               LUMEN_UTILITY_UNICODE_STRING("设置"),
+                                               LUMEN_UTILITY_UNICODE_STRING("游戏设置"),
                                                ButtonEeventGameSetting,
                                                &m_basic_do_button_action_data);
                 this->CreateAndInitMenuButtons(main_menu,
                                                start_game_menu_button_sprite,
                                                m_menu_font,
-                                               LUMEN_UTILITY_UNICODE_STRING("退出"),
+                                               LUMEN_UTILITY_UNICODE_STRING("退出游戏"),
                                                ButtonEeventQuitGame,
                                                &m_basic_do_button_action_data);
 
