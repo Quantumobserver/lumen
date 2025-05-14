@@ -174,7 +174,7 @@ public:
                         std::cout << "Start Game\n";
                         do_button_action_data.inter_scene_communication_data.change_scene_args.SetChangeSceneArgs(
                                 Lumen::Scene::SceneID::MENU,
-                                Lumen::Scene::SceneID::GAME_PLAY,
+                                Lumen::Scene::SceneID::PRE_GAME,
                                 Lumen::Scene::ChangeSceneArgs::Args{}
                         );
                         do_button_action_data.inter_scene_communication_data.change_scene = true;

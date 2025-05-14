@@ -1,0 +1,21 @@
+{
+        "font_setting": [
+                { "font_id": "", "font_file_path" : "" }
+        ],
+        "texture_setting": [
+                { "texture_id": "", "texture_file_path" : "" }
+        ],
+        "sprite_setting": [
+                { "sprite_id": "", "texture_id" : "", "texture_rectangle" : [] }
+        ],
+        "animation_setting": [
+                { "animation_id": "", "texture_id" : "", "texture_rectangle" : [],
+                  "number_of_frames" : 3, "frame_duration" : 0.1, "loop" : true }
+        ],
+        "sound_setting": [
+                { "sound_name": "", "sound_file_path" : "" }
+        ],
+        "text_setting" : [
+                { "text_id": "", "font_id" : "", "text" : "", "font_size" : 0, "color" : [] }
+        ]
+}

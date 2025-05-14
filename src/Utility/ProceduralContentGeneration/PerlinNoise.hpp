@@ -4,7 +4,7 @@
 #include <Core/Memory/ReadWritePtr.hpp>
 #include <Utility/Random/Lehmer.hpp>
 
-#include "Grid.hpp"
+#include <Utility/Grid.hpp>
 
 #include <cstdint>
 #include <vector>
@@ -15,7 +15,7 @@ namespace Lumen {
 namespace Utility {
 namespace ProceduralContentGeneration {
 
-constexpr void GenerateWhiteNoise(Lumen::Utility::ProceduralContentGeneration::Grid<float> &grid, 
+constexpr void GenerateWhiteNoise(Lumen::Utility::Grid<float> &grid, 
                                   std::uint32_t white_noise_seed) noexcept
 {
         std::uint32_t random_number = white_noise_seed;
@@ -51,8 +51,8 @@ constexpr float Interpolate(float x0, float x1, float alpha)
 
 } // namespace Detail
 
-constexpr void GenerateSmoothNoise(Lumen::Utility::ProceduralContentGeneration::Grid<float> &smooth_noise_octave,
-                                   const Lumen::Utility::ProceduralContentGeneration::Grid<float> &base_noise,
+constexpr void GenerateSmoothNoise(Lumen::Utility::Grid<float> &smooth_noise_octave,
+                                   const Lumen::Utility::Grid<float> &base_noise,
                                    std::size_t octave) noexcept
 {
         std::size_t sample_period = Lumen::Utility::ProceduralContentGeneration::Detail::PowerOfTwo(octave);
@@ -89,9 +89,9 @@ constexpr void GenerateSmoothNoise(Lumen::Utility::ProceduralContentGeneration::
 
 struct PerlinNoiseData {
 private:
-        Lumen::Utility::ProceduralContentGeneration::Grid<float> base_noise;
-        std::vector<Lumen::Utility::ProceduralContentGeneration::Grid<float> >smooth_noise_octave;
-        Lumen::Utility::ProceduralContentGeneration::Grid<float> perlin_noise;
+        Lumen::Utility::Grid<float> base_noise;
+        std::vector<Lumen::Utility::Grid<float> >smooth_noise_octave;
+        Lumen::Utility::Grid<float> perlin_noise;
 
 public:
         constexpr PerlinNoiseData(void) noexcept = default;
@@ -104,14 +104,14 @@ public:
         : base_noise{base_noise}, perlin_noise{perlin_noise}
         {
                 for (std::size_t i = 0; i < OCTAVE_COUNT; ++i) {
-                        this->smooth_noise_octave.push_back(Lumen::Utility::ProceduralContentGeneration::Grid<float>{smooth_noise_octave[i]});
+                        this->smooth_noise_octave.push_back(Lumen::Utility::Grid<float>{smooth_noise_octave[i]});
                 }
         }
 
         constexpr PerlinNoiseData(
-                Lumen::Utility::ProceduralContentGeneration::Grid<float> &&base_noise,
-                std::vector<Lumen::Utility::ProceduralContentGeneration::Grid<float> > &&smooth_noise,
-                Lumen::Utility::ProceduralContentGeneration::Grid<float> &&perlin_noise) noexcept
+                Lumen::Utility::Grid<float> &&base_noise,
+                std::vector<Lumen::Utility::Grid<float> > &&smooth_noise,
+                Lumen::Utility::Grid<float> &&perlin_noise) noexcept
         : base_noise{std::move(base_noise)}, smooth_noise_octave{std::move(smooth_noise)},
           perlin_noise{std::move(perlin_noise)} {}
 
@@ -123,7 +123,7 @@ public:
 
 //         template<std::size_t OCTAVE_COUNT>
 //         constexpr PerlinNoiseData(
-//                 Lumen::Utility::ProceduralContentGeneration::Grid<float> (&base_noise_array)[OCTAVE_COUNT]) noexcept
+//                 Lumen::Utility::Grid<float> (&base_noise_array)[OCTAVE_COUNT]) noexcept
 //         : noise_ptr{&base_noise_array[0]}, octave_count{OCTAVE_COUNT}
 //         {
 // #ifndef NDEBUG
@@ -140,18 +140,18 @@ public:
                 return this->smooth_noise_octave.size();
         }
 
-        constexpr Lumen::Utility::ProceduralContentGeneration::Grid<float> &GetBaseNoise(void) noexcept
+        constexpr Lumen::Utility::Grid<float> &GetBaseNoise(void) noexcept
         {
                 return this->base_noise;
         }
 
-        constexpr Lumen::Utility::ProceduralContentGeneration::Grid<float> &GetSmoothNoise(std::size_t octave) noexcept
+        constexpr Lumen::Utility::Grid<float> &GetSmoothNoise(std::size_t octave) noexcept
         {
                 assert(octave < this->GetOctaveCount());
                 return this->smooth_noise_octave[octave];
         }
 
-        constexpr Lumen::Utility::ProceduralContentGeneration::Grid<float> &GetPerlinNoise(void) noexcept
+        constexpr Lumen::Utility::Grid<float> &GetPerlinNoise(void) noexcept
         {
                 return this->perlin_noise;
         }

@@ -84,7 +84,19 @@ void TestMenuCase1(void) noexcept
         {
                 auto &button = menu.CreateMenuButton();
                 button.SetVisible(true);
-                button.SetText({*ui_manager.GetDefaultFont(), "Start Game"});
+// std::string_view str_raw{"你好"};
+// std::u32string str_u32;
+// str_u32.resize(str_raw.size());
+// const auto end = sf::Utf8::toUtf32(str_raw.begin(), str_raw.end(), str_u32.begin());
+// const auto size = std::distance(str_u32.begin(), end);
+// str_u32.resize(static_cast<std::size_t>(size));
+// sf::String str_wide{str_u32};
+// button.SetText({*ui_manager.GetDefaultFont(), str_wide});
+
+std::string_view str_raw{"hello 你好"};
+sf::String str_u32 = sf::String::fromUtf8(str_raw.begin(), str_raw.end());
+button.SetText({*ui_manager.GetDefaultFont(), str_u32});
+                //button.SetText({*ui_manager.GetDefaultFont(), "Start Game你好"});
                 button.SetBackground(ui_manager.GetDefaultSprite());
                 button.SetActionHandler(
                         [](void *data, const Lumen::UI::Component::RelativeSelectionAction &relative_selection_action) noexcept

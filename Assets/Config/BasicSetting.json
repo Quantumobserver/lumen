@@ -1,0 +1,42 @@
+{
+        "project" : {
+                "name" : "ProjectName",
+                "version" : "1.0.0",
+                "description" : "ProjectDescription",
+                "author" : ["Author"],
+                "license" : ["MIT"],
+                "repository" : ["Repository"]
+        },
+        "basic_setting" : {
+                "window" : {
+                        "title" : "Lumen",
+                        "width" : 1920,
+                        "height" : 1080,
+                        "fullscreen" : false,
+                        "video_mode" : {
+                                "vsync" : false,
+                                "antialiasing" : false,
+                                "shadow" : false
+                        }
+                },
+                "language" : {
+                        "supported_languages" : ["English", "Simplified Chinese"],
+                        "default_language" : "English"
+                },
+                "sound" : {
+                        "volume" : 1.0,
+                        "mute" : false,
+                        "sound_effect" : true,
+                        "sound_music" : true,
+                        "sound_voice" : true,
+                        "sound_master" : true
+                }
+
+        },
+        "modification_setting" : {
+                "enable_modification" : false,
+                "modification_file_path" : [],
+                "modification_directory_path" : []
+        },
+        "asset_setting_file_path" : ""
+}

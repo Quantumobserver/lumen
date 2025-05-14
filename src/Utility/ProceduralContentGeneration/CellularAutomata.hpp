@@ -4,7 +4,7 @@
 #include <Core/Memory/ReadWritePtr.hpp>
 #include <Utility/Random/Lehmer.hpp>
 
-#include "Grid.hpp"
+#include <Utility/Grid.hpp>
 
 #include <cstddef>
 
@@ -17,7 +17,7 @@ namespace ProceduralContentGeneration {
 
 template<typename T>
 constexpr void InitCellularAutomata(
-        Lumen::Utility::ProceduralContentGeneration::Grid<T> &cellular_automata_data,
+        Lumen::Utility::Grid<T> &cellular_automata_data,
         const std::uint32_t random_seed, const std::uint32_t alive_if_under_or_equal_to) noexcept
 {
         //std::size_t i{0};
@@ -35,11 +35,35 @@ constexpr void InitCellularAutomata(
         }
 }
 
+template<typename T>
+constexpr void InitCellularAutomata2D(
+        Lumen::Utility::Grid<T> &cellular_automata_data,
+        const std::uint32_t seed, const std::uint32_t alive_if_under_or_equal_to) noexcept
+{
+
+        std::size_t index{0};
+        for (std::size_t i = 0; i < cellular_automata_data.GetHeight(); ++i) {
+                for (std::size_t j = 0; j < cellular_automata_data.GetWidth(); ++j) {
+                        const auto random_number = Lumen::Utility::Random::LehmerRandomNumberGenerator2D(
+                                static_cast<std::uint32_t>(j ^ seed), static_cast<std::uint32_t>(i));
+
+                        if (random_number <= alive_if_under_or_equal_to) {
+                                cellular_automata_data.At(index) = true;
+                        } else {
+                                cellular_automata_data.At(index) = false;
+                        }
+                        ++index;
+                }
+
+                //++i;
+        }
+}
+
 namespace Detail {
 
 template<typename T>
 constexpr std::size_t CountAliveNeighbors(
-        const Lumen::Utility::ProceduralContentGeneration::Grid<T> &cellular_automata_data,
+        const Lumen::Utility::Grid<T> &cellular_automata_data,
         std::size_t x, std::size_t y) noexcept
 {
         assert(x < cellular_automata_data.GetWidth());
@@ -82,7 +106,7 @@ constexpr std::size_t CountAliveNeighbors(
 
 template<typename T>
 constexpr void UpdateASingleCellInCellularAutomata(
-        Lumen::Utility::ProceduralContentGeneration::Grid<T> &cellular_automata_data,
+        Lumen::Utility::Grid<T> &cellular_automata_data,
         std::size_t x, std::size_t y,
         const std::size_t death_limit, const std::size_t birth_limit) noexcept
 {
@@ -111,7 +135,7 @@ constexpr void UpdateASingleCellInCellularAutomata(
 
 template<typename T>
 constexpr void UpdateCellularAutomata(
-        Lumen::Utility::ProceduralContentGeneration::Grid<T> &cellular_automata_data,
+        Lumen::Utility::Grid<T> &cellular_automata_data,
         const std::size_t death_limit, const std::size_t birth_limit) noexcept
 {
 //std::cout << __LINE__ << "\n";

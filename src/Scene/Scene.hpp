@@ -24,6 +24,7 @@ enum class SceneID {
         NULL_SCENE,
         MENU,
         GAME_PLAY,
+        PRE_GAME,
         NUMBER_OF_SCENES,
 };
 
@@ -89,12 +90,21 @@ class TestBackgroundLayer;
 
 } // namespace MenuLayer
 
+namespace PreGameLayer {
+
+class PreGameUILayer;
+class BackgroundLayer;
+
+} // namespace PreGameLayer
+
 class BaseScene {
         friend Lumen::Scene::GamePlayLayer::TestUILayer;
         friend Lumen::Scene::GamePlayLayer::GameWorldLayer;
         friend Lumen::Scene::GamePlayLayer::TestBackgroundLayer;
         friend Lumen::Scene::MenuLayer::TestUILayer;
         friend Lumen::Scene::MenuLayer::TestBackgroundLayer;
+        friend Lumen::Scene::PreGameLayer::PreGameUILayer;
+        friend Lumen::Scene::PreGameLayer::BackgroundLayer;
 protected:
         Lumen::Scene::SceneID m_scene_id;
 

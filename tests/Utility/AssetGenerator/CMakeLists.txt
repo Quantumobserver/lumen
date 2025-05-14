@@ -1,17 +1,15 @@
 
-add_executable(Lumen main.cpp ${LUMEN_SRC_DIR}/Log/DebugSignal.cpp)
-
-target_include_directories(Lumen PRIVATE
-                           ${DEPENDENCIES_DIR}/glm/
+add_executable(AssetGenerator AssetGenerator.cpp ${LUMEN_SRC_DIR}/Log/DebugSignal.cpp)
+target_include_directories(AssetGenerator PRIVATE
                            ${DEPENDENCIES_DIR}/SFML/include/
+                           ${DEPENDENCIES_DIR}/glm/
                            ${LUMEN_SRC_DIR}/
                            )
 
-target_link_libraries(Lumen PRIVATE
+target_link_libraries(AssetGenerator PRIVATE
                       glm::glm
                       SFML::Window
                       SFML::Graphics
                       #SFML::Main
                       )
 
-add_subdirectory(Utility)

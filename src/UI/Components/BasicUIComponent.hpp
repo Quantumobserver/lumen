@@ -24,6 +24,7 @@ enum class UIComponentTypeTag {
         TEXT_AREA,
         CHECKBOX,
         MENU,
+        PANEL,
         NUMBER_OF_BASIC_UI_COMPONENTS,
 };
 

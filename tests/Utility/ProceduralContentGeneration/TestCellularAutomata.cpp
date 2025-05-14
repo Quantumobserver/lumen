@@ -8,7 +8,7 @@
 
 void SetVertexArrayCelluarAutomata(
         sf::VertexArray &vertices,
-        const Lumen::Utility::ProceduralContentGeneration::Grid<bool> &cellular_automata_data,
+        const Lumen::Utility::Grid<bool> &cellular_automata_data,
         const float cell_size) noexcept
 {
         vertices.setPrimitiveType(sf::PrimitiveType::Triangles);
@@ -63,7 +63,7 @@ void TestCACase1(void)
 
         bool bool_array[CELLULAR_AUTOMATA_WIDTH][CELLULAR_AUTOMATA_HEIGHT] = {{}};
 
-        Lumen::Utility::ProceduralContentGeneration::Grid<bool> cellular_automata_data{bool_array};
+        Lumen::Utility::Grid<bool> cellular_automata_data{bool_array};
         Lumen::Utility::ProceduralContentGeneration::InitCellularAutomata(
                 cellular_automata_data, 132565, (UINT32_MAX / 10) * 4);
 

@@ -6,6 +6,7 @@
 #include "Scene.hpp"
 #include "MenuScene/MenuScene.hpp"
 #include "GamePlayScene/GamePlayScene.hpp"
+#include "PreGameScene/PreGameScene.hpp"
 
 #include <cassert>
 #include <cstdlib>
@@ -57,6 +58,12 @@ private:
                 case Lumen::Scene::SceneID::GAME_PLAY:
                         return std::make_unique<Lumen::Scene::GamePlayScene>(this->m_window_ptr,
                                                                              this->m_resource_manager_ptr, 
+                                                                             this->m_entity_manager_ptr,
+                                                                             &this->m_inter_scene_communication_data);
+
+                case Lumen::Scene::SceneID::PRE_GAME:
+                        return std::make_unique<Lumen::Scene::PreGameScene>(this->m_window_ptr,
+                                                                             this->m_resource_manager_ptr,
                                                                              this->m_entity_manager_ptr,
                                                                              &this->m_inter_scene_communication_data);
 

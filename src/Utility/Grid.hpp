@@ -1,11 +1,13 @@
 
 #pragma once
 
+#include <Core/Memory/ReadWritePtr.hpp>
+
+#include <cassert>
 #include <utility>
 
 namespace Lumen {
 namespace Utility {
-namespace ProceduralContentGeneration {
 
 template<typename T>
 class Grid {
@@ -169,6 +171,5 @@ public:
         }
 };
 
-} // namespace ProceduralContentGeneration
 } // namespace Utility
 } // namespace Lumen

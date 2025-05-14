@@ -9,7 +9,7 @@
 
 void SetVertexArrayPerlinNoise(
         sf::VertexArray &vertices,
-        const Lumen::Utility::ProceduralContentGeneration::Grid<float> &perlin_noise,
+        const Lumen::Utility::Grid<float> &perlin_noise,
         const float cell_size) noexcept
 {
         vertices.setPrimitiveType(sf::PrimitiveType::Triangles);
@@ -113,7 +113,7 @@ constexpr const std::size_t OCTAVE = 6;
 float (&float_array)[OCTAVE][GRID_WIDTH][GRID_HEIGHT] =
         *reinterpret_cast<float (*)[OCTAVE][GRID_WIDTH][GRID_HEIGHT]>(new float[OCTAVE][GRID_WIDTH][GRID_HEIGHT]);
 
-constexpr void GenerateWhiteNoise_Old(Lumen::Utility::ProceduralContentGeneration::Grid<float> &grid, 
+constexpr void GenerateWhiteNoise_Old(Lumen::Utility::Grid<float> &grid, 
                                   std::uint32_t random_seed) noexcept
 {
         std::uint32_t random_number = random_seed;
@@ -126,7 +126,7 @@ constexpr void GenerateWhiteNoise_Old(Lumen::Utility::ProceduralContentGeneratio
         }
 }
 
-constexpr void GenerateWhiteNoise_New(Lumen::Utility::ProceduralContentGeneration::Grid<float> &grid, 
+constexpr void GenerateWhiteNoise_New(Lumen::Utility::Grid<float> &grid, 
                                   std::uint32_t random_seed) noexcept
 {
         std::uint32_t random_number = random_seed;
@@ -139,7 +139,7 @@ constexpr void GenerateWhiteNoise_New(Lumen::Utility::ProceduralContentGeneratio
         }
 }
 
-constexpr void GenerateWhiteNoise_New_2(Lumen::Utility::ProceduralContentGeneration::Grid<float> &grid, 
+constexpr void GenerateWhiteNoise_New_2(Lumen::Utility::Grid<float> &grid, 
                                   std::uint32_t random_seed) noexcept
 {
         std::uint32_t random_number = random_seed;
@@ -152,7 +152,7 @@ constexpr void GenerateWhiteNoise_New_2(Lumen::Utility::ProceduralContentGenerat
         }
 }
 
-constexpr void GenerateWhiteNoise_New_3(Lumen::Utility::ProceduralContentGeneration::Grid<float> &grid, 
+constexpr void GenerateWhiteNoise_New_3(Lumen::Utility::Grid<float> &grid, 
                                   std::uint32_t random_seed) noexcept
 {
         std::uint32_t random_number = random_seed;
@@ -165,7 +165,7 @@ constexpr void GenerateWhiteNoise_New_3(Lumen::Utility::ProceduralContentGenerat
         }
 }
 
-constexpr void GenerateWhiteNoise_New_4(Lumen::Utility::ProceduralContentGeneration::Grid<float> &grid, 
+constexpr void GenerateWhiteNoise_New_4(Lumen::Utility::Grid<float> &grid, 
                                   std::uint32_t random_seed) noexcept
 {
         std::uint32_t random_number = random_seed;
@@ -181,8 +181,8 @@ constexpr void GenerateWhiteNoise_New_4(Lumen::Utility::ProceduralContentGenerat
         }
 }
 
-constexpr void GenerateSmoothNoise_Old(Lumen::Utility::ProceduralContentGeneration::Grid<float> &smooth_noise_octave,
-                                   const Lumen::Utility::ProceduralContentGeneration::Grid<float> &base_noise,
+constexpr void GenerateSmoothNoise_Old(Lumen::Utility::Grid<float> &smooth_noise_octave,
+                                   const Lumen::Utility::Grid<float> &base_noise,
                                    std::size_t octave) noexcept
 {
         std::size_t sample_period = Lumen::Utility::ProceduralContentGeneration::Detail::PowerOfTwo(octave);
@@ -219,8 +219,8 @@ constexpr void GenerateSmoothNoise_Old(Lumen::Utility::ProceduralContentGenerati
         }
 }
 
-constexpr void GenerateSmoothNoise_New(Lumen::Utility::ProceduralContentGeneration::Grid<float> &smooth_noise_octave,
-                                   const Lumen::Utility::ProceduralContentGeneration::Grid<float> &base_noise,
+constexpr void GenerateSmoothNoise_New(Lumen::Utility::Grid<float> &smooth_noise_octave,
+                                   const Lumen::Utility::Grid<float> &base_noise,
                                    std::size_t octave) noexcept
 {
         std::size_t sample_period = Lumen::Utility::ProceduralContentGeneration::Detail::PowerOfTwo(octave);
@@ -371,7 +371,7 @@ void TestPalinNoiseCase1(void)
 {
 #if 0
         {
-                Lumen::Utility::ProceduralContentGeneration::Grid<float> base_noise{float_array[0]};
+                Lumen::Utility::Grid<float> base_noise{float_array[0]};
 
                 // const auto start_old = std::chrono::high_resolution_clock::now();
                 // GenerateWhiteNoise_Old(base_noise, 23646);
@@ -403,14 +403,14 @@ void TestPalinNoiseCase1(void)
 
 #if 0
         {
-                Lumen::Utility::ProceduralContentGeneration::Grid<float> base_noise{float_array[0]};
+                Lumen::Utility::Grid<float> base_noise{float_array[0]};
 
                 const auto gen_white_noise_start_old = std::chrono::high_resolution_clock::now();
                 Lumen::Utility::ProceduralContentGeneration::GenerateWhiteNoise(base_noise, 23646);
                 const auto gen_white_noise_end_old = std::chrono::high_resolution_clock::now();
 
 
-                Lumen::Utility::ProceduralContentGeneration::Grid<float> smooth_noise_octave{float_array[1]};
+                Lumen::Utility::Grid<float> smooth_noise_octave{float_array[1]};
 
                 const auto start_old = std::chrono::high_resolution_clock::now();
                 GenerateSmoothNoise_Old(smooth_noise_octave, base_noise, 1);
@@ -436,25 +436,25 @@ void TestPalinNoiseCase1(void)
 
 #if 0
         {
-                Lumen::Utility::ProceduralContentGeneration::Grid<float> base_noise{float_array[0]};
+                Lumen::Utility::Grid<float> base_noise{float_array[0]};
 
                 const auto gen_white_noise_start_old = std::chrono::high_resolution_clock::now();
                 Lumen::Utility::ProceduralContentGeneration::GenerateWhiteNoise(base_noise, 23646);
                 const auto gen_white_noise_end_old = std::chrono::high_resolution_clock::now();
 
-                std::vector<Lumen::Utility::ProceduralContentGeneration::Grid<float> > smooth_noise_octave{
+                std::vector<Lumen::Utility::Grid<float> > smooth_noise_octave{
                         { float_array[1] },
                         { float_array[2] },
                         { float_array[3] },
                         { float_array[4] },
                 };
 
-                Lumen::Utility::ProceduralContentGeneration::Grid<float> perlin_noise{float_array[OCTAVE - 1]};
+                Lumen::Utility::Grid<float> perlin_noise{float_array[OCTAVE - 1]};
 
                 Lumen::Utility::ProceduralContentGeneration::PerlinNoiseData perlin_noise_data{
-                        Lumen::Utility::ProceduralContentGeneration::Grid<float>{base_noise}, 
+                        Lumen::Utility::Grid<float>{base_noise}, 
                         std::move(smooth_noise_octave),
-                        Lumen::Utility::ProceduralContentGeneration::Grid<float>{perlin_noise},
+                        Lumen::Utility::Grid<float>{perlin_noise},
                 };
 
                 const auto gen_smooth_noise_start = std::chrono::high_resolution_clock::now();
@@ -496,25 +496,25 @@ void TestPalinNoiseCase1(void)
 
 #if 0
         {
-                Lumen::Utility::ProceduralContentGeneration::Grid<float> base_noise{float_array[0]};
+                Lumen::Utility::Grid<float> base_noise{float_array[0]};
 
                 const auto gen_white_noise_start_old = std::chrono::high_resolution_clock::now();
                 Lumen::Utility::ProceduralContentGeneration::GenerateWhiteNoise(base_noise, 23646);
                 const auto gen_white_noise_end_old = std::chrono::high_resolution_clock::now();
 
-                std::vector<Lumen::Utility::ProceduralContentGeneration::Grid<float> > smooth_noise_octave{
+                std::vector<Lumen::Utility::Grid<float> > smooth_noise_octave{
                         { float_array[1] },
                         { float_array[2] },
                         { float_array[3] },
                         { float_array[4] },
                 };
 
-                Lumen::Utility::ProceduralContentGeneration::Grid<float> perlin_noise{float_array[OCTAVE - 1]};
+                Lumen::Utility::Grid<float> perlin_noise{float_array[OCTAVE - 1]};
 
                 Lumen::Utility::ProceduralContentGeneration::PerlinNoiseData perlin_noise_data{
-                        Lumen::Utility::ProceduralContentGeneration::Grid<float>{base_noise}, 
+                        Lumen::Utility::Grid<float>{base_noise}, 
                         std::move(smooth_noise_octave),
-                        Lumen::Utility::ProceduralContentGeneration::Grid<float>{perlin_noise},
+                        Lumen::Utility::Grid<float>{perlin_noise},
                 };
 
                 const auto gen_smooth_noise_start = std::chrono::high_resolution_clock::now();
@@ -551,11 +551,11 @@ void TestPalinNoiseCase1(void)
         sf::RenderWindow window{sf::VideoMode{{1920, 1080}}, {"My window"}};
         window.setFramerateLimit(60);
 
-        Lumen::Utility::ProceduralContentGeneration::Grid<float> base_noise{float_array[0]};
+        Lumen::Utility::Grid<float> base_noise{float_array[0]};
         Lumen::Utility::ProceduralContentGeneration::GenerateWhiteNoise(
                 base_noise, 23646);
         
-        std::vector<Lumen::Utility::ProceduralContentGeneration::Grid<float> > smooth_noise_octave{
+        std::vector<Lumen::Utility::Grid<float> > smooth_noise_octave{
                         //{ float_array[0] },
                         { float_array[1] },
                         { float_array[2] },
@@ -563,14 +563,14 @@ void TestPalinNoiseCase1(void)
                         { float_array[4] },
         };
         
-        Lumen::Utility::ProceduralContentGeneration::Grid<float> perlin_noise{float_array[OCTAVE - 1]};
+        Lumen::Utility::Grid<float> perlin_noise{float_array[OCTAVE - 1]};
 // // std::cout << "PerlinNoiseData: " << __LINE__ << "float_array[OCTAVE - 1] addr:" << float_array[OCTAVE - 1] << "\n";
 // // std::cout << "PerlinNoiseData: " << __LINE__ << "perlin_noise addr:" << perlin_noise.GetData() << "\n";
 
         Lumen::Utility::ProceduralContentGeneration::PerlinNoiseData perlin_noise_data{
-                Lumen::Utility::ProceduralContentGeneration::Grid<float>{base_noise}, 
+                Lumen::Utility::Grid<float>{base_noise}, 
                 std::move(smooth_noise_octave),
-                Lumen::Utility::ProceduralContentGeneration::Grid<float>{perlin_noise},
+                Lumen::Utility::Grid<float>{perlin_noise},
         };
 
         const auto gen_perlin_noise_start = std::chrono::high_resolution_clock::now();
@@ -586,9 +586,9 @@ void TestPalinNoiseCase1(void)
         //SetVertexArrayPerlinNoise(vertices, base_noise, cell_size);
         SetVertexArrayPerlinNoise(vertices, perlin_noise_data.GetPerlinNoise(), cell_size);
 //std::cout << "PerlinNoiseData: " << __LINE__ << "\n";
-        //Lumen::Utility::ProceduralContentGeneration::Grid<float> perlin_noise{bool_array[1]};
+        //Lumen::Utility::Grid<float> perlin_noise{bool_array[1]};
 
-        // Lumen::Utility::ProceduralContentGeneration::Grid<float> smooth_noise{float_array[1]};
+        // Lumen::Utility::Grid<float> smooth_noise{float_array[1]};
         // Lumen::Utility::ProceduralContentGeneration::GenerateSmoothNoise(smooth_noise, base_noise, 2);
         // SetVertexArrayPerlinNoise(vertices, smooth_noise, cell_size);
 

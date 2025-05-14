@@ -1,0 +1,11 @@
+
+{
+        "tile_map" : {
+                "tiles" : [
+
+                        { "id" : "ui_button", "file_path" : "ui_button.png" }
+                ],
+                "texture_file_path" : "UI_texture.png",
+                "config_file_path" : "UI_config.bin"
+        }
+}
